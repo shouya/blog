@@ -1,0 +1,667 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>9 Aug, 2013 SICP Note - Shou's origin</title>
+  <meta name="author" content="Shou Ya">
+
+  
+  <meta name="description" content="9 Aug, 2013 SICP Note Aug 9th, 2013 I started to read the new section. Well, my progress was slow yet. This section is about hierarchical data and &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://shouya.github.io/page/sicp-notes/aug-9-2013.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Shou's origin" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+<!--
+<link href="/assets/fonts/PT_Sans_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Sans_Bold.woff" rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Bold.woff" rel="stylesheet" type="text/css">
+-->
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-33282225-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Shou's origin</a></h1>
+  
+    <h2>Source of everything</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:shouya.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/page/sicp-notes/">SICP Notes</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">9 Aug, 2013 SICP Note</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-09T23:15:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2013</time></p>
+  </header>
+  
+  <p>I started to read the new section. Well, my progress was slow yet.</p>
+
+<p>This section is about hierarchical data and the closure
+property. (<a href="https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-15.html#%_sec_2.2">textbook</a>)</p>
+
+<p>The graph shows a representation of <code>cons</code>,</p>
+
+<p><img src="https://mitpress.mit.edu/sicp/full-text/book/ch2-Z-G-12.gif" alt="cons" /></p>
+
+<p>As you see, a cons is actually a pair. In language of LISP, a cons
+could contain following types of elements:</p>
+
+<ul>
+  <li>regular atom</li>
+  <li>another cons</li>
+  <li>nil, presented as <code>'()</code> usually.</li>
+</ul>
+
+<p>An atom is a single value. The <code>nil</code> is a little special, as we
+usually use it to indicate an empty <em>list</em>(notice that it’s not
+<em>cons</em>). With cons-es and nil, we can construct a linear sequence(i.e.
+list) with the following structure.</p>
+
+<p><img src="https://mitpress.mit.edu/sicp/full-text/book/ch2-Z-G-13.gif" alt="list" /></p>
+
+<p>It is construct by <code>(cons 1 (cons 2 (cons 3 (cons 4 '()))))</code>. In
+Haskell it looks more elegant: <code>1:2:3:4:[]</code>. This is actually what an
+list is in Haskell as well as LISP. This is a very pretty and clean
+concept of a manner to construct data types.</p>
+
+<p>In this section the authors mainly introduced some basic uses of
+<code>cons</code>. Especially, It emphasized a usual way to construct a list with
+<code>cons</code>, as list is widely used in Scheme programming.</p>
+
+<p>This section is not difficult for me since I am used to compose such
+recursive functions. In the study of Haskell I’d practiced a lot.</p>
+
+<p>So after skimming the example implement of <code>list-ref</code>, <code>length</code> and
+<code>append</code> functions. I would try the exercises directly.</p>
+
+<blockquote>
+  <p><strong>Exercise 2.17:</strong>  Define a procedure last-pair that returns the list
+that contains only the last element of a given (nonempty) list:
+    (last-pair (list 23 72 149 34))
+    (34)</p>
+</blockquote>
+
+<p>My solution is
+below(<a href="https://github.com/shouya/sicp-exercise/blob/master/2.17.ss">github</a>). It
+works perfectly with both guile and revo.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">last-pair</span> <span class="nv">lst</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">cond</span>
+</span><span class="line">   <span class="p">((</span><span class="nb">null? </span><span class="nv">lst</span><span class="p">)</span> <span class="s">&quot;failed&quot;</span><span class="p">)</span>
+</span><span class="line">   <span class="p">((</span><span class="nb">null? </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">lst</span><span class="p">))</span> <span class="nv">lst</span><span class="p">)</span>
+</span><span class="line">   <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">last-pair</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lst</span><span class="p">)))))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">last-pair</span> <span class="o">&#39;</span><span class="p">(</span><span class="mi">23</span> <span class="mi">72</span> <span class="mi">149</span> <span class="mi">34</span><span class="p">)))</span>
+</span><span class="line"><span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<blockquote>
+  <p><strong>Exercise 2.18:</strong>  Define a procedure reverse that takes a list as
+argument and returns a list of the same elements in reverse order:
+    (reverse (list 1 4 9 16 25))
+    (25 16 9 4 1)</p>
+
+</blockquote>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">reverse </span><span class="nv">lst</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">reverse-helper</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>
+</span><span class="line">    <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">null? </span><span class="nv">a</span><span class="p">)</span> <span class="nv">b</span>
+</span><span class="line">        <span class="p">(</span><span class="nf">reverse-helper</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">a</span><span class="p">)</span>
+</span><span class="line">                        <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">a</span><span class="p">)</span> <span class="nv">b</span><span class="p">))))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">reverse-helper</span> <span class="nv">lst</span> <span class="o">&#39;</span><span class="p">()))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">reverse2</span> <span class="nv">lst</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">reverse-helper</span> <span class="nv">a</span><span class="p">)</span>
+</span><span class="line">    <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">null? </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">a</span><span class="p">))</span> <span class="p">(</span><span class="nb">list </span><span class="p">(</span><span class="nb">car </span><span class="nv">a</span><span class="p">))</span>
+</span><span class="line">        <span class="p">(</span><span class="nb">append </span><span class="p">(</span><span class="nf">reverse-helper</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">a</span><span class="p">))</span>
+</span><span class="line">                <span class="p">(</span><span class="nb">list </span><span class="p">(</span><span class="nb">car </span><span class="nv">a</span><span class="p">)))))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">reverse-helper</span> <span class="nv">lst</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nb">reverse </span><span class="o">&#39;</span><span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)))</span>
+</span><span class="line"><span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">reverse2</span> <span class="o">&#39;</span><span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)))</span>
+</span><span class="line"><span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>I produced two functions. The first one is better as it’s intuitive,
+clear and efficient. I wrote the second one as a thought to implement
+a linear recursion version beside the iteration taught in
+<a href="https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-11.html#%_sec_1.2">section 1.2.1</a>.
+Both cases pass the test under revo and scheme.</p>
+
+<blockquote>
+  <p><strong>Exercise 2.19:</strong>  Consider the change-counting program of section
+  <a href="https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-11.html#%_sec_1.2.2">1.2.2</a>.
+  It would be nice to be able to easily change the currency
+  used by the program, so that we could compute the number of ways to
+  change a British pound, for example. As the program is written, the
+  knowledge of the currency is distributed partly into the procedure
+  <code>first-denomination</code> and partly into the procedure <code>count-change</code> (which
+  knows that there are five kinds of U.S. coins). It would be nicer to
+  be able to supply a list of coins to be used for making change.</p>
+</blockquote>
+
+<blockquote>
+  <p>We want to rewrite the procedure cc so that its second argument is a
+  list of the values of the coins to use rather than an integer
+  specifying which coins to use. We could then have lists that defined
+  each kind of currency:</p>
+</blockquote>
+
+<blockquote>
+  <pre><code>(define us-coins (list 50 25 10 5 1))
+(define uk-coins (list 100 50 20 10 5 2 1 0.5))
+</code></pre>
+</blockquote>
+
+<blockquote>
+  <p>We could then call <code>cc</code> as follows:
+    (cc 100 us-coins)
+    ;=&gt; 292</p>
+</blockquote>
+
+<blockquote>
+  <p>To do this will require changing the program <code>cc</code> somewhat. It will
+still have the same form, but it will access its second argument
+differently, as follows:</p>
+</blockquote>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">cc</span> <span class="nv">amount</span> <span class="nv">coin-values</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">cond </span><span class="p">((</span><span class="nb">= </span><span class="nv">amount</span> <span class="mi">0</span><span class="p">)</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class="line">        <span class="p">((</span><span class="k">or </span><span class="p">(</span><span class="nb">&lt; </span><span class="nv">amount</span> <span class="mi">0</span><span class="p">)</span> <span class="p">(</span><span class="nf">no-more?</span> <span class="nv">coin-values</span><span class="p">))</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class="line">        <span class="p">(</span><span class="nf">else</span>
+</span><span class="line">         <span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">cc</span> <span class="nv">amount</span>
+</span><span class="line">                <span class="p">(</span><span class="nf">except-first-denomination</span> <span class="nv">coin-values</span><span class="p">))</span>
+</span><span class="line">            <span class="p">(</span><span class="nf">cc</span> <span class="p">(</span><span class="nb">- </span><span class="nv">amount</span>
+</span><span class="line">                   <span class="p">(</span><span class="nf">first-denomination</span> <span class="nv">coin-values</span><span class="p">))</span>
+</span><span class="line">                <span class="nv">coin-values</span><span class="p">)))))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<blockquote>
+  <p>Define the procedures <code>first-denomination</code>, <code>except-first-denomination</code>,
+  and <code>no-more?</code> in terms of primitive operations on list
+  structures. Does the order of the list <code>coin-values</code> affect the answer
+  produced by <code>cc</code>? Why or why not?</p>
+</blockquote>
+
+<p>This was quite easy as actually what we treat the coin list in
+functions <code>first-denomination</code>, <code>except-first-denomination</code> and
+<code>no-more?</code> is equivalent to <code>car</code>, <code>cdr</code> and <code>null?</code> operators.</p>
+
+<p>So I define them directly(<a href="https://github.com/shouya/sicp-exercise/blob/master/2.19.ss">github</a>):</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="nv">no-more?</span> <span class="nv">null?</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="nv">except-first-denomination</span> <span class="nv">cdr</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="nv">first-denomination</span> <span class="nv">car</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Then it works. There’s an issue prompted. Revo, so far, cannot parse
+float numbers directly. This loss of feature was submitted as
+<a href="https://github.com/shouya/revo/issues/4">issue #4</a>.</p>
+
+<p>Next exercise is about a syntax to define arbitrary number of
+parameters of a lambda. The text was so long so I omitted it. I’d only
+reproduce the question directly:</p>
+
+<blockquote>
+  <p>Use this notation to write a procedure <code>same-parity</code> that takes one
+  or
+  more integers and returns a list of all the arguments that have the
+  same even-odd parity as the first argument. For example,</p>
+</blockquote>
+
+<blockquote>
+  <pre><code>(same-parity 1 2 3 4 5 6 7)
+;=&gt; (1 3 5 7)
+</code></pre>
+</blockquote>
+
+<blockquote>
+  <pre><code>(same-parity 2 3 4 5 6 7)
+;=&gt; (2 4 6)
+</code></pre>
+</blockquote>
+
+<p>The solutions is intuitive:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">same-parity</span> <span class="o">.</span> <span class="nv">x</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">same-parity-helper</span> <span class="nv">p</span> <span class="nv">b</span><span class="p">)</span>
+</span><span class="line">    <span class="p">(</span><span class="nf">cond</span>
+</span><span class="line">     <span class="p">((</span><span class="nb">null? </span><span class="nv">b</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+</span><span class="line">     <span class="p">(</span><span class="nf">p</span>    <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">b</span><span class="p">)</span>
+</span><span class="line">                 <span class="p">(</span><span class="nf">same-parity-helper</span> <span class="p">(</span><span class="nb">not </span><span class="nv">p</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">b</span><span class="p">))))</span>
+</span><span class="line">     <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">same-parity-helper</span> <span class="p">(</span><span class="nb">not </span><span class="nv">p</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">b</span><span class="p">)))))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">same-parity-helper</span> <span class="no">#t</span> <span class="nv">x</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The next is about mapping. Easy as well is it. Mapping and reducing/folding
+are commonly used in Haskell as well as Ruby.</p>
+
+<p>Directly hitting the exercises:</p>
+
+<blockquote>
+  <p><strong>Exercise 2.21:</strong>  The procedure <code>square-list</code> takes a list of numbers as
+  argument and returns a list of the squares of those numbers.</p>
+</blockquote>
+
+<blockquote>
+  <pre><code> (square-list (list 1 2 3 4))
+ (1 4 9 16)
+</code></pre>
+</blockquote>
+
+<blockquote>
+  <p>Here are two different definitions of square-list. Complete both of
+   them by filling in the missing expressions:</p>
+</blockquote>
+
+<blockquote>
+  <pre><code> (define (square-list items)
+   (if (null? items)
+        nil
+       (cons &lt;??&gt; &lt;??&gt;)))
+ (define (square-list items)
+   (map &lt;??&gt; &lt;??&gt;))
+</code></pre>
+</blockquote>
+
+<p>My approach(<a href="https://github.com/shouya/sicp-exercise/blob/master/2.21.ss">github</a>):</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">square-list</span> <span class="nv">items</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">null? </span><span class="nv">items</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">()</span>
+</span><span class="line">      <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nb">car </span><span class="nv">items</span><span class="p">)</span> <span class="p">(</span><span class="nb">car </span><span class="nv">items</span><span class="p">))</span>
+</span><span class="line">            <span class="p">(</span><span class="nf">square-list</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">items</span><span class="p">)))))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">square-list2</span> <span class="nv">items</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">* </span><span class="nv">x</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">items</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Exercise 2.22 asks to explain why the following code doesn’t work as
+expectation:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">square-list</span> <span class="nv">items</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">iter</span> <span class="nv">things</span> <span class="nv">answer</span><span class="p">)</span>
+</span><span class="line">    <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">null? </span><span class="nv">things</span><span class="p">)</span>
+</span><span class="line">        <span class="nv">answer</span>
+</span><span class="line">        <span class="p">(</span><span class="nf">iter</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">things</span><span class="p">)</span>
+</span><span class="line">              <span class="p">(</span><span class="nb">cons </span><span class="nv">answer</span>
+</span><span class="line">                    <span class="p">(</span><span class="nf">square</span> <span class="p">(</span><span class="nb">car </span><span class="nv">things</span><span class="p">))))))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">iter</span> <span class="nv">items</span> <span class="nv">nil</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Well, the best way to cope with this kind of logical errors is to
+trace the program step by step. Let me try it.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="nv">call:</span> <span class="p">(</span><span class="nf">square-list</span> <span class="o">&#39;</span><span class="p">(</span><span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">))</span>
+</span><span class="line"><span class="nv">rec:</span>  <span class="p">(</span><span class="nf">iter</span> <span class="o">&#39;</span><span class="p">(</span><span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">()</span>            <span class="p">)</span>
+</span><span class="line"><span class="nv">rec:</span>  <span class="p">(</span><span class="nf">iter</span> <span class="o">&#39;</span><span class="p">(</span><span class="mi">3</span> <span class="mi">4</span><span class="p">)</span>   <span class="p">(</span><span class="o">&#39;</span><span class="p">()</span> <span class="o">.</span> <span class="mi">4</span><span class="p">)</span>      <span class="p">)</span>  <span class="c1">; problem starts here</span>
+</span><span class="line"><span class="nv">rec:</span>  <span class="p">(</span><span class="nf">iter</span> <span class="o">&#39;</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>     <span class="p">((</span><span class="o">&#39;</span><span class="p">()</span> <span class="o">.</span> <span class="mi">4</span><span class="p">)</span> <span class="o">.</span> <span class="mi">9</span><span class="p">))</span>
+</span><span class="line"><span class="o">...</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>A sequence, usually, is a cons in which the right pointer refers to
+another cons until appears <code>'()</code>. Cons-ing an element with another
+cons is the way to do it. While in this code, a cons is used to glue a
+list(or cons) with an element. That’s not the correct way to do it. An
+solution requires a little change in code and is less efficient is to
+change the <code>cons</code> into <code>append</code>, which connect to lists into one,
+besides, the <code>(square (car things))</code> needs to be wrapped into a list
+as well.</p>
+
+<p>The next exercise is about the <code>for-each</code> procedure. <code>for-each</code> offers
+the same function as <code>map</code> except that <code>for-each</code> returns an arbitrary
+value instead of a list. The exercise asks to implement the <code>for-each</code>
+procedure. This is not difficult, but I still reviewed the implement
+of this in
+revo. (<a href="https://github.com/shouya/revo/blob/ff5250710c6a730986673bd2ca084a469313b4f1/lib/revo/builtin/stdlib.rv#L327">github</a>)
+In revo, <code>for-each</code> was implemented as a standard lib function as well
+as <code>map</code>. This part of code was implemented under scheme, directly
+copied from the <a href="https://github.com/jcoglan/heist">Heist</a> project,
+which is another scheme interpreter written in ruby. In his
+implementation it looks slightly complex as it has to follow the R5RS
+standard <code>for-each</code> for different arguments. I don’t need to cope with
+them now. Here’s
+it(<a href="https://github.com/shouya/sicp-exercise/blob/master/2.23.ss">github</a>):</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">my-for-each</span> <span class="nv">proc</span> <span class="nv">lst</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">map </span><span class="nv">proc</span> <span class="nv">lst</span><span class="p">)</span>
+</span><span class="line">  <span class="o">&#39;</span><span class="p">())</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">my-for-each2</span> <span class="nv">proc</span> <span class="nv">lst</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">null? </span><span class="nv">lst</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">()</span>
+</span><span class="line">      <span class="p">(</span><span class="nf">begin</span>
+</span><span class="line">        <span class="p">(</span><span class="nf">proc</span> <span class="p">(</span><span class="nb">car </span><span class="nv">lst</span><span class="p">))</span>
+</span><span class="line">        <span class="p">(</span><span class="nf">my-for-each2</span> <span class="nv">proc</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">lst</span><span class="p">)))))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>I felt yet comfortable.</p>
+
+  
+    <footer>
+      <p class="meta">
+        
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-09T23:15:00+08:00" pubdate data-updated="true">Aug 9<span>th</span>, 2013</time>
+        
+      </p>
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://shouya.github.io/page/sicp-notes/aug-9-2013.html" data-via="" data-counturl="http://shouya.github.io/page/sicp-notes/aug-9-2013.html" >Tweet</a>
+  
+  
+  
+</div>
+
+      
+    </footer>
+  
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/setting-up-ip-over-icmp-with-hans/">Setting Up IP Over ICMP With Hans</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/efficiently-determine-if-a-number-is-pan-digtal/">Efficiently Determine if a Number Is Pan-digital</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/experience-with-kde-gci/">Experience About Contributing KDE Projects</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/sacrifice/">祭獻</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/shines-at-dawn/">朝曦</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/shouya">@shouya</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'shouya',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/shouyatf@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014
+- Shou Ya
+- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'shousorigin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://shouya.github.io/page/sicp-notes/aug-9-2013.html';
+        var disqus_url = 'http://shouya.github.io/page/sicp-notes/aug-9-2013.html';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

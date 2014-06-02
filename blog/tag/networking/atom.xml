@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Tag: networking | Shou's origin]]></title>
+  <link href="http://shouya.github.io/blog/tag/networking/atom.xml" rel="self"/>
+  <link href="http://shouya.github.io/"/>
+  <updated>2014-06-03T02:50:22+08:00</updated>
+  <id>http://shouya.github.io/</id>
+  <author>
+    <name><![CDATA[Shou Ya]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Setting up IP over ICMP with hans]]></title>
+    <link href="http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/"/>
+    <updated>2014-06-02T23:19:29+08:00</updated>
+    <id>http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans</id>
+    <content type="html"><![CDATA[<h2 id="background">Background</h2>
+<p>The ISP, China Telecom, interrupted the internet access from my home
+yesterday due to the expiration of annually subscription of the
+internet service. While I found that ICMP packets are not blocked.
+Even though I can’t even do a DNS query, I can ping any server as usual.</p>
+
+<p>The inaccessibility of internet has greatly evoked my anxiety on
+seeking changes. Well, it’s theoretically possible to carry data in
+ICMP packets. Therefore, according to the hacker community’s
+principle, there should already been hackers who made use of this and
+opened the sources of their programs.</p>
+
+<p>Indeed, searching ‘ICMP tunneling’, I found
+<a href="http://code.gerade.org/hans/">hans</a> and
+<a href="http://thomer.com/icmptx/">icmptx</a>. The latter one is more
+primitive and complicated to use. After several trials and failures, I
+decide to give <strong>icmptx</strong> up, and try <strong>hans</strong> instead.</p>
+
+<p>This article is a tutorial/note about how to establish normal internet
+connection in the condition that only ICMP packets are allowed to pass
+through the firewall with <strong>hans</strong>.</p>
+
+<!-- more -->
+
+<h2 id="step-1-establish-the-tunnel">Step 1: Establish the tunnel</h2>
+<p>From the server side, first start the server.</p>
+
+<pre><code>  # ./hans -s 10.2.0.1 -m 10000
+</code></pre>
+
+<p>The option <code>-s</code> specifies the inet address for the tunnel interface,
+and the <code>-m</code> specifies the size of mtu.</p>
+
+<p>Then try to connect from the client.</p>
+
+<pre><code> # ./hans -c &lt;server_ip&gt; -m 10000
+</code></pre>
+
+<p>Please beware the mtu should be matched between the server and the
+client,
+otherwise it might cause problems.</p>
+
+<p>In addition, you should switch off the normal response to ICMP echo
+request.</p>
+
+<pre><code> # sysctl net.ipv4.icmp_echo_ignore_all=1
+</code></pre>
+
+<p>Because the ICMP packets should now be handled all by hans.
+But if you still want to have it working, add <code>-s</code> option whiling
+launching the server side of hans.</p>
+
+<h3 id="choosing-the-size-of-mtu">Choosing the size of MTU</h3>
+
+<p>Without specifying the mtu manually in the command’s argument,
+hans will automatically choose the system default one.
+It will normally be around 1500. But this would be a little bit
+small to communicate over ICMP. In practice, with a default mtu
+value of 1500, the download speed can hardly reach 7 KiB/second.
+While as it changes 10 000, the speed went around 10 KiB/second.</p>
+
+<p>Nonetheless, you can try various values of mtu and find your
+best fit.</p>
+
+<h3 id="testing-the-tunnel">Testing the tunnel</h3>
+<p>Now the tunnel should be established. From the client side,
+you should see that the inet address of <code>tun0</code> is chosen automatically
+according to the server’s configuration. Otherwise, if you
+haven’t seen any valid inet address for the client <code>tun0</code>
+interface, the connection is not established successfully. At this
+time,
+check if the operations above take effect and ensure you have a
+working
+internet connection (at least ICMP packet is not blocked).</p>
+
+<p>From the server, you can ping the the ip of <code>tun0</code> in the client-side
+and it should work good.
+While pinging from the client-side would possibly be not working
+except
+you have specified the <code>-s</code> option to <code>hans</code> command.</p>
+
+<h2 id="step-2-configure-forwarding-routing-on-the-server">Step 2: Configure forwarding routing on the server</h2>
+<p>On the server:</p>
+
+<pre><code> # iptables -F
+ # iptables -F -t nat
+ # iptables -A FORWARD -i tun0 -j ACCEPT
+ # iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+</code></pre>
+
+<p>Don’t forget to enable IP forwarding:</p>
+
+<pre><code> # sysctl net.ipv4.ip_forwarding=1
+</code></pre>
+
+<h2 id="step-3-configure-the-routing-table">Step 3: Configure the routing table</h2>
+
+<p>We should now redirect all packets through the tunnel
+to the server.</p>
+
+<pre><code> # ip route del default
+ # ip route add default via 10.2.0.1
+</code></pre>
+
+<p>It’s necessary to specify how the server side can be reached.</p>
+
+<pre><code> # ip route add &lt;server_ip&gt; via &lt;original_router&gt;
+</code></pre>
+
+<p>So there won’t be a circular packet transmission.</p>
+
+<p>Done.</p>
+
+<h2 id="resources-that-might-help">Resources that might help</h2>
+<ul>
+  <li><a href="https://github.com/friedrich/hans">github: friedrich/hans</a></li>
+  <li><a href="http://code.gerade.org/hans/">official guide of hans</a></li>
+  <li><a href="http://thomer.com/icmptx/">icmptx: how to</a></li>
+  <li><a href="http://github.com/jakkarth/icmptx">github: jakkarth/icmptx</a></li>
+  <li><a href="http://www.faqs.org/docs/iptables/traversingoftables.html">iptables theory: traversing of
+tables</a></li>
+  <li><a href="http://www.howtogeek.com/177621/the-beginners-guide-to-iptables-the-linux-firewall/">a beginner’s guide to
+iptables</a></li>
+  <li><a href="http://wiki.gentoo.org/wiki/Home_Router">home router - gentoo wiki</a></li>
+  <li><a href="http://itsecworks.com/2013/02/15/fire-in-the-hole-of-the-firewall/">another person log about the usage of
+icmptx</a></li>
+</ul>
+]]></content>
+  </entry>
+  
+</feed>

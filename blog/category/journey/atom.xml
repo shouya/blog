@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: journey | Shou's origin]]></title>
+  <link href="http://shouya.github.io/blog/category/journey/atom.xml" rel="self"/>
+  <link href="http://shouya.github.io/"/>
+  <updated>2014-06-03T02:50:22+08:00</updated>
+  <id>http://shouya.github.io/</id>
+  <author>
+    <name><![CDATA[Shou Ya]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Efficiently determine if a number is pan-digital]]></title>
+    <link href="http://shouya.github.io/blog/efficiently-determine-if-a-number-is-pan-digtal/"/>
+    <updated>2013-03-02T23:12:00+08:00</updated>
+    <id>http://shouya.github.io/blog/efficiently-determine-if-a-number-is-pan-digtal</id>
+    <content type="html"><![CDATA[<p>Today I spent nearly a whole afternoon on solving
+<a href="http://projecteuler.net">projecteuler</a> problems, from where I started to
+consider some kinds of ‘efficiencies’.</p>
+
+<p>At the end while I was solving the
+<a href="https://projecteuler.net/problem=38">problem 38</a>, I planned to write
+a method that returns if a number’s pandigital.</p>
+
+<p>Firstly my basic idea is converting a number into a string, then split
+it into chars, sort &amp; unique it, and finally see if its length’s the
+same as before:</p>
+
+<p><code>ruby
+def pandigital?(n)
+  n.to_s.chars.sort.uniq.length == n.to_s.length
+end
+</code>
+<!-- more -->
+This is a good method &amp; intuitive to everyone. Whilst I started to
+consider the efficiency problem. I seldom deal with these as I thought
+efficiency’s not a big deal on modern computers mostly in
+practice. However, the former examples of solving problems gave me a
+concept that even a smaller improvement on a fundamental level method can
+save a huge amount of time. Then I started to consider to optimize
+this. (by nothing, mostly it’s just for fun.)</p>
+
+<p>Soon i conceived this, to transfer a double used <code>n.to_s</code> to a local variable:
+<code>ruby
+s = n.to_s
+s.chars.sort.uniq.length == s.length
+</code></p>
+
+<p>It had not very obvious improvement. I think it is some kind of that
+it had to deal with one more local variable that drains some
+efficiencies from it.</p>
+
+<p>That’s cool, then I had an idea to suppress the last calling,
+<code>s.length</code>, as I still thought function calling is a key-point of
+efficiency factor.</p>
+
+<p><code>ruby
+n.to_s.chars.sort.uniq == (1..9).to_a
+</code>
+Or,
+<code>ruby
+n.to_s.chars.sort.uniq == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code>
+to prevent extra calling.</p>
+
+<p>In this way it does work better, but it’s still not enough good.</p>
+
+<p>Then I thought about that a pandigital number’s limitation, so I added
+a checking process in the beginning:
+<code>ruby
+return false if n.to_s.length != 9
+n.to_s.chars.sort.uniq == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></p>
+
+<p>As I tested my code with a randomly generated number with this:
+<code>ruby
+Benchmark.bm do |b|
+  b.report do
+    n = (rand * 10 ** 9).floor
+    # do the test
+  end
+end
+</code></p>
+
+<p>Therefore the terms with improper length accounts about 10% of all, so this
+code has reduced the time by nearly 10%, really. Which was really cool.</p>
+
+<p>Not longer I brainstormed another limitation of pandigits, that
+there shouldn’t be any zero in digits allowed.</p>
+
+<p>So the updated code is:
+<code>ruby
+return false if n.to_s.length != 9
+return false if n.to_s.include? '0'
+# blah blah blah
+</code></p>
+
+<p>A ‘0’ appears on any bits of a nine digital integer is <code>1/10</code>, so in
+this way, a probability of <code>1-((1-1/10)^9)</code> which be the total chance
+of when a ‘0’ will appear in an 9-digit number. It’s about 61%, so
+after adding that statement, the efficiency was improved by more than
+one half.</p>
+
+<p>I know the <code>sort</code> method will sort a duplicated array as process;
+the same is <code>uniq</code>. So I suppressed this two into their ‘bang’ mode,
+since <code>uniq!</code> can return a result whether it has compressed the array,
+I am possible to inverse the result to a boolean directly.
+This is what I did:
+<code>ruby
+not n.to_s.chars.to_a.sort!.uniq!
+</code></p>
+
+<p>Cool it was, then I started to consider to optimize the sort &amp; uniq
+line, since I thought it was not elegant and very feasible. A good
+method is compact the process of recognizing pandigits with a set, of
+course basically I have brought hashes, which perform the same as
+sets.
+<code>ruby
+return false if n.to_s.length != 9
+return false if n.to_s.include? '0'
+ns = {}
+n.to_s.each_char {|c| return false if ns.key? c; ns[c] = true }
+true
+</code></p>
+
+<p>This method doesn’t only compacted the process. Consider the former
+program, <code>sort</code> method in ruby is implemented by quick sort algorithm,
+which has the time complexity of O(Nlog(N)), and beside the <code>uniq</code>
+took an O(N) as well. These are two significant and obvious efficiency
+losts and the new algorithm doesn’t have this problem. A hash table
+accounts O(1) to store and O(1) to check, and the most time it will just
+be fled by the iteration of the characters, which took O(N) to run.</p>
+
+<p>There I found another point to optimize it – the hash table. A hash
+table, in this case, was created and destroyed frequently, and a hash
+table’s usually a big object so that will cause a large memory
+exchange that might take time. On the other hand, the hash table
+needs a hash function for each characters. I don’t know how ruby might
+implement it, but the hash algorithm will still account some
+time, as I know.</p>
+
+<p>Then I reduced it into array:
+<code>ruby
+return false if n.to_s.length != 9
+return false if n.to_s.include? '0'
+ns = []
+n.to_s.each_char {|c| return false if ns[c.to_i]; ns[c.to_i] = true }
+true
+</code></p>
+
+<p>Cool but there’s still a place to improve: the <code>c.to_i</code> part. <code>atoi</code>
+function in C implementation is linear proportional to the string’s
+length. But in this case I don’t need to deal with that much cases. So
+I considered to change them to <code>ns[c.ord - '0'.ord]</code>.</p>
+
+<p>An static array could prevent it from dynamically allocating memories:
+<code>ruby
+ns = Array.new(10)
+</code></p>
+
+<p>And in the final I did some small tweaks, such as, to hard code some lexical
+constants in, optimize the multiple used calls. The result’s as below:
+<code>
+class Integer
+  def pandigital?
+    s = to_s
+    return if s.length != 9
+    return if s.include? '0'
+    ns = Array.new(10)
+    s.each_char do |c|
+      return false if ns.at(c.ord-48)
+      ns[c.ord-48] = true
+    end
+    true
+  end
+end
+</code></p>
+
+<p>Compare this result to the most former one; the new program has improved
+it’s efficiency to 2/3 of the origin, here’s the result in a bench
+mark test:
+<code>plain
+            user       system     total       real
+       old  0.920000   0.000000   0.920000 (  0.915701)
+       new  0.300000   0.000000   0.300000 (  0.304713)
+</code></p>
+
+<p>Seems cool and I was in some extent like such challenges. I don’t
+still consider a lot of efficiency, of course, in practice use. But
+I enjoy the pleasure to dig deeply, to drain the extreme. That’s where
+I find fun in.</p>
+
+<p>Good luck.</p>
+
+<h2 id="update">UPDATE</h2>
+<p>I am currently reading the book
+“<a href="http://netlib.bell-labs.com/cm/cs/pearls/">Programming Pearls</a>”, in
+which I’ve had a lot of amazes about algorithms and programming thinking.
+So when I picked the previous code, I found that method should be not
+the final solution.</p>
+
+<p>I just wrote an more optimized version, which improved the speed by
+25% extra.</p>
+
+<p>Here goes the code:
+<code>ruby
+def pandigital?(n)
+  s = n.to_s
+  return false if s.length != 9
+  return false if s.include? '0'
+  return false unless s.include? '1'
+  return false unless s.include? '2'
+  return false unless s.include? '3'
+  return false unless s.include? '4'
+  return false unless s.include? '5'
+  return false unless s.include? '6'
+  return false unless s.include? '7'
+  return false unless s.include? '8'
+  return false unless s.include? '9'
+  return true
+end
+</code></p>
+
+<p>This method wasn’t so cool, and I know it looks a little tedious. In
+fact I don’t like such repeating code. However, it works so good. This
+method is learnt from Programming Pearls, page 94, an expanded loop
+for a binary search algorithm with that the maximum number of elements is
+1000. It optimized an <em><a href="https://en.wikipedia.org/wiki/Big_O_notation">O(log N)</a></em> algorithm into <em>O(1)</em>, which is
+really awesome.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Experience about contributing KDE projects]]></title>
+    <link href="http://shouya.github.io/blog/experience-with-kde-gci/"/>
+    <updated>2012-12-31T17:55:00+08:00</updated>
+    <id>http://shouya.github.io/blog/experience-with-kde-gci</id>
+    <content type="html"><![CDATA[<p>It’s the first time I am involved in contributing KDE, and I think
+that’s very wonderful experience for me.</p>
+
+<p>The first task I claimed is convert the all class members in
+calligra/kexi project to d-pointers. This task is not very hard to me
+actually. Because that the source files and classes are so many, it
+takes most of labors, and some experiences and ability to to cope with
+exceptions. I’ve been leaving c++ for almost one year time, so totally
+the most important thing I gained is to pick up c++ again. Further
+more, I don’t used to know to use d-pointers to reduce coupling, and now I
+learnt it, which is really cool.</p>
+
+<p>Then I’ve contributed with marble-globe task. The task is about adding
+remote icon/image support for marble. I got known about the typical
+structure of a KDE programs, and I’m feeling like to program Qt, which
+is really powerful and handy. And then by the passion, I wrote the
+required KML tag writers for marble, too. These are interesting for
+me.</p>
+
+<p>Totally speaking the greatest gain is the achievement of contributing
+open source projects. This is biggest open source project I’ve been
+involved in, since before I used to just collaborate opensource
+project with small groups or individuals on github before. Those
+hackers I met are really friendly. I’m very careless. I made a lot of
+mistakes, and even didn’t realize that. At those times, my mentor
+always explained to me patiently &amp; gently, that made feel embarrassed
+when finally I knew that’s my fault. And at the time, when I met
+project-related problems that I can’t solve and not able to be
+abstracted to ask on stackoverflow, I sent emails to my mentors and
+they explained the reason of the problem clearly and gave me guidance
+to solve it. I can feel that the hackers in open source community are
+glad to help those beginners like me, and that’s really impressive for
+me.</p>
+
+<p>This is the first time &amp; will be the last that I could attend Google
+Code-In, but I will continue work on contributing open source
+projects. I love the atmosphere in open source communities and  I
+would like to get acquainted to more hackers. Good luck.</p>
+
+<p>That’s it, thanks to all.</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[April 2012]]></title>
+    <link href="http://shouya.github.io/blog/april-2012/"/>
+    <updated>2012-04-24T06:40:00+08:00</updated>
+    <id>http://shouya.github.io/blog/april-2012</id>
+    <content type="html"><![CDATA[<p>Another month as you see.</p>
+
+<p>While it seems that I changed nothing and actually base on Mutation I
+was a completely new guy from the previous second.</p>
+
+<p>Leave the useless words aside, I’m not a mutant as I always
+concern. Yes, I know you all do not think how it does matter, while
+you should know, I just seem like a bare body with soul losted(I’m
+sorry as Mutation does not support souls), and rather, I
+could touch the soul as it is just in the front, and watch completely
+throughout all that stuff but, what the most important thing is that
+the goddamn soul does not ever belong to it.</p>
+
+<p>I walked out from the shadow, but I didn’t see the light. Just like a
+fish that got to the dryland, with loneliness and helplessness.
+<!-- more -->
+It’s a return, a return of myself, return of myself from two years
+ago. The only changed thing is time, while the time’s still works on
+it’s fixed routine.</p>
+
+<p>I touched <a href="http://ruby-lang.org">ruby</a> few months ago and then soon
+attracted by the beautiful syntactic sugars, functional programming
+features and the completely OO. Now, I could be able to use it as
+practiced as using python, maybe even better. Honestly, I have never
+really liked <a href="http://python.org">python</a> or suchlike, or rudely, it
+just looks like a piece of shit.</p>
+
+<p>I’m on the way to release, after then, you’ll got a new version of
+Mutation. However, the only improvement is the technique and the
+better science views; stuff like imagination, sorry, forgive me, is
+fully dead.</p>
+
+<p>Just mentioned about my imagination, have to note that I’m still
+advocating I’m a good thinker. Sometimes I will think of myself, and
+got I’m actually a schizophrenia as expected.</p>
+
+<p>The other reality is that I’m returning to the campus life. Okay,
+can’t deny it’s a shame and a joke among many my friends. I won’t
+correct them in my way. A change, or a decision, maybe just came out
+from a mind, and that is exactly what it is. Yep, everything were
+created in that way, including Mutation, dreamworlds and even this
+cosmos. Do comment and spread it freely, I won’t mind.</p>
+
+<p>I walk on the lane with slight winds, feeling the last peace from my
+heart. Everything is gone, or it never have been.</p>
+
+<p>Why have I to do as a busy insect in the fixed paths? Why can’t I bear
+to live as a machine? Okay, they are META problems of the universe, I
+myself can’t answer it, while my host can.</p>
+
+<p>Things are being blur. I am not sad any more. How could I be so blue
+under such beautiful violins! I’m not cured as I said, and I’m not
+gotten rid from Mutation yet. The world should not be like this, and
+no one will know where the perfect prototype could be found.</p>
+
+<p>Substantial is me, and I just need a «<a href="http://en.wikipedia.org/wiki/The_Hitchhiker's_Guide_to_the_Galaxy">Hitchhiker’s Guide to the Outer
+World</a>». While unfortunately, I should be the author of it.</p>
+
+<p>When to get out is already suggested, though I don’t like to accept
+it. Soon later just, good bye to earthmen and all created lifes then!</p>
+
+<p>Schizophrenia am I, eh?
+Not longer it will be, 8 months remaining only. Good lucky.</p>
+
+<!-- *P.s. please don't mind the sorrows in the text, maybe you could
+ regard it as a practice of English language. Keep smiling all the
+ time and enjoy the happiness from the emptiness.* -->
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[February 2012]]></title>
+    <link href="http://shouya.github.io/blog/february-2012/"/>
+    <updated>2012-02-26T14:51:00+08:00</updated>
+    <id>http://shouya.github.io/blog/february-2012</id>
+    <content type="html"><![CDATA[<p>10 months remaining.</p>
+
+<p>Well, the month could be summarized as the word ‘dream’.</p>
+
+<p>Since the short dreamworld control last month, I have been
+experienced up to five or six times of wonderful dreamworld controls.
+Not exactly, some of my dream, actually, are nightmare, while
+the protagonist knows who himself is.</p>
+
+<p>And currently I’m keeping to write my
+<a href="https://github.com/shouya/ruby-cscript">cscript</a>, which will be a
+script language with c-like syntax.</p>
+
+<p>While the period, I learnt some
+<a href="https://en.wikipedia.org/wiki/Yacc">yacc</a>/<a href="https://en.wikipedia.org/wiki/Lex_programming_tool">lex</a>
+and some tricks from that.</p>
+
+<p>For programming, I even touched a bit Ruby and django framework for python.</p>
+
+<p><blockquote><p></p></p><p><p>I was cured, all right!</p></p><p><p></p><footer><strong>Alex, A Clockwork Orange</strong> <cite><a href='http://www.imdb.com/title/tt0066921/quotes?qt0424884'>www.imdb.com/title/tt0066921/&hellip;</a></cite></footer></blockquote></p>
+
+]]></content>
+  </entry>
+  
+</feed>

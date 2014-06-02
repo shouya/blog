@@ -1,0 +1,363 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>19 Mar, 2014 SICP Note - Shou's origin</title>
+  <meta name="author" content="Shou Ya">
+
+  
+  <meta name="description" content="19 Mar, 2014 SICP Note Mar 19th, 2014 I got to keep reading SICP. Repicking the book recently from my
+drawer, I decided to continue this article &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://shouya.github.io/page/sicp-notes/mar-19-2014.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Shou's origin" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+<!--
+<link href="/assets/fonts/PT_Sans_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Sans_Bold.woff" rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Bold.woff" rel="stylesheet" type="text/css">
+-->
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-33282225-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Shou's origin</a></h1>
+  
+    <h2>Source of everything</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:shouya.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/page/sicp-notes/">SICP Notes</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">19 Mar, 2014 SICP Note</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-19T19:50:00+08:00" pubdate data-updated="true">Mar 19<span>th</span>, 2014</time></p>
+  </header>
+  
+  <p>I got to keep reading SICP. Repicking the book recently from my
+drawer, I decided to continue this article series. SICP tastes good,
+and it brings me surprise everytime I read it again. Actually I read
+much faster than the progress on taking notes here. Anyway, I’d to
+record what I learned from the book.</p>
+
+<hr />
+
+<p>Being lazy and tired on the cliché of eight queens problem and the
+graphical
+language before <em>Section 2.3</em>, I will not write programs as solutions
+for the problems. (Okay, actually I just want to skip to the symbolic
+language section, which is far more attracting.)</p>
+
+<p>Starting from <em>Excercise 2.42</em>, exercise asks to write a function
+<code>safe?</code> for the eight-queen puzzle, which checks whether a queen is
+compatible with other queens on the board in the given place. This is
+not difficult. We should take the conjunction of these three
+conditions:</p>
+
+<ul>
+  <li>no chess is there in the same row</li>
+  <li>no chess is there in the upward diagonal</li>
+  <li>no chess is there in the downward diagonal</li>
+</ul>
+
+<p>Since we calculate the availability for each column, there will be no
+conflict in the same column.</p>
+
+<p><em>Exercise 2.43</em>. This question is interesting. It asks to find out the
+ reason why this code:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="nf">flatmap</span>
+</span><span class="line">  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new-row</span><span class="p">)</span>
+</span><span class="line">    <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rest-of-queens</span><span class="p">)</span>
+</span><span class="line">	          <span class="p">(</span><span class="nf">adjoin-position</span> <span class="nv">new-row</span> <span class="nv">k</span> <span class="nv">rest-of-queens</span><span class="p">))</span>
+</span><span class="line">         <span class="p">(</span><span class="nf">queen-cols</span> <span class="p">(</span><span class="nb">- </span><span class="nv">k</span> <span class="mi">1</span><span class="p">))))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">enumerate-interval</span> <span class="mi">1</span> <span class="nv">board-size</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>appears evidently slower than the code:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="nf">flatmap</span>
+</span><span class="line">  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">rest-of-queens</span><span class="p">)</span>
+</span><span class="line">     <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">new-row</span><span class="p">)</span>
+</span><span class="line">             <span class="p">(</span><span class="nf">adjoin-position</span> <span class="nv">new-row</span> <span class="nv">k</span> <span class="nv">rest-of-queens</span><span class="p">))</span>
+</span><span class="line">          <span class="p">(</span><span class="nf">enumerate-interval</span> <span class="mi">1</span> <span class="nv">board-size</span><span class="p">)))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">queen-cols</span> <span class="p">(</span><span class="nb">- </span><span class="nv">k</span> <span class="mi">1</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>giving these two snippet function the same.</p>
+
+<p>Well, what the inefficient one does is to enumerate all possible ways
+to place the queens and filter the valid ones. The efficiency of this
+algorithm is $O(8^N)$. However, the efficient way to do this is to
+eliminate the number of wasted steps. For each step of the efficient
+algorithm follows the reduced possibilities and therefore this part of
+efficiency is be reduced to $O(N!)$, which is far more smaller than
+the exponential.</p>
+
+<p>The exercise 2.44 - 2.52 are boring so I’d just skip them. Tomorrow
+I’d work on the symbolic data section, which is my favorite. &lt;3</p>
+
+  
+    <footer>
+      <p class="meta">
+        
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-19T19:50:00+08:00" pubdate data-updated="true">Mar 19<span>th</span>, 2014</time>
+        
+      </p>
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://shouya.github.io/page/sicp-notes/mar-19-2014.html" data-via="" data-counturl="http://shouya.github.io/page/sicp-notes/mar-19-2014.html" >Tweet</a>
+  
+  
+  
+</div>
+
+      
+    </footer>
+  
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/setting-up-ip-over-icmp-with-hans/">Setting Up IP Over ICMP With Hans</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/efficiently-determine-if-a-number-is-pan-digtal/">Efficiently Determine if a Number Is Pan-digital</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/experience-with-kde-gci/">Experience About Contributing KDE Projects</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/sacrifice/">祭獻</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/shines-at-dawn/">朝曦</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/shouya">@shouya</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'shouya',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/shouyatf@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014
+- Shou Ya
+- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'shousorigin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://shouya.github.io/page/sicp-notes/mar-19-2014.html';
+        var disqus_url = 'http://shouya.github.io/page/sicp-notes/mar-19-2014.html';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

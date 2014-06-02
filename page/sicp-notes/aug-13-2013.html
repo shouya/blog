@@ -1,0 +1,607 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>13 Aug, 2013 SICP Note - Shou's origin</title>
+  <meta name="author" content="Shou Ya">
+
+  
+  <meta name="description" content="13 Aug, 2013 SICP Note Aug 13th, 2013 In section 2.2.3 the author described a conventional abstract
+interface for sequential data structure. The &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://shouya.github.io/page/sicp-notes/aug-13-2013.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Shou's origin" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+<!--
+<link href="/assets/fonts/PT_Sans_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Sans_Bold.woff" rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Bold.woff" rel="stylesheet" type="text/css">
+-->
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-33282225-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Shou's origin</a></h1>
+  
+    <h2>Source of everything</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:shouya.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/page/sicp-notes/">SICP Notes</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">13 Aug, 2013 SICP Note</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-13T23:30:00+08:00" pubdate data-updated="true">Aug 13<span>th</span>, 2013</time></p>
+  </header>
+  
+  <p>In section 2.2.3 the author described a conventional abstract
+interface for sequential data structure. The interfaces are
+three types of high-order functions. They are:</p>
+
+<ul>
+  <li>map</li>
+  <li>filter</li>
+  <li>accumulate</li>
+</ul>
+
+<p>For descriptions of each terms, I added corresponding haskell type
+signatures. I think that’s a very helpful way to understand them.</p>
+
+<p><em>Map</em> is the easiest to understand one. What it do is to take a
+ sequence and a procedure as argument and then produce the result
+ sequence in which each elements were applied the transformation
+ specified in the procedure.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">map</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="n">b</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><em>Filter</em> is a process that selects a subsequence of passing in
+ sequence according to the specific rule, another argument that is a
+ predication, i.e. a procedure that returns a boolean value. For those
+ that are predicated as true, they will be remained in the result
+ sequence; whereas for those which are not, they will be omitted. The
+ name of filter varies in some other programming languages. In ruby,
+ it is called <code>select</code>, or <code>find_all</code>.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">filter</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">Bool</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><em>Accumulate</em> is a little complicated. A accumulation process takes a
+ procedure that takes two arguments, an initial value and a sequence,
+ and return a  value. Accumulation is called <code>fold{l,r}</code> in Haskell
+ and <code>reduce</code>, <code>inject</code> in Ruby. As its name, it walks through the
+ elements of a sequence, and apply the procedure for each
+ elements. Differing from <em>map</em>, the result of <code>accumulate</code> is a value
+ rather than a sequence. For each steps of accumulating, the procedure
+ passed in produces a value, according to the element and, a carrying
+ value that is returned from the previous calling. Does it sound a
+ little complex? Perhaps it’s my problem on expressing. Here’s the
+ type signature of <code>fold-left</code> in Haskell.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">foldr</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span> <span class="ow">-&gt;</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>Very intuitive isn’t it? The procedure in it takes two arguments. One
+ is the carrying value, and the another one is an element from the
+ sequence.(In scheme’s <code>accumulate</code> they’re flipped.)
+ Besides, the second argument passed to <code>foldr</code> is the
+ initial carrying value. <code>fold-right</code> in Haskell is equivalent to
+ <code>accumulate</code> in scheme actually.</p>
+
+<p>An example is always a better illustration:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line">  <span class="n">foldr</span> <span class="p">(</span><span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">y</span> <span class="ow">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span> <span class="mi">0</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+</span><span class="line"><span class="ow">=</span> <span class="p">(</span><span class="mi">0</span><span class="o">+</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="mi">3</span><span class="o">+</span><span class="mi">0</span><span class="p">))))</span><span class="n">nn</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Did you see how it works now? Let me attach a picture from wikipedia
+that I think is helpful to understand it.</p>
+
+<p><img src="http://upload.wikimedia.org/wikipedia/commons/3/3e/Right-fold-transformation.png" alt="foldr" /></p>
+
+<p>By combining these high-order functions in different ways, we can
+obtain the result that we want.</p>
+
+<p>All right, let’s move on to the exercise.</p>
+
+<blockquote>
+  <p><em>Exercise 2.33.</em> <strong>233.</strong> Fill in the missing expressions to
+   complete the following definitions of some basic list-manipulation
+   operations as accumulations:</p>
+</blockquote>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">map </span><span class="nv">p</span> <span class="nv">sequence</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span> <span class="nv">&lt;??&gt;</span><span class="p">)</span> <span class="nv">nil</span> <span class="nv">sequence</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">append </span><span class="nv">seq1</span> <span class="nv">seq2</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate</span> <span class="nv">cons</span> <span class="nv">&lt;??&gt;</span> <span class="nv">&lt;??&gt;</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">length </span><span class="nv">sequence</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate</span> <span class="nv">&lt;??&gt;</span> <span class="mi">0</span> <span class="nv">sequence</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So here’s my solution:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">map </span><span class="nv">p</span> <span class="nv">sequence</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">p</span> <span class="nv">x</span><span class="p">)</span> <span class="nv">y</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">()</span> <span class="nv">sequence</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">append </span><span class="nv">seq1</span> <span class="nv">seq2</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate</span> <span class="nv">cons</span> <span class="nv">seq2</span> <span class="nv">seq1</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">length </span><span class="nv">sequence</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">_</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">+ </span><span class="nv">y</span> <span class="mi">1</span><span class="p">))</span> <span class="mi">0</span> <span class="nv">sequence</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Aren’t them look elegant? Especially the second one.</p>
+
+<p>Exercise 2.34 is a question that asks to write a function to evaluate
+a polynomial in <em>x</em> at a given value. For a polynomial in form of</p>
+
+<p><img src="https://mitpress.mit.edu/sicp/full-text/book/ch2-Z-G-18.gif" alt="ploynomial" /></p>
+
+<p>The Horner’s rule to evaluate a polynomial can be illustrated as</p>
+
+<p><img src="https://mitpress.mit.edu/sicp/full-text/book/ch2-Z-G-19.gif" alt="horner's rule" /></p>
+
+<p>So simply turn this recursive formula into scheme code is what I did:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">horner-eval</span> <span class="nv">x</span> <span class="nv">coeff-seq</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">this-coeff</span> <span class="nv">higher-terms</span><span class="p">)</span>
+</span><span class="line">                <span class="p">(</span><span class="nb">+ </span><span class="nv">this-coeff</span> <span class="p">(</span><span class="nb">* </span><span class="nv">higher-terms</span> <span class="nv">x</span><span class="p">)))</span>
+</span><span class="line">              <span class="mi">0</span>
+</span><span class="line">              <span class="nv">coeff-seq</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Exercise 2.35 asks for a redefinition of <code>count-leaves</code> with the
+the abstract interfaces. The function count the number of the leaves
+of a tree. So here’s my answer, which works well.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">count-leaves</span> <span class="nv">t</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate</span> <span class="nv">+</span> <span class="mi">0</span>
+</span><span class="line">              <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span>
+</span><span class="line">                     <span class="p">(</span><span class="k">cond </span><span class="p">((</span><span class="nb">null? </span><span class="nv">x</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class="line">                           <span class="p">((</span><span class="nb">not </span><span class="p">(</span><span class="nb">pair? </span><span class="nv">x</span><span class="p">))</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class="line">                           <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nf">count-leaves</span> <span class="nv">x</span><span class="p">))))</span>
+</span><span class="line">                   <span class="nv">t</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>There are some questions remained. It is now quite late so I will
+complete them later.</p>
+
+<p>Update(14 August):</p>
+
+<p>Exercise 2.36.  The procedure accumulate-n is similar to accumulate
+except that it takes as its third argument a sequence of sequences,
+which are all assumed to have the same number of elements. It applies
+the designated accumulation procedure to combine all the first
+elements of the sequences, all the second elements of the sequences,
+and so on, and returns a sequence of the results. For instance, if s
+is a sequence containing four sequences, <code>((1 2 3) (4 5 6) (7 8 9) (10
+11 12))</code>, then the value of <code>(accumulate-n + 0 s)</code> should be the sequence
+(22 26 30). Fill in the missing expressions in the following
+definition of <code>accumulate-n</code>:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">accumulate-n</span> <span class="nv">op</span> <span class="nv">init</span> <span class="nv">seqs</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">null? </span><span class="p">(</span><span class="nb">car </span><span class="nv">seqs</span><span class="p">))</span>
+</span><span class="line">      <span class="nv">nil</span>
+</span><span class="line">      <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">accumulate</span> <span class="nv">op</span> <span class="nv">init</span> <span class="nv">&lt;??&gt;</span><span class="p">)</span>
+</span><span class="line">            <span class="p">(</span><span class="nf">accumulate-n</span> <span class="nv">op</span> <span class="nv">init</span> <span class="nv">&lt;??&gt;</span><span class="p">))))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So the result should be</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">accumulate-n</span> <span class="nv">op</span> <span class="nv">init</span> <span class="nv">seqs</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">null? </span><span class="p">(</span><span class="nb">car </span><span class="nv">seqs</span><span class="p">))</span> <span class="o">&#39;</span><span class="p">()</span>
+</span><span class="line">      <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">accumulate</span> <span class="nv">op</span> <span class="nv">init</span> <span class="p">(</span><span class="nb">map </span><span class="nv">car</span> <span class="nv">seqs</span><span class="p">)</span> <span class="p">)</span>
+</span><span class="line">            <span class="p">(</span><span class="nf">accumulate-n</span> <span class="nv">op</span> <span class="nv">init</span> <span class="p">(</span><span class="nb">map </span><span class="nv">cdr</span> <span class="nv">seqs</span><span class="p">)))))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>I thought to accumulate all the first elements, and then drop the rest
+to the recursion again. So was what I’ve done.</p>
+
+<p>Exercises is about implementing matrix operations: <code>dot-product</code>,
+<code>matrix-*-vector</code>, <code>matrix-*-matrix</code> and <code>transpose</code>.</p>
+
+<p>My solution seems good, but I know the implementation of
+<code>matrix-*-matrix</code> is not the simplest solution, as I didn’t follow the
+pre-given template.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="c1">; Dot product</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">dot-product</span> <span class="nv">v</span> <span class="nv">w</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate</span> <span class="nv">+</span> <span class="mi">0</span> <span class="p">(</span><span class="nb">map </span><span class="nv">*</span> <span class="nv">v</span> <span class="nv">w</span><span class="p">)))</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">; Matrix * Vector</span>
+</span><span class="line"><span class="c1">; http://upload.wikimedia.org/math/d/c/f/dcf8ccf9344226b39a18818eb03eea6e.png</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">matrix-*-vector</span> <span class="nv">m</span> <span class="nv">v</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">w</span><span class="p">)</span> <span class="p">(</span><span class="nb">map </span><span class="nv">*</span> <span class="nv">w</span> <span class="nv">v</span><span class="p">))</span> <span class="nv">m</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">; Matrix * Matrix</span>
+</span><span class="line"><span class="c1">; http://upload.wikimedia.org/math/7/b/c/7bc5e0122746b494cc5844db44ef975c.png</span>
+</span><span class="line"><span class="c1">; http://upload.wikimedia.org/math/7/b/6/7b62cda9a2e78e8414806c5aea486b5c.png</span>
+</span><span class="line"><span class="c1">; http://upload.wikimedia.org/math/d/3/c/d3c223ed4af4939e565893b2f3136bae.png</span>
+</span><span class="line"><span class="c1">;; NOT BEST SOLUTION</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">matrix-*-matrix</span> <span class="nv">m</span> <span class="nv">n</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mi</span><span class="p">)</span>
+</span><span class="line">         <span class="p">(</span><span class="nf">accumulate-n</span> <span class="nv">+</span> <span class="mi">0</span>
+</span><span class="line">                       <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">mii</span> <span class="nv">ni</span><span class="p">)</span>
+</span><span class="line">                              <span class="p">(</span><span class="nb">map </span><span class="nv">*</span> <span class="nv">ni</span> <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="nv">_</span> <span class="nv">mii</span><span class="p">)</span> <span class="nv">ni</span><span class="p">)))</span>
+</span><span class="line">                            <span class="nv">mi</span> <span class="nv">n</span><span class="p">)))</span>
+</span><span class="line">       <span class="nv">m</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">; Transpose</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">transpose</span> <span class="nv">mat</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">accumulate-n</span> <span class="nv">cons</span> <span class="o">&#39;</span><span class="p">()</span> <span class="nv">mat</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The following images are from
+<a href="http://en.wikipedia.org/wiki/Matrix_multiplication">wikipedia</a>.</p>
+
+<p>M * V formula:</p>
+
+<p><img src="http://upload.wikimedia.org/math/d/c/f/dcf8ccf9344226b39a18818eb03eea6e.png" alt="" /></p>
+
+<p>M * M formula &amp; example:</p>
+
+<p><img src="http://upload.wikimedia.org/math/7/b/c/7bc5e0122746b494cc5844db44ef975c.png" alt="" /><br />
+<img src="http://upload.wikimedia.org/math/7/b/6/7b62cda9a2e78e8414806c5aea486b5c.png" alt="" />
+<img src="http://upload.wikimedia.org/math/d/3/c/d3c223ed4af4939e565893b2f3136bae.png" alt="" /></p>
+
+<p>The way I follow to write the M*M program is right like what is
+demonstrated in the example.</p>
+
+<p>Exercise 2.38 compares between <code>fold-left</code> and <code>fold-right</code>. <em>Give a
+property that <code>op</code> should satisfy to guarantee that fold-right and
+fold-left will produce the same values for any sequence.</em></p>
+
+<p>My guessing condition is that,</p>
+
+<p>we know that op takes two arguments, so in different direction of
+folding, the arguments are flipped. So for an op whose arguments are
+interchangeable, it produce the same result for <code>fold-left</code> and
+<code>fold-right</code>.</p>
+
+<blockquote>
+  <p><strong>Exercise 2.39:</strong> Complete the following definitions of reverse
+   (exercise 2.18) in terms of fold-right and fold-left from
+   exercise 2.38:</p>
+</blockquote>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">reverse </span><span class="nv">sequence</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="nf">fold-right</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span> <span class="nv">&lt;??&gt;</span><span class="p">)</span> <span class="nv">nil</span> <span class="nv">sequence</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">reverse </span><span class="nv">sequence</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="nf">fold-left</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span> <span class="nv">&lt;??&gt;</span><span class="p">)</span> <span class="nv">nil</span> <span class="nv">sequence</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>My solution:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">reverser</span> <span class="nv">sequence</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">fold-right</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">append </span><span class="nv">y</span> <span class="p">(</span><span class="nb">list </span><span class="nv">x</span><span class="p">)))</span> <span class="o">&#39;</span><span class="p">()</span> <span class="nv">sequence</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">reversel</span> <span class="nv">sequence</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">fold-left</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span> <span class="nv">y</span><span class="p">)</span> <span class="p">(</span><span class="nb">cons </span><span class="nv">y</span> <span class="nv">x</span><span class="p">))</span> <span class="o">&#39;</span><span class="p">()</span> <span class="nv">sequence</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>BTW today(13 August) I learned some lambda calculus. One is the deduction of Y
+combinator. I am obsessive about this kind of stuff. I know what
+attracts me most is the mathematical beauty inside.</p>
+
+<p><code>Y = \f.(\x.x x) (\x.f (x x))</code></p>
+
+  
+    <footer>
+      <p class="meta">
+        
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-13T23:30:00+08:00" pubdate data-updated="true">Aug 13<span>th</span>, 2013</time>
+        
+      </p>
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://shouya.github.io/page/sicp-notes/aug-13-2013.html" data-via="" data-counturl="http://shouya.github.io/page/sicp-notes/aug-13-2013.html" >Tweet</a>
+  
+  
+  
+</div>
+
+      
+    </footer>
+  
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/setting-up-ip-over-icmp-with-hans/">Setting Up IP Over ICMP With Hans</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/efficiently-determine-if-a-number-is-pan-digtal/">Efficiently Determine if a Number Is Pan-digital</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/experience-with-kde-gci/">Experience About Contributing KDE Projects</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/sacrifice/">祭獻</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/shines-at-dawn/">朝曦</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/shouya">@shouya</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'shouya',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/shouyatf@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014
+- Shou Ya
+- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'shousorigin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://shouya.github.io/page/sicp-notes/aug-13-2013.html';
+        var disqus_url = 'http://shouya.github.io/page/sicp-notes/aug-13-2013.html';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

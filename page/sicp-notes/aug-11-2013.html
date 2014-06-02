@@ -1,0 +1,591 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>11 Aug, 2013 SICP Note - Shou's origin</title>
+  <meta name="author" content="Shou Ya">
+
+  
+  <meta name="description" content="11 Aug, 2013 SICP Note Aug 11th, 2013 Section 2.2.2 is about Hierarchy Structure. The book elaborates how
+to use simple pairs to construct complex &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://shouya.github.io/page/sicp-notes/aug-11-2013.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Shou's origin" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+<!--
+<link href="/assets/fonts/PT_Sans_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Sans_Bold.woff" rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Bold.woff" rel="stylesheet" type="text/css">
+-->
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-33282225-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Shou's origin</a></h1>
+  
+    <h2>Source of everything</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:shouya.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/page/sicp-notes/">SICP Notes</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">11 Aug, 2013 SICP Note</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-11T12:45:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2013</time></p>
+  </header>
+  
+  <p>Section 2.2.2 is about <em>Hierarchy Structure</em>. The book elaborates how
+to use simple pairs to construct complex data types in hierarchy
+structures. We use multiple nesting sequence in a specific composition
+to construct our hierarchy data type.</p>
+
+<p>We regard a cons as a binary tree node structure. Its <code>car</code> can be regard as
+the left-child, and its <code>cdr</code> could be the right. (In this way we can
+present any sequence data structure as a binary tree.)</p>
+
+<p>The exercise 2.24 asks for interpretation of result of the expression
+<code>(list 1 (list 2 (list 3 4)))</code>. This one’s easy. My answer’s below.</p>
+
+<p><a href="http://imgur.com/nazclS0">&lt;img
+src=”http://i.imgur.com/nazclS0l.jpg” title=View large image”/&gt;</a></p>
+
+<p>The first three exercise are both for warming up. Exercise 2.25 asks to
+find the <code>car</code> and <code>cdr</code> composition to acquire <code>7</code> from each lists:</p>
+
+<ul>
+  <li><code>(1 3 (5 7) 9)</code></li>
+  <li><code>((7))</code></li>
+  <li><code>(1 (2 (3 (4 (5 (6 7))))))</code></li>
+</ul>
+
+<p>The responses are:</p>
+
+<ul>
+  <li><code>(cadr (caddr (~)))</code></li>
+  <li><code>(car (car (~)))</code></li>
+  <li><code>(cadr (cadr (cadr (cadr (cadr (cadr (~)))))))</code></li>
+</ul>
+
+<p>Issue found: revo doesn’t have convenient functions <code>cadr</code>, <code>caddr</code>
+defined. It was reported as <a href="https://github.com/shouya/revo/issues/5">issue #5</a>.</p>
+
+<p>Exercise 2.26:</p>
+
+<ul>
+  <li><code>(append x y) ;=&gt; (1 2 3 4 5 6)</code></li>
+  <li><code>(cons x y)   ;=&gt; ((1 2 3) 4 5 6)</code></li>
+  <li><code>(list x y)   ;=&gt; ((1 2 3) (4 5 6))</code></li>
+</ul>
+
+<p>Exercise 2.27 asks to implement a <code>deep-reverse</code> function that
+recursively reverse elements in nesting lists. So my basic thought is,
+use the <code>reverse</code> function in exercise 2.27, map through each elements
+and apply recursively if one of which is a list. This is my solution,
+and it works.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">deep-reverse</span> <span class="nv">lst</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">e</span><span class="p">)</span>
+</span><span class="line">         <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">list? </span><span class="nv">e</span><span class="p">)</span>
+</span><span class="line">             <span class="p">(</span><span class="nf">deep-reverse</span> <span class="nv">e</span><span class="p">)</span> <span class="nv">e</span><span class="p">))</span>
+</span><span class="line">       <span class="p">(</span><span class="nb">reverse </span><span class="nv">lst</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Exercise 2.28 asks to implement a Ruby <code>Array#flatten</code> like function
+named <code>fringe</code> in scheme. What I thought is to use <code>append</code> to connect
+elements in nested pairs.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">fringe</span> <span class="nv">lst</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">fold-left</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">a</span> <span class="nv">b</span><span class="p">)</span>
+</span><span class="line">               <span class="p">(</span><span class="k">let </span><span class="p">((</span><span class="nf">rhs</span> <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">list? </span><span class="nv">b</span><span class="p">)</span>
+</span><span class="line">                              <span class="p">(</span><span class="nf">fringe</span> <span class="nv">b</span><span class="p">)</span>
+</span><span class="line">                              <span class="p">(</span><span class="nb">list </span><span class="nv">b</span><span class="p">))))</span>
+</span><span class="line">                 <span class="p">(</span><span class="nb">append </span><span class="nv">a</span> <span class="nv">rhs</span><span class="p">)))</span>
+</span><span class="line">             <span class="o">&#39;</span><span class="p">()</span> <span class="nv">lst</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Above is my solution. However, it seems in R5RS there’s no <code>fold-left</code>
+function, as it is standardized in R6RS. So guile doesn’t run it
+correctly, while my revo does :) Anyway the method is adoptable, so I
+won’t rewrite a standard R5RS style one again.</p>
+
+<p>Exercise 2.29</p>
+
+<p>Here’s it(<a href="https://github.com/shouya/sicp-exercise/blob/master/2.29.ss">github</a>):</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="c1">;; Question a)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="nv">left-branch</span> <span class="nv">car</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="nv">right-branch</span> <span class="nv">cadr</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="nv">branch-length</span> <span class="nv">car</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="nv">branch-structure</span> <span class="nv">cadr</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="nv">mobile?</span> <span class="nv">list?</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="c1">;; Question b)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">total-weight</span> <span class="nv">struct</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">not </span><span class="p">(</span><span class="nf">mobile?</span> <span class="nv">struct</span><span class="p">))</span> <span class="nv">struct</span>
+</span><span class="line">      <span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">total-weight</span> <span class="p">(</span><span class="nf">branch-structure</span> <span class="p">(</span><span class="nf">left-branch</span> <span class="nv">struct</span><span class="p">)))</span>
+</span><span class="line">         <span class="p">(</span><span class="nf">total-weight</span> <span class="p">(</span><span class="nf">branch-structure</span> <span class="p">(</span><span class="nf">right-branch</span> <span class="nv">struct</span><span class="p">))))))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="c1">;; Question c)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">equilibrium?</span> <span class="nv">struct</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">not </span><span class="p">(</span><span class="nf">mobile?</span> <span class="nv">struct</span><span class="p">))</span> <span class="no">#t</span>
+</span><span class="line">      <span class="p">(</span><span class="k">let </span><span class="p">((</span><span class="nf">left</span> <span class="p">(</span><span class="nf">left-branch</span> <span class="nv">struct</span><span class="p">))</span>
+</span><span class="line">            <span class="p">(</span><span class="nf">right</span> <span class="p">(</span><span class="nf">right-branch</span> <span class="nv">struct</span><span class="p">)))</span>
+</span><span class="line">        <span class="p">(</span><span class="k">and </span><span class="p">(</span><span class="nf">equilibrium?</span> <span class="p">(</span><span class="nf">branch-structure</span> <span class="nv">left</span><span class="p">))</span>
+</span><span class="line">             <span class="p">(</span><span class="nf">equilibrium?</span> <span class="p">(</span><span class="nf">branch-structure</span> <span class="nv">right</span><span class="p">))</span>
+</span><span class="line">             <span class="p">(</span><span class="nb">= </span><span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nf">branch-length</span> <span class="nv">left</span><span class="p">)</span>
+</span><span class="line">                   <span class="p">(</span><span class="nf">total-weight</span> <span class="p">(</span><span class="nf">branch-structure</span> <span class="nv">left</span><span class="p">)))</span>
+</span><span class="line">                <span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nf">branch-length</span> <span class="nv">right</span><span class="p">)</span>
+</span><span class="line">                   <span class="p">(</span><span class="nf">total-weight</span> <span class="p">(</span><span class="nf">branch-structure</span> <span class="nv">right</span><span class="p">))))))))</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; Question d)</span>
+</span><span class="line"><span class="c1">;(if #f</span>
+</span><span class="line"><span class="c1">;    (begin</span>
+</span><span class="line"><span class="c1">;      (define make-mobile cons)</span>
+</span><span class="line"><span class="c1">;      (define left-branch car)</span>
+</span><span class="line"><span class="c1">;      (define right-branch cdr)</span>
+</span><span class="line"><span class="c1">;      (define make-branch cons)</span>
+</span><span class="line"><span class="c1">;      (define branch-length car)</span>
+</span><span class="line"><span class="c1">;      (define branch-structure cdr)</span>
+</span><span class="line"><span class="c1">;      (define mobile? pair?)</span>
+</span><span class="line"><span class="c1">;      ) &#39;())</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>These codes work as expectation hopefully. The test cases are written
+in the source codes which is not presented here. You can view them on
+github.</p>
+
+<p>All right, then next section is talking about how to map through a
+tree structure.</p>
+
+<p>Exercise 2.3 asked to square all elements within a tree and keep its
+shape. I raised a impulsion to write a universal <code>tree-map</code> function,
+and it would apply a lambda and a tree as arguments, then return the
+result tree in which all the leaves was transformed in the lambda.</p>
+
+<p>My solution’s here:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">map-tree</span> <span class="nv">proc</span> <span class="nv">tree</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">not </span><span class="p">(</span><span class="nb">pair? </span><span class="nv">tree</span><span class="p">))</span> <span class="p">(</span><span class="nf">proc</span> <span class="nv">tree</span><span class="p">)</span>
+</span><span class="line">      <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">ele</span><span class="p">)</span> <span class="p">(</span><span class="nf">map-tree</span> <span class="nv">proc</span> <span class="nv">ele</span><span class="p">))</span>
+</span><span class="line">           <span class="nv">tree</span><span class="p">)))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">map-tree2</span> <span class="nv">proc</span> <span class="nv">tree</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">cond </span><span class="p">((</span><span class="nb">null? </span><span class="nv">tree</span><span class="p">)</span> <span class="o">&#39;</span><span class="p">())</span>
+</span><span class="line">        <span class="p">((</span><span class="nb">not </span><span class="p">(</span><span class="nb">pair? </span><span class="nv">tree</span><span class="p">))</span> <span class="p">(</span><span class="nf">proc</span> <span class="nv">tree</span><span class="p">))</span>
+</span><span class="line">        <span class="p">(</span><span class="k">else </span><span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nf">map-tree2</span> <span class="nv">proc</span> <span class="p">(</span><span class="nb">car </span><span class="nv">tree</span><span class="p">))</span>
+</span><span class="line">                    <span class="p">(</span><span class="nf">map-tree2</span> <span class="nv">proc</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">tree</span><span class="p">))))))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">scale-tree</span> <span class="nv">tree</span> <span class="nv">scl</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">map-tree</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">* </span><span class="nv">x</span> <span class="nv">scl</span><span class="p">))</span> <span class="nv">tree</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">square-tree</span> <span class="nv">tree</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">map-tree2</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">* </span><span class="nv">x</span> <span class="nv">x</span><span class="p">))</span> <span class="nv">tree</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">scale-tree</span> <span class="o">&#39;</span><span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="p">(</span><span class="mi">4</span> <span class="mi">5</span> <span class="p">(</span><span class="mi">6</span> <span class="mi">7</span> <span class="mi">8</span><span class="p">)))</span> <span class="mi">2</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line"><span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">square-tree</span> <span class="o">&#39;</span><span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="p">(</span><span class="mi">4</span> <span class="mi">5</span> <span class="p">(</span><span class="mi">6</span> <span class="mi">7</span> <span class="mi">8</span><span class="p">)))))</span>
+</span><span class="line"><span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>I used the two ways(direct recursion and high-order function) to
+define the function <code>map-tree</code>, and then use it to generate
+<code>scale-tree</code> and <code>square-tree</code>.</p>
+
+<p>And then I found what I did is exactly what is asked in exercise 2.31.</p>
+
+<p>Exercise 2.32 is one of my favorite questions. It asks to complete the
+program and figure out how the following codes can generate all
+subsets of a list.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">subsets</span> <span class="nv">s</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">null? </span><span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nb">list </span><span class="o">&#39;</span><span class="p">())</span>
+</span><span class="line">      <span class="p">(</span><span class="k">let </span><span class="p">((</span><span class="nf">reset</span> <span class="p">(</span><span class="nf">subsets</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">s</span><span class="p">))))</span>
+</span><span class="line">        <span class="p">(</span><span class="nb">append </span><span class="nv">rest</span> <span class="p">(</span><span class="nb">map </span><span class="nv">&lt;???&gt;</span> <span class="nv">rest</span><span class="p">)))))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Firstly my solution:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">subsets</span> <span class="nv">s</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">null? </span><span class="nv">s</span><span class="p">)</span> <span class="p">(</span><span class="nb">list </span><span class="o">&#39;</span><span class="p">())</span>
+</span><span class="line">      <span class="p">(</span><span class="k">let </span><span class="p">((</span><span class="nf">rest</span> <span class="p">(</span><span class="nf">subsets</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">s</span><span class="p">))))</span>
+</span><span class="line">        <span class="p">(</span><span class="nb">append </span><span class="nv">rest</span>
+</span><span class="line">                <span class="p">(</span><span class="nb">map </span><span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">cons </span><span class="p">(</span><span class="nb">car </span><span class="nv">s</span><span class="p">)</span> <span class="nv">x</span><span class="p">))</span>
+</span><span class="line">                     <span class="nv">rest</span><span class="p">)))))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">subsets</span> <span class="o">&#39;</span><span class="p">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>I like this because it adopts a typical idea in algorithm design,
+<em>partition</em>. I learned this idea in the book
+<a href="http://www.cs.bell-labs.com/cm/cs/pearls/">Programming Pearls</a>.
+Basically the main thesis was very
+clear. When faced to an algorithm problem, I should consider to
+separate the question into several small sub-questions, then compute
+each sub-questions, and combine the up in the final step. This is what
+exactly applied in the code.</p>
+
+<p>Firstly, obviously the terminal condition is <code>'()</code>. Subsets of <code>'()</code>
+is only itself. Then consider the global application. For a regular
+list, for example, <code>(a b c)</code>, has three elements. One we’d take the
+first element <code>a</code> out, and compute the subsets of the rest ones,
+<code>(b c)</code>. What we’d notice most is how to combine the result up. I
+choose to observe what the subsets of the rest are and what I
+expected, and then compare the results to decide what I’d do to
+generate the expected result.</p>
+
+<p>So the subsets of <code>(b c)</code> are <code>((b c) (c) (b) '())</code> and the result
+should be <code>((a b c) (a c) (a b) (a) (b c) (c) (b) '())</code>. The
+difference between these two lists is that the result contain an extra
+group of elements that each has <code>a</code>, the first elements, contained.</p>
+
+<p>This is why here’s an <code>append</code> that concatenate the original list and
+the list which imitates from original list and has the first element
+added on. I filled the space with a <code>cons</code> operation in a lambda.</p>
+
+<p>To illustrate how the code works, I drew a graph showing the
+partitioning and reducing process.</p>
+
+<p><a href="http://imgur.com/6ZqHjLT"><img src="http://i.imgur.com/6ZqHjLTl.jpg" title="View large image" /></a></p>
+
+<p>Yet I feel refreshing on the questions. Although these are not quite
+challenging yet, I can still regard these as a practice of computer
+science thinking, which was yet amazing.</p>
+
+  
+    <footer>
+      <p class="meta">
+        
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-11T12:45:00+08:00" pubdate data-updated="true">Aug 11<span>th</span>, 2013</time>
+        
+      </p>
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://shouya.github.io/page/sicp-notes/aug-11-2013.html" data-via="" data-counturl="http://shouya.github.io/page/sicp-notes/aug-11-2013.html" >Tweet</a>
+  
+  
+  
+</div>
+
+      
+    </footer>
+  
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/setting-up-ip-over-icmp-with-hans/">Setting Up IP Over ICMP With Hans</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/efficiently-determine-if-a-number-is-pan-digtal/">Efficiently Determine if a Number Is Pan-digital</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/experience-with-kde-gci/">Experience About Contributing KDE Projects</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/sacrifice/">祭獻</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/shines-at-dawn/">朝曦</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/shouya">@shouya</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'shouya',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/shouyatf@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014
+- Shou Ya
+- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'shousorigin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://shouya.github.io/page/sicp-notes/aug-11-2013.html';
+        var disqus_url = 'http://shouya.github.io/page/sicp-notes/aug-11-2013.html';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

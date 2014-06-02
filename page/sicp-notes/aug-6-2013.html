@@ -1,0 +1,891 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>6 Aug, 2013 SICP Note - Shou's origin</title>
+  <meta name="author" content="Shou Ya">
+
+  
+  <meta name="description" content="6 Aug, 2013 SICP Note Aug 6th, 2013 Section 2.1.2 is about the significance of abstract data types. The
+obvious illustration in the book give me a &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://shouya.github.io/page/sicp-notes/aug-6-2013.html">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Shou's origin" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+<!--
+<link href="/assets/fonts/PT_Sans_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Sans_Bold.woff" rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Bold.woff" rel="stylesheet" type="text/css">
+-->
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-33282225-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Shou's origin</a></h1>
+  
+    <h2>Source of everything</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:shouya.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/page/sicp-notes/">SICP Notes</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article role="article">
+  
+  <header>
+    <h1 class="entry-title">6 Aug, 2013 SICP Note</h1>
+    <p class="meta">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-06T22:46:00+08:00" pubdate data-updated="true">Aug 6<span>th</span>, 2013</time></p>
+  </header>
+  
+  <p>Section 2.1.2 is about the significance of abstract data types. The
+obvious illustration in the book give me a very intuitive concept
+about it.</p>
+
+<p><img src="https://mitpress.mit.edu/sicp/full-text/book/ch2-Z-G-6.gif" alt="Figure 2.1:  Data-abstraction barriers in the rational-number package." /></p>
+
+<p>The book demonstrated an other way to encapsulate a rational number,
+as following:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">make-rat</span> <span class="nv">n</span> <span class="nv">d</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">cons </span><span class="nv">n</span> <span class="nv">d</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">numer</span> <span class="nv">x</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">let </span><span class="p">((</span><span class="nf">g</span> <span class="p">(</span><span class="nb">gcd </span><span class="p">(</span><span class="nb">car </span><span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">x</span><span class="p">))))</span>
+</span><span class="line">    <span class="p">(</span><span class="nb">/ </span><span class="p">(</span><span class="nb">car </span><span class="nv">x</span><span class="p">)</span> <span class="nv">g</span><span class="p">)))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">denom</span> <span class="nv">x</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">let </span><span class="p">((</span><span class="nf">g</span> <span class="p">(</span><span class="nb">gcd </span><span class="p">(</span><span class="nb">car </span><span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">x</span><span class="p">))))</span>
+</span><span class="line">    <span class="p">(</span><span class="nb">/ </span><span class="p">(</span><span class="nb">cdr </span><span class="nv">x</span><span class="p">)</span> <span class="nv">g</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>In the example, the call of <code>gcd</code> has been moved from the constructor
+to the property<em>(?)</em> accessors, providing a lazy evaluation interface, i.e. call
+by need. As an abstract data type, those built on the top of these don’t
+have to be modified to keep compatible.</p>
+
+<p>All right, I already knew it. That’s why we keep building higher-level
+abstraction in computer programs, ranging from operating systems to
+programming languages, giving us benefit from easily maintaining and
+modifying programs. Take an common example. One of the use of
+operating system is to provide a compatibility layer above various
+hardwares. For the application built on the top of an specific OS, it
+can call a unified interface to control a hardware regardless what its
+manufactory or model is. Besides, those standards are there for this
+purpose of abstracting as well. Let’s say, Revised<sup>5</sup> Report on
+the Algorithmic Language Scheme(R<sup>5</sup>RS/R5RS) specified a
+group of rules and interfaces. Basing on it, no matter guile, racket,
+or revo, no matter what language used to implement, a scheme program
+could run on them and produce the same result as specified.</p>
+
+<p>Somehow one respect that programming attracts me is its abstraction
+feature. I can’t imagine in other social stuff, or even in some nature
+science that there are such clear and logical abstraction
+available. All right.</p>
+
+<blockquote>
+  <p><strong>Exercise 2.2:</strong>  Consider the problem of representing line segments in a
+plane. Each segment is represented as a pair of points: a starting
+point and an ending point. Define a constructor <code>make-segment</code> and
+selectors <code>start-segment</code> and <code>end-segment</code> that define the representation
+of segments in terms of points. Furthermore, a point can be
+represented as a pair of numbers: the x coordinate and the y
+coordinate. Accordingly, specify a constructor make-point and
+selectors <code>x-point</code> and <code>y-point</code> that define this
+representation. Finally, using your selectors and constructors, define
+a procedure <code>midpoint-segment</code> that takes a line segment as argument and
+returns its midpoint (the point whose coordinates are the average of
+the coordinates of the endpoints). To try your procedures, you’ll need
+a way to print points:</p>
+</blockquote>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">print-point</span> <span class="nv">p</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="s">&quot;(&quot;</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">x-point</span> <span class="nv">p</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">y-point</span> <span class="nv">p</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="s">&quot;)&quot;</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<blockquote>
+
+  <p><strong>SICP</strong> - <em>Page 127</em> (Chinese edition: <em>page 60</em>)</p>
+</blockquote>
+
+<p>My solution is:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>My solution</span><a href="https://github.com/shouya/sicp-exercise/blob/master/2.2.ss">view on github </a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">print-point</span> <span class="nv">p</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="s">&quot;(&quot;</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">x-point</span> <span class="nv">p</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="s">&quot;,&quot;</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">y-point</span> <span class="nv">p</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="s">&quot;)&quot;</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">print-point-newline</span> <span class="nv">p</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">print-point</span> <span class="nv">p</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">; Have fun :)</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">make-point</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">q</span><span class="p">)</span> <span class="p">(</span><span class="k">if </span><span class="nv">q</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">x-point</span> <span class="nv">p</span><span class="p">)</span> <span class="p">(</span><span class="nf">p</span> <span class="no">#t</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">y-point</span> <span class="nv">p</span><span class="p">)</span> <span class="p">(</span><span class="nf">p</span> <span class="no">#f</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">make-segment</span> <span class="nv">p1</span> <span class="nv">p2</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">cons </span><span class="nv">p1</span> <span class="nv">p2</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">start-segment</span> <span class="nv">seg</span><span class="p">)</span> <span class="p">(</span><span class="nb">car </span><span class="nv">seg</span><span class="p">))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">end-segment</span> <span class="nv">seg</span><span class="p">)</span> <span class="p">(</span><span class="nb">cdr </span><span class="nv">seg</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">midpoint-segment</span> <span class="nv">seg</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">make-point</span> <span class="p">(</span><span class="nb">/ </span><span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">x-point</span> <span class="p">(</span><span class="nf">start-segment</span> <span class="nv">seg</span><span class="p">))</span>
+</span><span class="line">                    <span class="p">(</span><span class="nf">x-point</span> <span class="p">(</span><span class="nf">end-segment</span> <span class="nv">seg</span><span class="p">)))</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class="line">              <span class="p">(</span><span class="nb">/ </span><span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">y-point</span> <span class="p">(</span><span class="nf">start-segment</span> <span class="nv">seg</span><span class="p">))</span>
+</span><span class="line">                    <span class="p">(</span><span class="nf">y-point</span> <span class="p">(</span><span class="nf">end-segment</span> <span class="nv">seg</span><span class="p">)))</span> <span class="mi">2</span><span class="p">)))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">print-segment</span> <span class="nv">seg</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">print-point</span> <span class="p">(</span><span class="nf">start-segment</span> <span class="nv">seg</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="s">&quot;-&quot;</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">print-point</span> <span class="p">(</span><span class="nf">end-segment</span> <span class="nv">seg</span><span class="p">)))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">print-segment-newline</span> <span class="nv">seg</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">print-segment</span> <span class="nv">seg</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="c1">; Test cases</span>
+</span><span class="line"><span class="p">(</span><span class="k">let </span><span class="p">((</span><span class="nf">seg</span> <span class="p">(</span><span class="nf">make-segment</span> <span class="p">(</span><span class="nf">make-point</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class="line">                         <span class="p">(</span><span class="nf">make-point</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">))))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">print-segment-newline</span> <span class="nv">seg</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">print-point-newline</span> <span class="p">(</span><span class="nf">midpoint-segment</span> <span class="nv">seg</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Slightly long is it but looks much better than yesterday’s.</p>
+
+<p>Here I used a glitch, with lambda’s power to form a tuple type(here
+it’s like a cons). This trick is from the next section but it looks cool
+so I just picked it into this code.</p>
+
+<blockquote>
+  <p><strong>Exercise 2.3:</strong>  Implement a representation for rectangles in a
+plane. (Hint: You may want to make use of exercise 2.2.) In terms of
+your constructors and selectors, create procedures that compute the
+perimeter and the area of a given rectangle. Now implement a different
+representation for rectangles. Can you design your system with
+suitable abstraction barriers, so that the same perimeter and area
+procedures will work using either representation?</p>
+
+  <p><strong>SICP</strong> - <em>Page 128</em> (Chinese edition: <em>page 60</em>)</p>
+</blockquote>
+
+<p>My solution:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span>solution</span><a href="https://github.com/shouya/sicp-exercise/blob/master/2.3.ss">view on github </a></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+<span class="line-number">56</span>
+<span class="line-number">57</span>
+<span class="line-number">58</span>
+<span class="line-number">59</span>
+<span class="line-number">60</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="c1">;; New</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">ver-dist-point</span> <span class="nv">p1</span> <span class="nv">p2</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">abs </span><span class="p">(</span><span class="nb">- </span><span class="p">(</span><span class="nf">y-point</span> <span class="nv">p1</span><span class="p">)</span>
+</span><span class="line">          <span class="p">(</span><span class="nf">y-point</span> <span class="nv">p2</span><span class="p">))))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">hor-dist-point</span> <span class="nv">p1</span> <span class="nv">p2</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">abs </span><span class="p">(</span><span class="nb">- </span><span class="p">(</span><span class="nf">x-point</span> <span class="nv">p1</span><span class="p">)</span>
+</span><span class="line">          <span class="p">(</span><span class="nf">x-point</span> <span class="nv">p2</span><span class="p">))))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="c1">;; Method 1 to define a rectangle</span>
+</span><span class="line"><span class="c1">; (define (make-rect p1 p2)</span>
+</span><span class="line"><span class="c1">;   (cons p1 p2))</span>
+</span><span class="line"><span class="c1">; (define (start-rect rect) (car rect))</span>
+</span><span class="line"><span class="c1">; (define (end-rect rect) (cdr rect))</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; Method 2</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">make-rect</span> <span class="nv">p1</span> <span class="nv">p2</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">list </span><span class="p">(</span><span class="nf">x-point</span> <span class="nv">p1</span><span class="p">)</span>
+</span><span class="line">        <span class="p">(</span><span class="nf">x-point</span> <span class="nv">p2</span><span class="p">)</span>
+</span><span class="line">        <span class="p">(</span><span class="nf">y-point</span> <span class="nv">p1</span><span class="p">)</span>
+</span><span class="line">        <span class="p">(</span><span class="nf">y-point</span> <span class="nv">p2</span><span class="p">)))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">start-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">make-point</span> <span class="p">(</span><span class="nb">car </span><span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">              <span class="p">(</span><span class="nb">caddr </span><span class="nv">rect</span><span class="p">)))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">end-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">make-point</span> <span class="p">(</span><span class="nb">cadr </span><span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">              <span class="p">(</span><span class="nb">cadddr </span><span class="nv">rect</span><span class="p">)))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">height-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">ver-dist-point</span> <span class="p">(</span><span class="nf">start-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">                  <span class="p">(</span><span class="nf">end-rect</span> <span class="nv">rect</span><span class="p">)))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">width-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">hor-dist-point</span> <span class="p">(</span><span class="nf">start-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">                  <span class="p">(</span><span class="nf">end-rect</span> <span class="nv">rect</span><span class="p">)))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">circum-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">* </span><span class="mi">2</span> <span class="p">(</span><span class="nb">+ </span><span class="p">(</span><span class="nf">height-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">          <span class="p">(</span><span class="nf">width-rect</span> <span class="nv">rect</span><span class="p">))))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">area-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nf">height-rect</span> <span class="nv">rect</span><span class="p">)</span>
+</span><span class="line">     <span class="p">(</span><span class="nf">width-rect</span> <span class="nv">rect</span><span class="p">)))</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">;; Abstract Layers:</span>
+</span><span class="line"><span class="c1">;;</span>
+</span><span class="line"><span class="c1">;; 1. cons / list / car / cdr / cadr ...</span>
+</span><span class="line"><span class="c1">;; 2. make-rect / start-rect / end-rect</span>
+</span><span class="line"><span class="c1">;; 3. width-rect / height-rect</span>
+</span><span class="line"><span class="c1">;; 4. circum-rect / area-rect</span>
+</span><span class="line"><span class="c1">;;</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">let </span><span class="p">((</span><span class="nf">rect</span> <span class="p">(</span><span class="nf">make-rect</span> <span class="p">(</span><span class="nf">make-point</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class="line">                       <span class="p">(</span><span class="nf">make-point</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">))))</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">area-rect</span> <span class="nv">rect</span><span class="p">))</span>     <span class="c1">;=&gt; 4</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">circum-rect</span> <span class="nv">rect</span><span class="p">))</span>   <span class="c1">;=&gt; 8</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The abstraction layers are indicated in the code.</p>
+
+<p>I demonstrated two types of implements to encapsulate a rectangle, on
+layer 2. Since both of them provide the same interfaces to construct a
+rectangle data type and to access its standard properties(in this
+case, they are <code>start-rect</code> and <code>end-rect</code>), other codes built upon it
+aren’t necessary to modify anything for compatibility.</p>
+
+<p>Okay, let’s move on the next section, <strong>2.1.3. What Is Meant by My Data?</strong></p>
+
+<p>Totally it’s talking about when we talk about <em>data</em>, what is we
+really referring to. The answer is a little unintuitive, that we only
+have to know a datum’s interfaces. Let me make a simple example from
+our daily life. When we say ‘water’, we know, or we parse the language
+‘water’ as a transparent drinkable liquid, while we usually don’t
+think that it’s composed by a specific state of combination of
+molecules that is consist of two hydrogen atoms and an oxygen atom,
+because that is not important to us. Before the discovery in chemistry
+about the composition of water, people don’t know that, but they can
+still distinguish what water is. It’s interfaces decide how
+people see and feel it. That’s it, <em>transparent</em> <em>liquid</em> that’s
+<em>drinkable</em>, simply. If there’s another thing that has the same
+properties, we might probably be able to consider it as water, at
+least it has the same function as water. This, is what is meant by the</p>
+<s>datum</s>
+<p>water.</p>
+
+<p>More interesting is it in examples of code, in fact, I
+think. Never mind that.</p>
+
+<blockquote>
+  <p><strong>Exercise 2.4:</strong>  Here is an alternative procedural representation of
+pairs. For this representation, verify that <code>(car (cons x y))</code> yields <code>x</code>
+for any objects <code>x</code> and <code>y</code>.</p>
+</blockquote>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">cons </span><span class="nv">x</span> <span class="nv">y</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">m</span><span class="p">)</span> <span class="p">(</span><span class="nf">m</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nb">car </span><span class="nv">z</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">z</span> <span class="p">(</span><span class="k">lambda </span><span class="p">(</span><span class="nf">p</span> <span class="nv">q</span><span class="p">)</span> <span class="nv">p</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<blockquote>
+
+  <p><strong>SICP</strong> - <em>Page 131</em>, Chinese edition: <em>page 62</em>.</p>
+</blockquote>
+
+<p>My proof, with lambda calculus, in the haskell syntax form. First let
+me rewrite the definition.</p>
+
+<blockquote>
+  <pre><code>cons = \x -&gt; \y -&gt; \m -&gt; m x y
+car  = \z -&gt; z (\p -&gt; \q -&gt; p)
+</code></pre>
+</blockquote>
+
+<p>Firstly, do a β reduction on <code>cons</code>. Let there’s a <code>cons</code> for <code>a</code> and
+<code>b</code>.</p>
+
+<blockquote>
+  <pre><code>cons a b = \m -&gt; m a b
+</code></pre>
+</blockquote>
+
+<p>Then do a β reduction on <code>car</code>, substitute the cons as the argument to
+<code>car</code>:</p>
+
+<blockquote>
+  <pre><code>car (cons a b) =
+car (\m -&gt; m a b)
+    = (\m -&gt; m a b) (\p -&gt; \q -&gt; p)
+    = (\p -&gt; \q -&gt; p) a b
+    = \q -&gt; a
+    = a
+</code></pre>
+</blockquote>
+
+<p>Proved.</p>
+
+<p>Definition of <code>cdr</code> could be:
+&gt;     cdr = \z -&gt; z (\p -&gt; \q -&gt; q)</p>
+
+<p>Likewise.</p>
+
+<p>I find it quite comfortable to do such lambda calculus. Let me talk
+about a thing related to lambda calculus today. I have SAT writing
+class today morning. The teacher is the founder, the
+institute. Although she seemed to be a good lecturer who knows how to
+attract people’s focus, she’s still boring for me since the content of
+the class, about Homer’s Epics, was not attractive for me at all. I
+pretending to be concentrated but actually I thought of things
+unrelated. I tried to challenge myself, to see if I’d be possible to
+deduce <a href="http://en.wikipedia.org/wiki/Church_encoding">Church number</a>
+and operators by my own. Then I took a piece of paper and a pencil and
+start to scratch on it. In fact yet before I have it done, the teacher
+noticed me and criticized me relentlessly. Funny is that I was still
+trying hardly deduce it in my mind, and pretending to be concentrated.</p>
+
+<p>I can still remember how I feel about lambda calculus when I first
+touch it. It was
+<a href="http://en.wikipedia.org/wiki/Fixed-point_combinator#Y_combinator">Y-Combinator</a>,
+a beautiful fixed point combinator, that firstly attracted me to such
+theoretical computer science field, as I found it incredibly
+beautiful. All right, let’s back to the topic.</p>
+
+<blockquote>
+  <p>Exercise 2.5.  Show that we can represent pairs of nonnegative
+integers using only numbers and arithmetic operations if we represent
+the pair a and b as the integer that is the product 2a 3b. Give the
+corresponding definitions of the procedures cons, car, and cdr.</p>
+
+  <p><strong>SICP</strong> - <em>Page 131</em>, Chinese edition: <em>page 62</em>.</p>
+
+</blockquote>
+
+<p>My solution(<a href="https://github.com/shouya/sicp-exercise/blob/master/2.5.ss">github</a>):</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+</pre></td><td class="code"><pre><code class="scheme"><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">my-cons</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">* </span><span class="p">(</span><span class="nb">expt </span><span class="mi">2</span> <span class="nv">a</span><span class="p">)</span>
+</span><span class="line">     <span class="p">(</span><span class="nb">expt </span><span class="mi">3</span> <span class="nv">b</span><span class="p">)))</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">my-car</span> <span class="nv">x</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">= </span><span class="p">(</span><span class="nb">modulo </span><span class="nv">x</span> <span class="mi">3</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class="line">      <span class="p">(</span><span class="nf">my-car</span> <span class="p">(</span><span class="nb">/ </span><span class="nv">x</span> <span class="mi">3</span><span class="p">))</span>
+</span><span class="line">      <span class="p">(</span><span class="nb">/ </span><span class="p">(</span><span class="nb">log </span><span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">log </span><span class="mi">2</span><span class="p">))))</span>
+</span><span class="line"><span class="p">(</span><span class="k">define </span><span class="p">(</span><span class="nf">my-cdr</span> <span class="nv">x</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="k">if </span><span class="p">(</span><span class="nb">= </span><span class="p">(</span><span class="nb">modulo </span><span class="nv">x</span> <span class="mi">2</span><span class="p">)</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class="line">      <span class="p">(</span><span class="nf">my-cdr</span> <span class="p">(</span><span class="nb">/ </span><span class="nv">x</span> <span class="mi">2</span><span class="p">))</span>
+</span><span class="line">      <span class="p">(</span><span class="nb">/ </span><span class="p">(</span><span class="nb">log </span><span class="nv">x</span><span class="p">)</span> <span class="p">(</span><span class="nb">log </span><span class="mi">3</span><span class="p">))))</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="k">let </span><span class="p">((</span><span class="nf">cons1</span> <span class="p">(</span><span class="nf">my-cons</span> <span class="mi">1</span> <span class="mi">5</span><span class="p">))</span>
+</span><span class="line">      <span class="p">(</span><span class="nf">cons2</span> <span class="p">(</span><span class="nf">my-cons</span> <span class="mi">0</span> <span class="mi">3</span><span class="p">))</span>
+</span><span class="line">      <span class="p">(</span><span class="nf">cons3</span> <span class="p">(</span><span class="nf">my-cons</span> <span class="mi">7</span> <span class="mi">8</span><span class="p">)))</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="nv">cons1</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">my-car</span> <span class="nv">cons1</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">my-cdr</span> <span class="nv">cons1</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="nv">cons2</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">my-car</span> <span class="nv">cons2</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">my-cdr</span> <span class="nv">cons2</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="nv">cons3</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">my-car</span> <span class="nv">cons3</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nb">display </span><span class="p">(</span><span class="nf">my-cdr</span> <span class="nv">cons3</span><span class="p">))</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">)</span>
+</span><span class="line">  <span class="p">(</span><span class="nf">newline</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>It runs perfectly under both guile and revo. Very interesting code
+piece it is.</p>
+
+<p>Oh gosh! The next question is about church number! Let me challenge
+it. (courageous!)</p>
+
+<blockquote>
+  <p>Exercise 2.6.  In case representing pairs as procedures wasn’t
+mind-boggling enough, consider that, in a language that can manipulate
+procedures, we can get by without numbers (at least insofar as
+nonnegative integers are concerned) by implementing 0 and the
+operation of adding 1 as</p>
+
+  <pre><code>(define zero (lambda (f) (lambda (x) x)))
+
+(define (add-1 n)
+  (lambda (f) (lambda (x) (f ((n f) x)))))
+</code></pre>
+
+  <p>This representation is known as <em>Church numerals</em>, after its inventor,
+Alonzo Church, the logician who invented the  calculus.</p>
+
+  <p>Define one and two directly (not in terms of <code>zero</code> and <code>add-1</code>). (Hint:
+Use substitution to evaluate <code>(add-1 zero)</code>). Give a direct definition
+of the addition procedure <code>+</code> (not in terms of repeated application of
+add-1).</p>
+
+</blockquote>
+
+<p>One &amp; two:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">zero</span>  <span class="ow">=</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">x</span>  <span class="ow">=</span> <span class="nf">\</span><span class="n">g</span> <span class="ow">-&gt;</span> <span class="n">y</span> <span class="ow">-&gt;</span> <span class="n">y</span>  <span class="p">;</span> <span class="n">alpha</span> <span class="n">conversion</span>
+</span><span class="line"><span class="nf">add</span><span class="o">-</span><span class="mi">1</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">n</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">f</span> <span class="p">((</span><span class="n">n</span> <span class="n">f</span><span class="p">)</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="mi">1</span>     <span class="ow">=</span> <span class="n">add</span><span class="o">-</span><span class="mi">1</span> <span class="n">zero</span>
+</span><span class="line">      <span class="ow">=</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">f</span> <span class="p">(((</span><span class="nf">\</span><span class="n">g</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">y</span> <span class="ow">-&gt;</span> <span class="n">y</span><span class="p">)</span> <span class="n">f</span><span class="p">)</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="line">      <span class="ow">=</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">f</span> <span class="p">((</span><span class="nf">\</span><span class="n">y</span> <span class="ow">-&gt;</span> <span class="n">y</span><span class="p">)</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="line">      <span class="ow">=</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">f</span> <span class="n">x</span>
+</span><span class="line">      <span class="ow">=</span> <span class="nf">\</span><span class="n">g</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">y</span> <span class="ow">-&gt;</span> <span class="n">g</span> <span class="n">y</span>    <span class="p">;</span> <span class="n">alpha</span> <span class="n">conversion</span>
+</span><span class="line">
+</span><span class="line"><span class="mi">2</span>     <span class="ow">=</span> <span class="n">add</span><span class="o">-</span><span class="mi">1</span> <span class="mi">1</span>
+</span><span class="line">      <span class="ow">=</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">f</span> <span class="p">(((</span><span class="nf">\</span><span class="n">g</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">y</span> <span class="ow">-&gt;</span> <span class="n">g</span> <span class="n">y</span><span class="p">)</span> <span class="n">f</span><span class="p">)</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="line">      <span class="ow">=</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">f</span> <span class="p">(</span><span class="n">f</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">n</span>     <span class="ow">=</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">f</span><span class="o">^</span><span class="n">n</span> <span class="n">x</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Plus:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">n</span> <span class="o">+</span> <span class="n">m</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">f</span><span class="o">^</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="n">n</span><span class="p">)</span> <span class="n">x</span><span class="p">)</span>
+</span><span class="line">      <span class="ow">=</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">f</span><span class="o">^</span><span class="n">m</span> <span class="p">(</span><span class="n">f</span><span class="o">^</span><span class="n">n</span> <span class="n">x</span><span class="p">))</span>
+</span><span class="line"><span class="o">+</span>     <span class="ow">=</span> <span class="nf">\</span><span class="n">m</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">n</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">f</span> <span class="ow">-&gt;</span> <span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="n">f</span> <span class="p">(</span><span class="n">n</span> <span class="n">f</span> <span class="n">x</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Deduced on today’s class already :)</p>
+
+<p>Feel yet comfortable. I’d just carry on.</p>
+
+  
+    <footer>
+      <p class="meta">
+        
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-08-06T22:46:00+08:00" pubdate data-updated="true">Aug 6<span>th</span>, 2013</time>
+        
+      </p>
+      
+        <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://shouya.github.io/page/sicp-notes/aug-6-2013.html" data-via="" data-counturl="http://shouya.github.io/page/sicp-notes/aug-6-2013.html" >Tweet</a>
+  
+  
+  
+</div>
+
+      
+    </footer>
+  
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/setting-up-ip-over-icmp-with-hans/">Setting Up IP Over ICMP With Hans</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/efficiently-determine-if-a-number-is-pan-digtal/">Efficiently Determine if a Number Is Pan-digital</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/experience-with-kde-gci/">Experience About Contributing KDE Projects</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/sacrifice/">祭獻</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/shines-at-dawn/">朝曦</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/shouya">@shouya</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'shouya',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/shouyatf@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2014
+- Shou Ya
+- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'shousorigin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://shouya.github.io/page/sicp-notes/aug-6-2013.html';
+        var disqus_url = 'http://shouya.github.io/page/sicp-notes/aug-6-2013.html';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
