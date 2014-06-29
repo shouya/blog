@@ -4,7 +4,7 @@
   <title><![CDATA[Shou's origin]]></title>
   <link href="http://shouya.github.io/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-06-03T02:50:22+08:00</updated>
+  <updated>2014-06-29T19:08:05+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -12,6 +12,41 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[夢魘]]></title>
+    <link href="http://shouya.github.io/blog/digging-in-a-dream/"/>
+    <updated>2014-06-29T18:45:29+08:00</updated>
+    <id>http://shouya.github.io/blog/digging-in-a-dream</id>
+    <content type="html"><![CDATA[<p>晚上，我在墳地挖土，點上火炬。 <br />
+頭頂的火光把周圍照得通明。   </p>
+
+<p>我抓著幻想中的水平懸絲，  <br />
+在各式燒給他們的物件中跳躍。   </p>
+
+<p>到白天，這裡卻成了一座鬼城。   <br />
+四處盡是餐館酒店，一片繁華。   </p>
+
+<p>我回到自己挖土所在的墳地。 <br />
+所有我做的改變都在漸漸復原。   </p>
+
+<p>我的心漸漸又恐懼轉為憂傷，  <br />
+又由憂傷轉為恐懼。   </p>
+
+<p>我為她創造的夢境，  <br />
+以及在夢境中創造的她，  <br />
+都從來沒有出現過。   </p>
+
+<p>我不屬於這個世界，  <br />
+她也不屬於這個世界。   </p>
+
+<p>於是我醒來了，一切依舊，  <br />
+即便如此我也不願在那樣的夢境中留戀。   </p>
+
+<p>&#8216;’我們的名字都被他改變了。’’</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Setting Up IP Over ICMP With Hans]]></title>
