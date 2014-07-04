@@ -4,7 +4,7 @@
   <title><![CDATA[Shou's origin]]></title>
   <link href="http://shouya.github.io/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-06-29T19:13:27+08:00</updated>
+  <updated>2014-07-05T06:58:03+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -12,6 +12,325 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[A Brief Journal About Learning Coq]]></title>
+    <link href="http://shouya.github.io/blog/a-brief-journal-about-learning-coq/"/>
+    <updated>2014-07-05T01:08:34+08:00</updated>
+    <id>http://shouya.github.io/blog/a-brief-journal-about-learning-coq</id>
+    <content type="html"><![CDATA[<p><em>This article is completely an informal journal about my learning process on
+Coq. It is just created as my whim prompted. Please don’t academically refer
+any part of it as studying material to learn Coq.</em></p>
+
+<h2 id="pre">Pre</h2>
+
+<p>I first heard of Coq in my admiring mathematician,
+<a href="https://twitter.com/txyyss">@txyyss</a>’s tweets. At the time I saw him talked
+about he’s glad and immersing in re-proving all the theorems he had learned.
+He also said, as deeping in Coq, he found a improvement on other related
+academic aspects. Driven by curiousity, I went to know about what a heck Coq
+is. Then I saw it describe itself as a ‘Proof Assistant’. I felt something
+uneven about it. As looking through all the programming languages I had
+learned, even those as logically abstract as Prolog, were not capable to do a
+proof.</p>
+
+<!-- more -->
+
+<p>At the time I was still in my high school. I just downloaded a Coq environment
+on my
+machine in the computer lab. Then I tried to follow the
+<a href="http://coq.inria.fr/V8.1/tutorial.html">official tutorial guide</a> to explore how
+it is used to do a proof. The experience was terrible. The official tutorial
+was
+completely not-novice-friendly, at least to me. I followed it for a section,
+doing what the guide instructed me to do, and they all works. I learned <code>0</code>
+has a
+type of <code>nat</code>, and <code>nat</code> has a type of <code>Type</code>, and that’s all, no more things
+substantial. The following sections are tough enough so I don’t even know what I
+was doing. Therefore I gived it up.</p>
+
+<p>My curiousity was evoked the second time by the <span title="狂讚士">“berserk-faver”</span> <a href="https://twitter.com/javranw">@javranw</a>. He
+express similar opinion and excitement as @txyyss towards Coq. At the time it
+was the onset of the long summer vacation after high school graduation. I got
+plenty of free time to learn the extracurricular interesting stuff. So I
+decided to pick Coq up again.</p>
+
+<h2 id="on">On</h2>
+
+<p>This time I found a Virginia University course about Coq, published as
+<a href="https://www.kevinjsullivan.com/00-syllabus">website</a>:
+I decide to start here because I
+saw the syllabus are well arranged and besides, I thought the course material
+might be easier for a layman to get started.
+([link to the tutorial]
+(http://kevinjsullivan.org/Courses/Reasoning/L02_Intro.html))</p>
+
+<p>The study curve of this course seems still very steep. In the other words, the
+course goes complicated very soon after it teaches some common-sense-like
+knowledge that I can hardly catch up with it. Besides, I don’t think the
+guide is written in very obvious and clear language.</p>
+
+<p>I had also checked the well-known
+<a href="http://www.cis.upenn.edu/~bcpierce/sf/current/">Software Foundations</a>. And
+I discovered it’s actually more clear and friendly to novice like me. So I head
+on to study following this guide.</p>
+
+<p>The progress was very slow. While a few of the exercises, mostly rated 3+
+stars, are really challenging. I tried to work on all exercises myself. And I
+maintained a <a href="https://github.com/shouya/sf-sol">Github repository</a> to publish
+my solutions.</p>
+
+<p>I usually study it after midnight. So I could have a quiet and distract-free
+environment for me to think. I was very concentrated while doing the proofs. It
+feels very good. Especially after proving a difficult theorem, I acquired great
+pleasance from the accomplishment. I can’t describe the the feeling as I
+first proved the commutation law of multiplication, which took me about 3 hours.</p>
+
+<p>In fact, in each new chapter I learned something new about Coq. However, as I
+turned to the chapter of
+‘<a href="http://www.cis.upenn.edu/~bcpierce/sf/current/Logic.html">Logic</a>’, I learned
+not only about Coq skills but also a mode of critical thinking towards the
+base, the logic, and the logic of logic. I learned the logic system also need
+an axiom, which subverted my view to logic before. A logical proposition can
+either be true or false, and besides, it cannot guarantee to be in one of these
+two states only. This axiom that establishes the whole logic system can be
+expressed in many forms. An optional exercise in the guide is to prove they are
+equivalent. Rated full 5 stars, this question is the most difficult exercise
+I’ve met. Anyway I still finished 4/5 of it.</p>
+
+<h3 id="sequela">Sequela</h3>
+
+<p>I once tweeted (translated into English)
+<a href="https://twitter.com/54c3/status/478478760371429376">link</a>:</p>
+
+<blockquote>
+  <p>I just dreammed in the nap. In the dream there was an arena-like place. The
+fighters used with logic symbols as weapons. They battled, and exerted
+various tactics. As a round over, they proved some theorem. #dream #coq
+#broken_brain</p>
+</blockquote>
+
+<p>Really. My mind is full of logics in the days I study Coq. I can feel it
+vividly that my mind start to ask about the logic of everything I see. Logic
+would spring from my mind on every affairs. That is very interesting experience.
+Especially after immersed in Coq for a whole night, I see everything and think:
+can I prove it?</p>
+
+<p>Somewhat I like that feeling :)</p>
+
+<!--
+
+Of course I still put my girlfriend Cres in the first position. I tried to
+spare some times accompanying with her. But to do this I have to convince
+myself in a illogical way (because there is no logic): my emotion will
+nevertheless take all control of my flesh body than my ration in coping with
+matters related to my girlfriend. So I stop thinking about Coq while chatting
+with her.
+
+I will have various affections while talking to her. However,
+after she sleep and I get back to the world of Coq, every emotional sense just
+go vain.
+
+Oh... I can't let Cres know about this... She'll think that I'm belittling her.
+Actually I'm regarding her in the most important position to me. Anyway. I'll
+just comment it out. Nobody will read this paragraph :)
+
+-->
+
+<h3 id="intelligence">Intelligence</h3>
+
+<p>In an ideal condition, to prove a theorem, I will first understand the theorem
+itself, and conceive a way to prove it. Then I’ll translate the idea into
+tactics in Coq. However, as I got more and more practiced in Coq, I do not
+always follow this way to prove a theorem. For some simple theorems, I can prove
+them without understanding them. I know what tactic should be used under
+specific condition. I would only concern about the hypotheses and the goals. My
+empirical intuition will guide me to the most likely way to prove them.</p>
+
+<p>I first realized the situation while I was proving a theorem related to
+<code>override</code> function in the next chapter after <code>override</code> is defined. I then
+disinclined to review the definition of <code>override</code> again, because it’s a little
+bit convoluting. Naturally I tried to prove it without reviewing the definition
+of <code>override</code>. Also naturally I did it successfully. I realized the problem
+just as I finished the proof. The first impression I raised is that I felt
+panicky on myself. While as I then carefully checked the definition of
+<code>override</code> function and the proof process, I found that’s already the optimal
+way. I will do exactly the same after I understood the definition.</p>
+
+<p>At that time, I had a sense that I was no longer a human, but a proving
+machine. I knew the tactics, and I knew when to use them. Prooving theorems
+seemed to be a machinery work. I was somewhat depressed on this kind of
+loss-of-intelligence.</p>
+
+<p>However, sometimes I thought in the other way. If I could grasp my empirical
+intuition, turn them into substantial rules, can I make a program that can
+prove whatever I can prove as a human? The program will never understand a
+theorem, but they can prove them in a Coq’ly logical way.</p>
+
+<h2 id="comments-on-the-design">Comments on the design</h2>
+
+<p>I thought the design is the point I want dissing about Coq mostly. Although
+powerful, Coq’s design on its syntax is as terrible as its “mother language”
+OCaml, and even worse.</p>
+
+<p>It might be improper for me, as a totally novice, to comment on Coq’s design. I
+know I’m yet far from qualified to do that. Nonetheless I still want to talk a
+little bit about it.</p>
+
+<p>Of course, I know neither syntax nor some mechanism are the most crucial
+things to a programming language. However, my steps followed the road of Ruby
+→ Scheme → Haskell. Studying those PLs was pleasing, at least they
+give me a sense of elegance. In contrast, I see Coq as a work from scratch
+than being well designed.</p>
+
+<h3 id="type-naming">Type naming</h3>
+
+<p>Actually, types in Coq are not as obvious as in other PLs. Unusual types
+are ubiquitous. I use ‘unusual type’ just because I don’t know how to descibe
+them. The nature of each type are not just transparent, but also must be
+defined by me manually. (At least I’m instructed to do so following the guide.)</p>
+
+<p>The case of type names, in the beginning, confused me. Why are the type names
+<code>nat</code>, <code>bool</code> lower-cased while <code>Set</code>, <code>Type</code>, <code>Prop</code> capitalized? I knew I
+won’t know the why of every unknowns just as I touched it. So I memorized it
+in a silly mode: names of the types we need to define by ourself are
+lower-cased, and the others are capitalized.</p>
+
+<p>This gave me the first intuition about differnet kinds of types.
+While then I walked through the guide, and gradually realized the difference
+between these two sort of types.</p>
+
+<p>Here’s correct<sup>(?)</sup> understanding about it. <code>nat</code> and <code>bool</code> are
+lower-cased because they are <em>inductive</em> types. In the other words, they are
+defined in a specific number of cases. Contrarily, we don’t see this feature in
+<code>Set</code>, <code>Type</code>, nor <code>Prop</code>, which are what we called <em>non-inductive types</em>.</p>
+
+<h3 id="tactic-naming">Tactic naming</h3>
+
+<p>Well, I will just pose here the most frequently used tactic names.</p>
+
+<p><code>simpl</code>, <code>reflexivity</code>, <code>destruct</code>, <code>induction</code>, <code>left</code>, <code>rewrite</code>.</p>
+
+<p>Did you see them? The names range among abbreviations, nouns,
+verbs, and adjectives. All of them are used as tactic names. While they’re not
+funtioning in different categories. They’re really alike. The naming gives me
+an impression that they are picked just from the whims of Coq inventors, so
+they’re not strict at all. There is no choice that I have to memorize them.</p>
+
+<h3 id="tactic-functioning">Tactic functioning</h3>
+
+<p>It is understandable that tactics function in very different ways. The
+behavior of them can sometimes be categorized with different fashions. For
+example, some of them will mark a goal as proved so we can continue to next
+goal or mark a <code>Qed</code> happily if all goals are proved. I call this feature
+‘commit’. This is an informal term invented by me because I don’t know what’s
+the accurate terminology for that.</p>
+
+<p>It can be thought to categorize the tactics by whether they commit. But it
+doesn’t apply to all the tactics. Now I have to pose three types:</p>
+
+<ul>
+  <li>commits: <code>reflexivity</code>, <code>assumption</code>, <code>exact</code>, …</li>
+  <li>does not commit: <code>simpl</code>, <code>rewrite</code>, <code>unfold</code>, <code>symmetry</code> …</li>
+  <li><span title="看心情">depends on mood</span>: <code>apply</code>, <code>inversion</code>, …</li>
+</ul>
+
+<p>Actually, there is an other case, because some tactics will split the goal into
+more subgoals. I will put they in an different category.</p>
+
+<ul>
+  <li>yields subgoals: <code>assert</code>, <code>replace</code>, <code>destruct</code>, <code>induction</code></li>
+</ul>
+
+<p>In fact, these do not always yield a subgoal. The number of subgoals <code>destruct</code>
+and <code>induction</code> yield depends on the number of inductive constructors of
+the type of the expression they are operating on.</p>
+
+<p>The behavior of inversion is ridiculous. One can conclude its usage as to
+simplify the <em>injective</em> case and <em>disjoint</em> case. Even the Software
+Foundations guide admits:</p>
+
+<blockquote>
+  <p>The inversion tactic is probably easier to understand by seeing it in action
+than from general descriptions like the above.</p>
+</blockquote>
+
+<p>Surely, it’s not difficult to use. I will list the places it usually applys. Of
+course these are just empirical conclusions.</p>
+
+<ol>
+  <li>false (disjoint equality) hypothesis (committing)</li>
+  <li><code>foo a = foo b</code> ⇒ <code>a = b</code>, some like applying <code>f_equal</code>
+theorem to a goal. (simplifing the hypothesis)</li>
+  <li><code>a :: b = x :: y</code> ⇒ <code>a = x</code> and <code>b = y</code> (spliting injective cases)</li>
+</ol>
+
+<p>In use case 1, it commits. In case 2, it does not commit but simplies
+a hypothesis. And in case 3, it split the cases. (As I write to here, I found
+it not so ridiculous as I thought it be before.)</p>
+
+<h3 id="tactic-option-syntax">Tactic option syntax</h3>
+
+<p>The disparity of tactic options are really confusing me. They’re even more
+difficult to remember than those tactic names. Voilà:</p>
+
+<p><code>induction n, m</code> vs <code>intros n m</code>. Comma separated or space separated?</p>
+
+<p><code>induction n as [| [x y] l]</code>. This syntax is used to name the induction
+variables in different case. We can think of <code>n</code> here in type of <code>list (X * Y)</code>.
+Notice that the cases ` ` and <code>[x y] l</code> are sperated with a <code>|</code> symbol, the
+list head (<code>[x y]</code>) and tail (<code>l</code>) are seperated with a space, and one
+individual element, of a pair, are embeded in another nested pair of square
+bracket. Additionally, I don’t even know till now how Coq recognize
+the user defined pair indicated in a specialized syntax <code>[x y]</code> correctly.</p>
+
+<p><code>rewrite xxx</code> vs <code>rewrite &lt;- xxx</code>. In fact, the left is an abbreviation of
+<code>rewrite -&gt; xxx</code>. I was confused on the special using of <code>&lt;-</code>. I thought it
+is an abuse of the symbol. A better way I can conceive is to split the function
+of <code>rewrite</code> into some like <code>rewrite[l,r]</code>.</p>
+
+<p><code>destruct eqn:&lt;eqn&gt;</code>. This is yet another ridiculous non-uniform syntax. You
+can imagine some use of destruct are like
+<code>destruct &lt;expr&gt; as &lt;cases&gt; eqn:&lt;eqn&gt;</code>. It really happens. And I have to
+memorized which goes first, the <code>as &lt;cases&gt;</code> or the <code>eqn:&lt;eqn&gt;</code>.</p>
+
+<h3 id="notation-syntax">Notation syntax</h3>
+
+<p>I couldn’t comprhend the usage of <code>Notation</code> so far. <code>Notation</code> is used to
+define notations, or say, syntatic sugars. The part that embarrassed me is
+its way to describe a syntax, which is a string, yes, a plain string. On the
+anesthetic and semantic aspect, syntatic description in a PL should have the
+the same syntatic level as the PL itself, rather than a degraded string.</p>
+
+<p>On the other hand, the notation in Coq is so beautiful yet powerful. It even
+capable to rival with standard macro definition in Scheme. I’ll pose some
+examples.</p>
+
+<pre><code>Notation "x + y" := (plus x y)
+  (at level 50, left associativity).
+Notation "( x , y )" := (pair x y).
+Notation "x :: l" := (cons x l)
+  (at level 60, right associativity).
+Notation "[ ]" := nil.
+Notation "[ x ; .. ; y ]" :=
+  (cons x .. (cons y nil) ..).
+</code></pre>
+
+<p>I don’t yet know how the definition the in the last case comes in
+nature. I’m curious about the implementation of the runtime syntatic definition
+to such a complex case. Contrarily, it’s at least conceivable how haskell infix
+operators work. Nor talk about the macros in the highly uniform syntax in
+Lisp.</p>
+
+<h2 id="last">Last</h2>
+
+<p>At last, I want to say:</p>
+
+<blockquote>
+  <p>在在一個定理上辛苦工作了兩個小時後敲 <code>Qed.</code> 的那種爽快的成就感簡直無以言表有沒有！</p>
+</blockquote>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[夢魘]]></title>
@@ -182,273 +501,6 @@ iptables</a></li>
   <li><a href="http://itsecworks.com/2013/02/15/fire-in-the-hole-of-the-firewall/">another person log about the usage of
 icmptx</a></li>
 </ul>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Efficiently Determine if a Number Is Pan-digital]]></title>
-    <link href="http://shouya.github.io/blog/efficiently-determine-if-a-number-is-pan-digtal/"/>
-    <updated>2013-03-02T23:12:00+08:00</updated>
-    <id>http://shouya.github.io/blog/efficiently-determine-if-a-number-is-pan-digtal</id>
-    <content type="html"><![CDATA[<p>Today I spent nearly a whole afternoon on solving
-<a href="http://projecteuler.net">projecteuler</a> problems, from where I started to
-consider some kinds of ‘efficiencies’.</p>
-
-<p>At the end while I was solving the
-<a href="https://projecteuler.net/problem=38">problem 38</a>, I planned to write
-a method that returns if a number’s pandigital.</p>
-
-<p>Firstly my basic idea is converting a number into a string, then split
-it into chars, sort &amp; unique it, and finally see if its length’s the
-same as before:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">def</span> <span class="nf">pandigital?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-</span><span class="line">  <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span>
-</span><span class="line"><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<!-- more -->
-<p>This is a good method &amp; intuitive to everyone. Whilst I started to
-consider the efficiency problem. I seldom deal with these as I thought
-efficiency’s not a big deal on modern computers mostly in
-practice. However, the former examples of solving problems gave me a
-concept that even a smaller improvement on a fundamental level method can
-save a huge amount of time. Then I started to consider to optimize
-this. (by nothing, mostly it’s just for fun.)</p>
-
-<p>Soon i conceived this, to transfer a double used <code>n.to_s</code> to a local variable:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-<span class="line-number">2</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="n">s</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span>
-</span><span class="line"><span class="n">s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">s</span><span class="o">.</span><span class="n">length</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>It had not very obvious improvement. I think it is some kind of that
-it had to deal with one more local variable that drains some
-efficiencies from it.</p>
-
-<p>That’s cool, then I had an idea to suppress the last calling,
-<code>s.length</code>, as I still thought function calling is a key-point of
-efficiency factor.</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">to_a</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-<p>Or,
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span> <span class="o">==</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="o">]</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
-to prevent extra calling.</p>
-
-<p>In this way it does work better, but it’s still not enough good.</p>
-
-<p>Then I thought about that a pandigital number’s limitation, so I added
-a checking process in the beginning:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-<span class="line-number">2</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
-</span><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span> <span class="o">==</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="o">]</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>As I tested my code with a randomly generated number with this:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">Benchmark</span><span class="o">.</span><span class="n">bm</span> <span class="k">do</span> <span class="o">|</span><span class="n">b</span><span class="o">|</span>
-</span><span class="line">  <span class="n">b</span><span class="o">.</span><span class="n">report</span> <span class="k">do</span>
-</span><span class="line">    <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="nb">rand</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span>
-</span><span class="line">    <span class="c1"># do the test</span>
-</span><span class="line">  <span class="k">end</span>
-</span><span class="line"><span class="k">end</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>Therefore the terms with improper length accounts about 10% of all, so this
-code has reduced the time by nearly 10%, really. Which was really cool.</p>
-
-<p>Not longer I brainstormed another limitation of pandigits, that
-there shouldn’t be any zero in digits allowed.</p>
-
-<p>So the updated code is:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
-</span><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
-</span><span class="line"><span class="c1"># blah blah blah</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>A ‘0’ appears on any bits of a nine digital integer is <code>1/10</code>, so in
-this way, a probability of <code>1-((1-1/10)^9)</code> which be the total chance
-of when a ‘0’ will appear in an 9-digit number. It’s about 61%, so
-after adding that statement, the efficiency was improved by more than
-one half.</p>
-
-<p>I know the <code>sort</code> method will sort a duplicated array as process;
-the same is <code>uniq</code>. So I suppressed this two into their ‘bang’ mode,
-since <code>uniq!</code> can return a result whether it has compressed the array,
-I am possible to inverse the result to a boolean directly.
-This is what I did:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="ow">not</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">to_a</span><span class="o">.</span><span class="n">sort!</span><span class="o">.</span><span class="n">uniq!</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>Cool it was, then I started to consider to optimize the sort &amp; uniq
-line, since I thought it was not elegant and very feasible. A good
-method is compact the process of recognizing pandigits with a set, of
-course basically I have brought hashes, which perform the same as
-sets.
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
-</span><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
-</span><span class="line"><span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">each_char</span> <span class="p">{</span><span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">key?</span> <span class="n">c</span><span class="p">;</span> <span class="n">ns</span><span class="o">[</span><span class="n">c</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span> <span class="p">}</span>
-</span><span class="line"><span class="kp">true</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>This method doesn’t only compacted the process. Consider the former
-program, <code>sort</code> method in ruby is implemented by quick sort algorithm,
-which has the time complexity of O(Nlog(N)), and beside the <code>uniq</code>
-took an O(N) as well. These are two significant and obvious efficiency
-losts and the new algorithm doesn’t have this problem. A hash table
-accounts O(1) to store and O(1) to check, and the most time it will just
-be fled by the iteration of the characters, which took O(N) to run.</p>
-
-<p>There I found another point to optimize it – the hash table. A hash
-table, in this case, was created and destroyed frequently, and a hash
-table’s usually a big object so that will cause a large memory
-exchange that might take time. On the other hand, the hash table
-needs a hash function for each characters. I don’t know how ruby might
-implement it, but the hash algorithm will still account some
-time, as I know.</p>
-
-<p>Then I reduced it into array:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
-</span><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
-</span><span class="line"><span class="n">ns</span> <span class="o">=</span> <span class="o">[]</span>
-</span><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">each_char</span> <span class="p">{</span><span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">ns</span><span class="o">[</span><span class="n">c</span><span class="o">.</span><span class="n">to_i</span><span class="o">]</span><span class="p">;</span> <span class="n">ns</span><span class="o">[</span><span class="n">c</span><span class="o">.</span><span class="n">to_i</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span> <span class="p">}</span>
-</span><span class="line"><span class="kp">true</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>Cool but there’s still a place to improve: the <code>c.to_i</code> part. <code>atoi</code>
-function in C implementation is linear proportional to the string’s
-length. But in this case I don’t need to deal with that much cases. So
-I considered to change them to <code>ns[c.ord - '0'.ord]</code>.</p>
-
-<p>An static array could prevent it from dynamically allocating memories:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="n">ns</span> <span class="o">=</span> <span class="nb">Array</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>And in the final I did some small tweaks, such as, to hard code some lexical
-constants in, optimize the multiple used calls. The result’s as below:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">class</span> <span class="nc">Integer</span>
-</span><span class="line">  <span class="k">def</span> <span class="nf">pandigital?</span>
-</span><span class="line">    <span class="n">s</span> <span class="o">=</span> <span class="nb">to_s</span>
-</span><span class="line">    <span class="k">return</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
-</span><span class="line">    <span class="k">return</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
-</span><span class="line">    <span class="n">ns</span> <span class="o">=</span> <span class="nb">Array</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-</span><span class="line">    <span class="n">s</span><span class="o">.</span><span class="n">each_char</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
-</span><span class="line">      <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ord</span><span class="o">-</span><span class="mi">48</span><span class="p">)</span>
-</span><span class="line">      <span class="n">ns</span><span class="o">[</span><span class="n">c</span><span class="o">.</span><span class="n">ord</span><span class="o">-</span><span class="mi">48</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span>
-</span><span class="line">    <span class="k">end</span>
-</span><span class="line">    <span class="kp">true</span>
-</span><span class="line">  <span class="k">end</span>
-</span><span class="line"><span class="k">end</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>Compare this result to the most former one; the new program has improved
-it’s efficiency to 2/3 of the origin, here’s the result in a bench
-mark test:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class=""><span class="line">        user       system     total       real
-</span><span class="line">   old  0.920000   0.000000   0.920000 (  0.915701)
-</span><span class="line">   new  0.300000   0.000000   0.300000 (  0.304713)</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>Seems cool and I was in some extent like such challenges. I don’t
-still consider a lot of efficiency, of course, in practice use. But
-I enjoy the pleasure to dig deeply, to drain the extreme. That’s where
-I find fun in.</p>
-
-<p>Good luck.</p>
-
-<h2 id="update">UPDATE</h2>
-<p>I am currently reading the book
-“<a href="http://netlib.bell-labs.com/cm/cs/pearls/">Programming Pearls</a>”, in
-which I’ve had a lot of amazes about algorithms and programming thinking.
-So when I picked the previous code, I found that method should be not
-the final solution.</p>
-
-<p>I just wrote an more optimized version, which improved the speed by
-25% extra.</p>
-
-<p>Here goes the code:
-&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-<span class="line-number">4</span>
-<span class="line-number">5</span>
-<span class="line-number">6</span>
-<span class="line-number">7</span>
-<span class="line-number">8</span>
-<span class="line-number">9</span>
-<span class="line-number">10</span>
-<span class="line-number">11</span>
-<span class="line-number">12</span>
-<span class="line-number">13</span>
-<span class="line-number">14</span>
-<span class="line-number">15</span>
-&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">def</span> <span class="nf">pandigital?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-</span><span class="line">  <span class="n">s</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;1&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;2&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;3&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;4&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;5&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;6&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;7&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;8&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;9&#39;</span>
-</span><span class="line">  <span class="k">return</span> <span class="kp">true</span>
-</span><span class="line"><span class="k">end</span>
-</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
-
-<p>This method wasn’t so cool, and I know it looks a little tedious. In
-fact I don’t like such repeating code. However, it works so good. This
-method is learnt from Programming Pearls, page 94, an expanded loop
-for a binary search algorithm with that the maximum number of elements is
-1000. It optimized an <em><a href="https://en.wikipedia.org/wiki/Big_O_notation">O(log N)</a></em> algorithm into <em>O(1)</em>, which is
-really awesome.</p>
 ]]></content>
   </entry>
   

@@ -9,7 +9,8 @@
   <meta name="author" content="Shou Ya">
 
   
-  <meta name="description" content="晚上，我在墳地挖土，點上火炬。 頭頂的火光把周圍照得通明。 我抓著幻想中的水平懸絲， 在各式燒給他們的物件中跳躍。 到白天，這裡卻成了一座鬼城。 四處盡是餐館酒店，一片繁華。 ">
+  <meta name="description" content="This article is completely an informal journal about my learning process on
+Coq. It is just created as my whim prompted. Please don’t academically &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -103,6 +104,61 @@ MathJax.Hub.Config({
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/a-brief-journal-about-learning-coq/">A Brief Journal About Learning Coq</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-05T01:08:34+08:00" pubdate data-updated="true">Jul 5<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><em>This article is completely an informal journal about my learning process on
+Coq. It is just created as my whim prompted. Please don’t academically refer
+any part of it as studying material to learn Coq.</em></p>
+
+<h2 id="pre">Pre</h2>
+
+<p>I first heard of Coq in my admiring mathematician,
+<a href="https://twitter.com/txyyss">@txyyss</a>’s tweets. At the time I saw him talked
+about he’s glad and immersing in re-proving all the theorems he had learned.
+He also said, as deeping in Coq, he found a improvement on other related
+academic aspects. Driven by curiousity, I went to know about what a heck Coq
+is. Then I saw it describe itself as a ‘Proof Assistant’. I felt something
+uneven about it. As looking through all the programming languages I had
+learned, even those as logically abstract as Prolog, were not capable to do a
+proof.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/a-brief-journal-about-learning-coq/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -207,64 +263,6 @@ through the firewall with <strong>hans</strong>.</p>
   
     <footer>
       <a rel="full-article" href="/blog/setting-up-ip-over-icmp-with-hans/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/efficiently-determine-if-a-number-is-pan-digtal/">Efficiently Determine if a Number Is Pan-digital</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-03-02T23:12:00+08:00" pubdate data-updated="true">Mar 2<span>nd</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Today I spent nearly a whole afternoon on solving
-<a href="http://projecteuler.net">projecteuler</a> problems, from where I started to
-consider some kinds of ‘efficiencies’.</p>
-
-<p>At the end while I was solving the
-<a href="https://projecteuler.net/problem=38">problem 38</a>, I planned to write
-a method that returns if a number’s pandigital.</p>
-
-<p>Firstly my basic idea is converting a number into a string, then split
-it into chars, sort &amp; unique it, and finally see if its length’s the
-same as before:</p>
-
-<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
-<span class="line-number">2</span>
-<span class="line-number">3</span>
-</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">def</span> <span class="nf">pandigital?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-</span><span class="line">  <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span>
-</span><span class="line"><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/efficiently-determine-if-a-number-is-pan-digtal/">Read on &rarr;</a>
     </footer>
   
 
@@ -659,15 +657,15 @@ and some tricks from that.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/a-brief-journal-about-learning-coq/">A Brief Journal About Learning Coq</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/digging-in-a-dream/">夢魘</a>
       </li>
     
       <li class="post">
         <a href="/blog/setting-up-ip-over-icmp-with-hans/">Setting Up IP Over ICMP With Hans</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/efficiently-determine-if-a-number-is-pan-digtal/">Efficiently Determine if a Number Is Pan-digital</a>
       </li>
     
       <li class="post">
