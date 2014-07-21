@@ -4,7 +4,7 @@
   <title><![CDATA[Tag: programming | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/tag/programming/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-07-05T06:58:03+08:00</updated>
+  <updated>2014-07-22T04:41:38+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -26,7 +26,7 @@ any part of it as studying material to learn Coq.</em></p>
 
 <p>I first heard of Coq in my admiring mathematician,
 <a href="https://twitter.com/txyyss">@txyyss</a>’s tweets. At the time I saw him talked
-about he’s glad and immersing in re-proving all the theorems he had learned.
+that he’s glad and immersed in re-proving all the theorems he had learned.
 He also said, as deeping in Coq, he found a improvement on other related
 academic aspects. Driven by curiousity, I went to know about what a heck Coq
 is. Then I saw it describe itself as a ‘Proof Assistant’. I felt something
