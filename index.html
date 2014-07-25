@@ -9,7 +9,8 @@
   <meta name="author" content="Shou Ya">
 
   
-  <meta name="description" content="背景 GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS 投毒，也就近乎於解決了大部份網站被牆的問題。 ">
+  <meta name="description" content="GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS
+投毒，也就近乎於解決了大部份網站被牆的問題。 方案 DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -132,10 +133,18 @@ MathJax.Hub.Config({
   </header>
 
 
-  <div class="entry-content"><h2 id="section">背景</h2>
-
-<p>GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS 
+  <div class="entry-content"><p>GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS
 投毒，也就近乎於解決了大部份網站被牆的問題。</p>
+
+<h1 id="section">方案</h1>
+
+<p>DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。dnsmasq 是一款的 DNS 服務器，我主要用其提供 DNS 緩存的功能。</p>
+
+<p>我將用 dnsmasq 設置本地的 DNS 服務器，然後配置 dnsmasq 從 dnscrypt 獲得結果並返回給請求者。而 dnscrypt 會把來自 dnsmasq 的請求加密丟到 opendns 的服務器，然後把解析結果返回回來。</p>
+
+<p>那麼 dnsmasq 將偵聽 <code>53</code> 端口，而 dnscrypt 的端口隨意，只要和 dnsmasq 裡的配置匹配就可以了。我隨便用了 <code>1053</code> 作為 dnscrypt 的端口。</p>
+
+<p>最後，把系統的 DNS 服務器設置為本機就可以了。</p>
 
 </div>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: solution | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/category/solution/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-07-26T04:01:21+08:00</updated>
+  <updated>2014-07-26T04:05:23+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -18,35 +18,10 @@
     <link href="http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution/"/>
     <updated>2014-07-26T02:27:35+08:00</updated>
     <id>http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution</id>
-    <content type="html"><![CDATA[<h2 id="section">背景</h2>
-
-<p>GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS 
+    <content type="html"><![CDATA[<p>GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS
 投毒，也就近乎於解決了大部份網站被牆的問題。</p>
 
-<!-- more -->
-
-<p>長期以來我都在使用 <a href="https://code.google.com/p/openerdns/">Opener DNS</a> 提供的免費 DNS 服務器 
-<code>42.120.21.30</code>，這個服務器工作正常，響應速度也很快，但是我在使用中遇到一個不知怎麼解決的問題而頭疼。那就是，很多 CLI 工具，包括 
-wget 和 curl，在設置了 Opener DNS 為 DNS 服務器後，都無法解析出任何地址，然而另一些工具，包括 nslookup 和 
-dig 等，卻沒有任何問題。而當切換為其他 DNS 服務器之後，wget 和 curl 
-之類的卻又可以正常解析了。這是很奇怪的現象，導致我後來連 emerge 都要開著 proxychains，甚是不方便。</p>
-
-<p>今天下午心血來潮想隨手把這個問題解決掉。首先考慮的是用 iptables 把 GFW 發回來的假的 DNS 
-請求結果丟掉，只留正常的結果。網路上這種資源不少，我四處抄來抄去縫縫補補拼了一份 iptables 的配置，並丟在 
-<a href="https://gist.github.com/shouya/c798a3aa7fb9a2a9b7fa">Gist</a> 上了。但問題是，好像 GFW 
-不光返回假的 DNS 結果，有時還回丟棄正確的結果，因為常常 DNS 請求只會返回假的結果，被 iptables 
-丟棄後導致請求超時，反而沒有效果。這種方法不能保證工作，而且速度很慢。</p>
-
-<p>經測試 DNS over TCP 效果不錯，速度快而且相對穩定。所以我試了一下用 pdnsd 代理所有 DNS 請求並用 TCP 查詢上游 DNS 
-服務器。但是當我安裝了 pdnsd 之後，不知哪裡出錯了，總是在其偵聽本地端口時提示兩個</p>
-
-<pre><code>[Errno 97] Address family not supported by protocol
-</code></pre>
-
-<p>錯誤，怎麼配置都不行，無論是 example 裡的還是 minimal 都無法解決。看起來可能是我系統配置的問題，或者是 pdnsd 的 
-bug。但我不是很確定到底怎麼回事，而且網路上好像沒有人有類似的情況，所以也不好上報。</p>
-
-<h1 id="section-1">方案</h1>
+<h1 id="section">方案</h1>
 
 <p>DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。dnsmasq 是一款的 DNS 服務器，我主要用其提供 DNS 緩存的功能。</p>
 
@@ -56,9 +31,34 @@ bug。但我不是很確定到底怎麼回事，而且網路上好像沒有人�
 
 <p>最後，把系統的 DNS 服務器設置為本機就可以了。</p>
 
+<!-- more -->
+
+<h2 id="section-1">背景</h2>
+
+<p>長期以來我都在使用 <a href="https://code.google.com/p/openerdns/">Opener DNS</a> 提供的免費 DNS 服務器
+<code>42.120.21.30</code>，這個服務器工作正常，響應速度也很快，但是我在使用中遇到一個不知怎麼解決的問題而頭疼。那就是，很多 CLI 工具，包括
+wget 和 curl，在設置了 Opener DNS 為 DNS 服務器後，都無法解析出任何地址，然而另一些工具，包括 nslookup 和
+dig 等，卻沒有任何問題。而當切換為其他 DNS 服務器之後，wget 和 curl
+之類的卻又可以正常解析了。這是很奇怪的現象，導致我後來連 emerge 都要開著 proxychains，甚是不方便。</p>
+
+<p>今天下午心血來潮想隨手把這個問題解決掉。首先考慮的是用 iptables 把 GFW 發回來的假的 DNS
+請求結果丟掉，只留正常的結果。網路上這種資源不少，我四處抄來抄去縫縫補補拼了一份 iptables 的配置，並丟在
+<a href="https://gist.github.com/shouya/c798a3aa7fb9a2a9b7fa">Gist</a> 上了。但問題是，好像 GFW
+不光返回假的 DNS 結果，有時還回丟棄正確的結果，因為常常 DNS 請求只會返回假的結果，被 iptables
+丟棄後導致請求超時，反而沒有效果。這種方法不能保證工作，而且速度很慢。</p>
+
+<p>經測試 DNS over TCP 效果不錯，速度快而且相對穩定。所以我試了一下用 pdnsd 代理所有 DNS 請求並用 TCP 查詢上游 DNS
+服務器。但是當我安裝了 pdnsd 之後，不知哪裡出錯了，總是在其偵聽本地端口時提示兩個</p>
+
+<pre><code>[Errno 97] Address family not supported by protocol
+</code></pre>
+
+<p>錯誤，怎麼配置都不行，無論是 example 裡的還是 minimal 都無法解決。看起來可能是我系統配置的問題，或者是 pdnsd 的
+bug。但我不是很確定到底怎麼回事，而且網路上好像沒有人有類似的情況，所以也不好上報。</p>
+
 <h2 id="dnscrypt">安裝配置 dnscrypt</h2>
 
-<p>首先在 gentoo 的官方 portage 源裡並沒有 dnscrypt-proxy 這個程式， 所以需要手動加入 gentoo-zh 這個 
+<p>首先在 gentoo 的官方 portage 源裡並沒有 dnscrypt-proxy 這個程式， 所以需要手動加入 gentoo-zh 這個
 overlay。 關於怎麼添加使用 overlay 這裡就不詳述了。</p>
 
 <p>所以是常規地：</p>
@@ -170,7 +170,6 @@ $ sudo rc-update add dnsmasq default
   <li><a href="http://www.v2ex.com/t/75568">dnsmasq如何强制用tcp与上游dns服务器通讯？</a></li>
   <li><a href="http://mariotaku.wordpress.com/2011/09/18/use-dnsmasq-easier-than-pdnsd/">比pdnsd更更更简单！用dnsmasq给你正确的DNS结果！</a></li>
 </ul>
-
 ]]></content>
   </entry>
   
