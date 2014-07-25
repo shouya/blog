@@ -4,7 +4,7 @@
   <title><![CDATA[Tag: networking | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/tag/networking/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-07-26T04:05:23+08:00</updated>
+  <updated>2014-07-26T04:18:48+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -139,7 +139,7 @@ server=127.0.0.1#1053
 <pre><code>$ echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf
 </code></pre>
 
-<p>現在 <code>curl https://twitter.com</code> 應該能很快返回正常結果了，這說明我們的配置很成功。</p>
+<p>現在去瀏覽器中關代理開 https://twitter.com 應該能很快看到正常網頁了，這說明我們的配置工作了。</p>
 
 <p>所以下一步，開機啟動來一發！</p>
 
