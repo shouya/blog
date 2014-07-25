@@ -4,7 +4,7 @@
   <title><![CDATA[Tag: unix | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/tag/unix/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-07-22T04:41:38+08:00</updated>
+  <updated>2014-07-26T04:01:21+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -12,6 +12,167 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[DNSCrypt + DNSmasq 解決 GFW 的 DNS 投毒方案]]></title>
+    <link href="http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution/"/>
+    <updated>2014-07-26T02:27:35+08:00</updated>
+    <id>http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution</id>
+    <content type="html"><![CDATA[<h2 id="section">背景</h2>
+
+<p>GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS 
+投毒，也就近乎於解決了大部份網站被牆的問題。</p>
+
+<!-- more -->
+
+<p>長期以來我都在使用 <a href="https://code.google.com/p/openerdns/">Opener DNS</a> 提供的免費 DNS 服務器 
+<code>42.120.21.30</code>，這個服務器工作正常，響應速度也很快，但是我在使用中遇到一個不知怎麼解決的問題而頭疼。那就是，很多 CLI 工具，包括 
+wget 和 curl，在設置了 Opener DNS 為 DNS 服務器後，都無法解析出任何地址，然而另一些工具，包括 nslookup 和 
+dig 等，卻沒有任何問題。而當切換為其他 DNS 服務器之後，wget 和 curl 
+之類的卻又可以正常解析了。這是很奇怪的現象，導致我後來連 emerge 都要開著 proxychains，甚是不方便。</p>
+
+<p>今天下午心血來潮想隨手把這個問題解決掉。首先考慮的是用 iptables 把 GFW 發回來的假的 DNS 
+請求結果丟掉，只留正常的結果。網路上這種資源不少，我四處抄來抄去縫縫補補拼了一份 iptables 的配置，並丟在 
+<a href="https://gist.github.com/shouya/c798a3aa7fb9a2a9b7fa">Gist</a> 上了。但問題是，好像 GFW 
+不光返回假的 DNS 結果，有時還回丟棄正確的結果，因為常常 DNS 請求只會返回假的結果，被 iptables 
+丟棄後導致請求超時，反而沒有效果。這種方法不能保證工作，而且速度很慢。</p>
+
+<p>經測試 DNS over TCP 效果不錯，速度快而且相對穩定。所以我試了一下用 pdnsd 代理所有 DNS 請求並用 TCP 查詢上游 DNS 
+服務器。但是當我安裝了 pdnsd 之後，不知哪裡出錯了，總是在其偵聽本地端口時提示兩個</p>
+
+<pre><code>[Errno 97] Address family not supported by protocol
+</code></pre>
+
+<p>錯誤，怎麼配置都不行，無論是 example 裡的還是 minimal 都無法解決。看起來可能是我系統配置的問題，或者是 pdnsd 的 
+bug。但我不是很確定到底怎麼回事，而且網路上好像沒有人有類似的情況，所以也不好上報。</p>
+
+<h1 id="section-1">方案</h1>
+
+<p>DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。dnsmasq 是一款的 DNS 服務器，我主要用其提供 DNS 緩存的功能。</p>
+
+<p>我將用 dnsmasq 設置本地的 DNS 服務器，然後配置 dnsmasq 從 dnscrypt 獲得結果並返回給請求者。而 dnscrypt 會把來自 dnsmasq 的請求加密丟到 opendns 的服務器，然後把解析結果返回回來。</p>
+
+<p>那麼 dnsmasq 將偵聽 <code>53</code> 端口，而 dnscrypt 的端口隨意，只要和 dnsmasq 裡的配置匹配就可以了。我隨便用了 <code>1053</code> 作為 dnscrypt 的端口。</p>
+
+<p>最後，把系統的 DNS 服務器設置為本機就可以了。</p>
+
+<h2 id="dnscrypt">安裝配置 dnscrypt</h2>
+
+<p>首先在 gentoo 的官方 portage 源裡並沒有 dnscrypt-proxy 這個程式， 所以需要手動加入 gentoo-zh 這個 
+overlay。 關於怎麼添加使用 overlay 這裡就不詳述了。</p>
+
+<p>所以是常規地：</p>
+
+<pre><code>$ sudo emerge -av dnscrypt-proxy
+</code></pre>
+
+<p><code>dnscrypt-proxy</code> 會依賴於一個叫 <code>libsodium</code> 的庫。</p>
+
+<p>在我的機器上 <code>libsodium</code> 和 <code>dnscrypt-proxy</code> 編譯時（準確說應該是<code>configure</code>的時候）會出一個錯誤：</p>
+
+<pre><code>checking if gcc -std=gnu99 static flag -static works... *** Error in `/usr/bin/ld': corrupted double-linked list: 0x099a4178 ***
+</code></pre>
+
+<p>在 Github 上看到有人同樣遇到了 libsodium 的<a href="https://github.com/jedisct1/libsodium/issues/120">這個問題</a>，原因是 gcc 的 <code>-pie</code> 和 <code>-static</code> 不兼容，
+而解決方法是在 <code>configure</code> 時禁用 <code>pie</code> 就好了。所以手動改這兩個包的 ebuild 文件，在 <code>econf</code> 最後加上 <code>--disable-pie</code>。
+於是兩個包都可以被編過了。改過後再 ebuild 一次 manifest，就可以正常安裝這兩個包了。</p>
+
+<p>dnscrypt 的配置位於 <code>/etc/conf.d/dnscrypt-proxy</code>，編輯使之偵聽於 <code>1053</code> 端口。我的配置如下：</p>
+
+<pre><code>DNSCRYPT_LOCALIP=127.0.0.1
+DNSCRYPT_LOCALPORT=1053
+DNSCRYPT_USER=dnscrypt
+DNSCRYPT_PROVIDER_NAME=2.dnscrypt-cert.opendns.com
+DNSCRYPT_PROVIDER_KEY=B735:1140:206F:225D:3E2B:D822:D7FD:691E:A1C3:3CC8:D666:8D0C:BE04:BFAB:CA43:FB79
+DNSCRYPT_RESOLVERIP=208.67.220.220
+DNSCRYPT_RESOLVERPORT=443
+</code></pre>
+
+<p>基本就是默認配置。</p>
+
+<p>把 dnscrypt 跑起來：</p>
+
+<pre><code>$ /etc/init.d/dnscrypt-proxy start
+</code></pre>
+
+<p>然後用 dig 測試之是否工作：</p>
+
+<pre><code>$ dig @127.0.0.1 -p 1053 twitter.com
+</code></pre>
+
+<p>如果得到正確結果，則說明 dnscrypt 配置好了。</p>
+
+<h2 id="dnsmasq">安裝 dnsmasq</h2>
+
+<p>安裝：</p>
+
+<pre><code>$ sudo emerge -av dnsmasq
+</code></pre>
+
+<p>因為我幾乎不怎麼用國內服務，所以也用不著為國內服務設置國內的 DNS 來提高效率。所以我用 dnsmasq 純屬為了其緩存。</p>
+
+<p>dnsmasq 的配置位於 <code>/etc/dnsmasq.conf</code>，這是我的配置：</p>
+
+<pre><code>no-resolv
+no-poll
+server=127.0.0.1#1053
+</code></pre>
+
+<p><code>no-resolv</code> 讓 dnsmasq 不去理睬 <code>/etc/resolv</code> 裡的配置。<code>no-poll</code> 讓其不檢測更新。<code>server</code> 裡對應的是 dnscrypt 的本地端口。</p>
+
+<p>這樣就可以了，跑起來：</p>
+
+<pre><code>$ /etc/init.d/dnsmasq start
+</code></pre>
+
+<p>試試：</p>
+
+<pre><code>$ dig @127.0.0.1 -p 53 twitter.com
+</code></pre>
+
+<p>沒問題的話就說明 dnsmasq 已經工作了。</p>
+
+<h2 id="section-2">完成</h2>
+
+<p>設置系統 DNS！</p>
+
+<pre><code>$ echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf
+</code></pre>
+
+<p>現在 <code>curl https://twitter.com</code> 應該能很快返回正常結果了，這說明我們的配置很成功。</p>
+
+<p>所以下一步，開機啟動來一發！</p>
+
+<pre><code>$ sudo rc-update add dnscrypt-proxy default
+$ sudo rc-update add dnsmasq default
+</code></pre>
+
+<p>搞定，去玩吧。</p>
+
+<h2 id="section-3">參考資料</h2>
+
+<ul>
+  <li><a href="https://github.com/jedisct1/libsodium/issues/120">Issue #120: arch linux i686 build errors: corrupted double linked lists - jedisct1/libsodium</a></li>
+  <li><a href="http://blog.sina.com.cn/s/blog_656126b20101ia39.html">详细安装配置 dnscrypt 和 dnsmasq</a></li>
+  <li><a href="http://lilydjwg.is-programmer.com/2012/11/10/dnscrypt-dnsmasq.36288.html">dnscrypt + dnsmasq</a></li>
+</ul>
+
+<h2 id="section-4">一些可能有用的鏈接</h2>
+
+<ul>
+  <li><a href="https://code.google.com/p/openerdns/">Opener DNS - Google Code</a></li>
+  <li><a href="http://www.opendns.com/about/innovations/dnscrypt/">DNSCrypt - OpenDNS</a></li>
+  <li><a href="http://en.wikipedia.org/wiki/DNS_spoofing">DNS spoofing - Wikipedia</a></li>
+  <li><a href="http://zh.wikipedia.org/wiki/%E5%9F%9F%E5%90%8D%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BC%93%E5%AD%98%E6%B1%A1%E6%9F%93#.E4.B8.AD.E5.9B.BD.E9.98.B2.E7.81.AB.E9.95.B7.E5.9F.8E">域名伺服器快取污染 - 維基百科</a></li>
+  <li><a href="http://igfw.net/archives/10890">如何本地避免GFW的DNS污染</a></li>
+  <li><a href="https://gist.github.com/wen-long/9580811">Gist: wen-long/DNS.md</a></li>
+  <li><a href="https://wido.me/sunteya/use-openwrt-resolve-gfw-dns-spoofing">openwrt 上通过 pdnsd 和 dnsmasq 解决 dns 污染</a></li>
+  <li><a href="http://www.v2ex.com/t/75568">dnsmasq如何强制用tcp与上游dns服务器通讯？</a></li>
+  <li><a href="http://mariotaku.wordpress.com/2011/09/18/use-dnsmasq-easier-than-pdnsd/">比pdnsd更更更简单！用dnsmasq给你正确的DNS结果！</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Setting up IP over ICMP with hans]]></title>
