@@ -4,7 +4,7 @@
   <title><![CDATA[Tag: programming | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/tag/programming/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-07-29T17:44:21+08:00</updated>
+  <updated>2014-08-03T18:43:58+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -27,10 +27,10 @@ any part of it as studying material to learn Coq.</em></p>
 <p>I first heard of Coq in my admiring mathematician,
 <a href="https://twitter.com/txyyss">@txyyss</a>’s tweets. At the time I saw him talked
 that he’s glad and immersed in re-proving all the theorems he had learned.
-He also said, as deeping in Coq, he found a improvement on other related
-academic aspects. Driven by curiousity, I went to know about what a heck Coq
+He also said, as deepening in Coq, he found a boost on other related
+academic aspects. Driven by curiosity, I went to know about what a heck Coq
 is. Then I saw it describe itself as a ‘Proof Assistant’. I felt something
-uneven about it. As looking through all the programming languages I had
+uneven about it. Looking through all the programming languages I had
 learned, even those as logically abstract as Prolog, were not capable to do a
 proof.</p>
 
@@ -40,14 +40,14 @@ proof.</p>
 on my
 machine in the computer lab. Then I tried to follow the
 <a href="http://coq.inria.fr/V8.1/tutorial.html">official tutorial guide</a> to explore how
-it is used to do a proof. The experience was terrible. The official tutorial
+to use it to do a proof. The experience was terrible. The official tutorial
 was
 completely not-novice-friendly, at least to me. I followed it for a section,
 doing what the guide instructed me to do, and they all works. I learned <code>0</code>
 has a
 type of <code>nat</code>, and <code>nat</code> has a type of <code>Type</code>, and that’s all, no more things
 substantial. The following sections are tough enough so I don’t even know what I
-was doing. Therefore I gived it up.</p>
+was doing. Thus I gived it up.</p>
 
 <p>My curiousity was evoked the second time by the <span title="狂讚士">“berserk-faver”</span> <a href="https://twitter.com/javranw">@javranw</a>. He
 express similar opinion and excitement as @txyyss towards Coq. At the time it
@@ -65,28 +65,28 @@ might be easier for a layman to get started.
 ([link to the tutorial]
 (http://kevinjsullivan.org/Courses/Reasoning/L02_Intro.html))</p>
 
-<p>The study curve of this course seems still very steep. In the other words, the
-course goes complicated very soon after it teaches some common-sense-like
+<p>The study curve of this course seems still steep. In the other words, the
+course goes complicated soon after it teaches some common-sense-like
 knowledge that I can hardly catch up with it. Besides, I don’t think the
-guide is written in very obvious and clear language.</p>
+guide is written in obvious and clear language.</p>
 
 <p>I had also checked the well-known
 <a href="http://www.cis.upenn.edu/~bcpierce/sf/current/">Software Foundations</a>. And
 I discovered it’s actually more clear and friendly to novice like me. So I head
 on to study following this guide.</p>
 
-<p>The progress was very slow. While a few of the exercises, mostly rated 3+
+<p>The progress was slow. While a few of the exercises, mostly rated 3+
 stars, are really challenging. I tried to work on all exercises myself. And I
 maintained a <a href="https://github.com/shouya/sf-sol">Github repository</a> to publish
 my solutions.</p>
 
 <p>I usually study it after midnight. So I could have a quiet and distract-free
-environment for me to think. I was very concentrated while doing the proofs. It
-feels very good. Especially after proving a difficult theorem, I acquired great
+environment for me to think. I was concentrated while doing the proofs. It
+feels good. Especially after proving a difficult theorem, I acquired great
 pleasance from the accomplishment. I can’t describe the the feeling as I
 first proved the commutation law of multiplication, which took me about 3 hours.</p>
 
-<p>In fact, in each new chapter I learned something new about Coq. However, as I
+<p>In fact, in each new chapter I learned something new about Coq. Yet, as I
 turned to the chapter of
 ‘<a href="http://www.cis.upenn.edu/~bcpierce/sf/current/Logic.html">Logic</a>’, I learned
 not only about Coq skills but also a mode of critical thinking towards the
@@ -207,7 +207,7 @@ defined in a specific number of cases. Contrarily, we don’t see this feature i
 
 <h3 id="tactic-naming">Tactic naming</h3>
 
-<p>Well, I will just pose here the most frequently used tactic names.</p>
+<p>Well, I shall just pose here the most frequently used tactic names.</p>
 
 <p><code>simpl</code>, <code>reflexivity</code>, <code>destruct</code>, <code>induction</code>, <code>left</code>, <code>rewrite</code>.</p>
 
