@@ -4,7 +4,7 @@
   <title><![CDATA[Shou's origin]]></title>
   <link href="http://shouya.github.io/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-08-04T18:46:09+08:00</updated>
+  <updated>2014-08-04T18:48:42+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -289,7 +289,7 @@ used in Scheme compilers.</p>
     <content type="html"><![CDATA[<p>GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS
 投毒，也就近乎於解決了大部份網站被牆的問題。</p>
 
-<h1 id="section">方案</h1>
+<h2 id="section">方案</h2>
 
 <p>DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。dnsmasq 是一款的 DNS 服務器，我主要用其提供 DNS 緩存的功能。</p>
 
