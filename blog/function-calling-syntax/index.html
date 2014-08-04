@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Shou's origin</title>
+  <title>Function Calling Syntax - Shou's origin</title>
   <meta name="author" content="Shou Ya">
 
   
@@ -20,7 +20,7 @@ procedual. In other &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://shouya.github.io">
+  <link rel="canonical" href="http://shouya.github.io/blog/function-calling-syntax">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -104,15 +104,12 @@ MathJax.Hub.Config({
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/function-calling-syntax/">Function Calling Syntax</a></h1>
+      <h1 class="entry-title">Function Calling Syntax</h1>
     
     
       <p class="meta">
@@ -135,7 +132,7 @@ MathJax.Hub.Config({
   </header>
 
 
-  <div class="entry-content"><p>We use programming languages to indicate a process of
+<div class="entry-content"><p>We use programming languages to indicate a process of
 actions/computations. Therefore programming languages tends to be more
 procedual. In other words, they are used to indicate how a thing is
 done.</p>
@@ -300,74 +297,16 @@ used in Scheme compilers.</p>
   <li><a href="https://en.wikipedia.org/wiki/Word_order">WP: Word Order</a></li>
 </ul>
 </div>
-  
-  
 
 
-    </article>
-  
-  
-    <article>
+  <footer>
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/how-to-be-happy/">翻譯：如何幸福起來</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
   
 
+<span class="byline author vcard">Posted by <span class="fn">Shou Ya</span></span>
 
-<time datetime="2014-07-28T22:17:07+08:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><blockquote>
-  <p>原文由 lukeprog 發表於 <a href="http://lesswrong.com/lw/4su/how_to_be_happy/">LessWrong</a>。
-關於注釋和引用，請參見原文。</p>
-</blockquote>
-
-<p>有一天一個同事對我說：「盧克，你應該是我見過的最幸福的人了！你怎麼做到每時每刻都這麼開心的？」</p>
-
-<p>他可能只是在誇張修辭，不過我還是回答了很長。曾經的大部分人生是不令我開心的，我甚至好幾次考慮過自殺。然後我花了兩年研究幸福科學。而現在，幸福是我的自然狀態。我甚至都不記得甚麼時候我有達 20 分鐘以上的不開心過。</p>
-
-<p>這類改變並非人人都會有，甚至大部份人都不會有（<a href="http://lesswrong.com/lw/9v/beware_of_otheroptimizing/">beware of other-optimizing</a>），但不妨一試！</p>
-
-<p>我們都希望開心些，而且變得開心對其他事情也有好處。譬如說，開心有利於人的身心健康，能提高創造力，還能使你更好地做決定。（畢竟當一個人不開心時很難做到理性思考。）所以呢，本篇作為<a href="http://lesswrong.com/lw/3nn/scientific_selfhelp_the_state_of_our_knowledge/">如何</a>系列的一部分，讓我們回過頭來審視一下<strong>幸福科學</strong>。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/how-to-be-happy/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/dnscrypt-plus-dnsmasq-solution/">DNSCrypt + DNSmasq 解決 GFW 的 DNS 投毒方案</a></h1>
-    
-    
-      <p class="meta">
-        
 
 
 
@@ -379,420 +318,53 @@ used in Scheme compilers.</p>
   
 
 
-<time datetime="2014-07-26T02:27:35+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS
-投毒，也就近乎於解決了大部份網站被牆的問題。</p>
-
-<h1 id="section">方案</h1>
-
-<p>DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。dnsmasq 是一款的 DNS 服務器，我主要用其提供 DNS 緩存的功能。</p>
-
-<p>我將用 dnsmasq 設置本地的 DNS 服務器，然後配置 dnsmasq 從 dnscrypt 獲得結果並返回給請求者。而 dnscrypt 會把來自 dnsmasq 的請求加密丟到 opendns 的服務器，然後把解析結果返回回來。</p>
-
-<p>那麼 dnsmasq 將偵聽 <code>53</code> 端口，而 dnscrypt 的端口隨意，只要和 dnsmasq 裡的配置匹配就可以了。我隨便用了 <code>1053</code> 作為 dnscrypt 的端口。</p>
-
-<p>最後，把系統的 DNS 服務器設置為本機就可以了。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/dnscrypt-plus-dnsmasq-solution/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
+<time datetime="2014-08-03T17:59:14+08:00" pubdate data-updated="true">Aug 3<span>rd</span>, 2014</time>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/a-brief-journal-about-learning-coq/">A Brief Journal About Learning Coq</a></h1>
-    
-    
-      <p class="meta">
-        
 
-
-
-
-
-
-
-
+<span class="categories">
   
-
-
-<time datetime="2014-07-05T01:08:34+08:00" pubdate data-updated="true">Jul 5<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><em>This article is completely an informal journal about my learning process on
-Coq. It is just created as my whim prompted. Please don’t academically refer
-any part of it as studying material to learn Coq.</em></p>
-
-<h2 id="pre">Pre</h2>
-
-<p>I first heard of Coq in my admiring mathematician,
-<a href="https://twitter.com/txyyss">@txyyss</a>’s tweets. At the time I saw him talked
-that he’s glad and immersed in re-proving all the theorems he had learned.
-He also said, as deepening in Coq, he found a boost on other related
-academic aspects. Driven by curiosity, I went to know about what a heck Coq
-is. Then I saw it describe itself as a ‘Proof Assistant’. I felt something
-uneven about it. Looking through all the programming languages I had
-learned, even those as logically abstract as Prolog, were not capable to do a
-proof.</p>
-
-</div>
+    <a class='category' href='/blog/category/think/'>think</a>
   
-  
-    <footer>
-      <a rel="full-article" href="/blog/a-brief-journal-about-learning-coq/">Read on &rarr;</a>
-    </footer>
-  
+</span>
 
 
-    </article>
-  
-  
-    <article>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/digging-in-a-dream/">夢魘</a></h1>
-    
-    
-      <p class="meta">
-        
 
-
-
-
-
-
-
-
+<span class="tags">
   
+    <a class='tag' href='/blog/tag/paradigm/'>paradigm</a>, <a class='tag' href='/blog/tag/programming-language/'>programming language</a>
+  
+</span>
 
 
-<time datetime="2014-06-29T18:45:29+08:00" pubdate data-updated="true">Jun 29<span>th</span>, 2014</time>
-        
-      </p>
+    </p>
     
-  </header>
-
-
-  <div class="entry-content"><p>晚上，我在墳地挖土，點上火炬。 <br />
-頭頂的火光把周圍照得通明。   </p>
-
-<p>我抓著幻想中的水平懸絲，  <br />
-在各式燒給他們的物件中跳躍。   </p>
-
-<p>到白天，這裡卻成了一座鬼城。   <br />
-四處盡是餐館酒店，一片繁華。   </p>
-
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://shouya.github.io/blog/function-calling-syntax/" data-via="" data-counturl="http://shouya.github.io/blog/function-calling-syntax/" >Tweet</a>
+  
+  
+  
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/digging-in-a-dream/">Read on &rarr;</a>
-    </footer>
-  
 
-
-    </article>
-  
-  
-    <article>
+    
+    <p class="meta">
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/setting-up-ip-over-icmp-with-hans/">Setting Up IP Over ICMP With Hans</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-02T23:19:29+08:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2 id="background">Background</h2>
-<p>The ISP, China Telecom, interrupted the internet access from my home
-yesterday due to the expiration of annually subscription of the
-internet service. While I found that ICMP packets are not blocked.
-Even though I can’t even do a DNS query, I can ping any server as usual.</p>
-
-<p>The inaccessibility of internet has greatly evoked my anxiety on
-seeking changes. Well, it’s theoretically possible to carry data in
-ICMP packets. Therefore, according to the hacker community’s
-principle, there should already been hackers who made use of this and
-opened the sources of their programs.</p>
-
-<p>Indeed, searching ‘ICMP tunneling’, I found
-<a href="http://code.gerade.org/hans/">hans</a> and
-<a href="http://thomer.com/icmptx/">icmptx</a>. The latter one is more
-primitive and complicated to use. After several trials and failures, I
-decide to give <strong>icmptx</strong> up, and try <strong>hans</strong> instead.</p>
-
-<p>This article is a tutorial/note about how to establish normal internet
-connection in the condition that only ICMP packets are allowed to pass
-through the firewall with <strong>hans</strong>.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/setting-up-ip-over-icmp-with-hans/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
+        <a class="basic-alignment left" href="/blog/how-to-be-happy/" title="Previous Post: 翻譯：如何幸福起來">&laquo; 翻譯：如何幸福起來</a>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/experience-with-kde-gci/">Experience About Contributing KDE Projects</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-12-31T17:55:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>It’s the first time I am involved in contributing KDE, and I think
-that’s very wonderful experience for me.</p>
-
-<p>The first task I claimed is convert the all class members in
-calligra/kexi project to d-pointers. This task is not very hard to me
-actually. Because that the source files and classes are so many, it
-takes most of labors, and some experiences and ability to to cope with
-exceptions. I’ve been leaving c++ for almost one year time, so totally
-the most important thing I gained is to pick up c++ again. Further
-more, I don’t used to know to use d-pointers to reduce coupling, and now I
-learnt it, which is really cool.</p>
-
-<p>Then I’ve contributed with marble-globe task. The task is about adding
-remote icon/image support for marble. I got known about the typical
-structure of a KDE programs, and I’m feeling like to program Qt, which
-is really powerful and handy. And then by the passion, I wrote the
-required KML tag writers for marble, too. These are interesting for
-me.</p>
-
-<p>Totally speaking the greatest gain is the achievement of contributing
-open source projects. This is biggest open source project I’ve been
-involved in, since before I used to just collaborate opensource
-project with small groups or individuals on github before. Those
-hackers I met are really friendly. I’m very careless. I made a lot of
-mistakes, and even didn’t realize that. At those times, my mentor
-always explained to me patiently &amp; gently, that made feel embarrassed
-when finally I knew that’s my fault. And at the time, when I met
-project-related problems that I can’t solve and not able to be
-abstracted to ask on stackoverflow, I sent emails to my mentors and
-they explained the reason of the problem clearly and gave me guidance
-to solve it. I can feel that the hackers in open source community are
-glad to help those beginners like me, and that’s really impressive for
-me.</p>
-
-<p>This is the first time &amp; will be the last that I could attend Google
-Code-In, but I will continue work on contributing open source
-projects. I love the atmosphere in open source communities and  I
-would like to get acquainted to more hackers. Good luck.</p>
-
-<p>That’s it, thanks to all.</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
       
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/sacrifice/">祭獻</a></h1>
-    
-    
-      <p class="meta">
-        
+    </p>
+  </footer>
+</article>
 
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-11-13T14:16:00+08:00" pubdate data-updated="true">Nov 13<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>我在黑暗中醒來  <br />
-不能看到任何東西  <br />
-我和一切無關  <br />
-因此意識遠遠離開了這個世界  <br />
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/sacrifice/">Read on &rarr;</a>
-    </footer>
-  
+  </section>
 
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/shines-at-dawn/">朝曦</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-10-14T18:26:00+08:00" pubdate data-updated="true">Oct 14<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>我注視著妳的眼睛 <br />
-我看不到光芒   </p>
-
-<p>我望到了我自己，在飽受折磨 <br />
-那是茫茫的天空 <br />
-彷彿甚麼都不存在 <br />
 </div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/shines-at-dawn/">Read on &rarr;</a>
-    </footer>
-  
 
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/warrior-who-fights-the-dragon/">挑戰龍的勇士</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-15T20:21:00+08:00" pubdate data-updated="true">Sep 15<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>我崇敬挑戰龍而失敗的勇士，<br />
-而不是皇帝。</p>
-
-<p>我期待的是一種平衡，<br />
-一種可以維持永久的，<br />
-自然而包容萬物的平衡，<br />
-將世界置於其中，<br />
-然後，把發現者燒死。
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/warrior-who-fights-the-dragon/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  <div class="pagination">
-    
-      <a class="prev" href="/browse/page/2/">&larr; Older</a>
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
 <aside class="sidebar">
   
     <section>
@@ -825,7 +397,7 @@ would like to get acquainted to more hackers. Good luck.</p>
 <section>
   <h1>GitHub Repos</h1>
   <ul id="gh_repos">
-    <li class="loading">Status updating&#8230;</li>
+    <li class="loading">Status updating...</li>
   </ul>
   
   <a href="https://github.com/shouya">@shouya</a> on GitHub
@@ -867,6 +439,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   
 </aside>
 
+
     </div>
   </div>
   <footer role="contentinfo"><p>
@@ -882,7 +455,10 @@ would like to get acquainted to more hackers. Good luck.</p>
       var disqus_shortname = 'shousorigin';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://shouya.github.io/blog/function-calling-syntax/';
+        var disqus_url = 'http://shouya.github.io/blog/function-calling-syntax/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

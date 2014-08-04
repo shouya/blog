@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Tag: paradigm | Shou's origin]]></title>
+  <link href="http://shouya.github.io/blog/tag/paradigm/atom.xml" rel="self"/>
+  <link href="http://shouya.github.io/"/>
+  <updated>2014-08-04T18:43:39+08:00</updated>
+  <id>http://shouya.github.io/</id>
+  <author>
+    <name><![CDATA[Shou Ya]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Function Calling Syntax]]></title>
+    <link href="http://shouya.github.io/blog/function-calling-syntax/"/>
+    <updated>2014-08-03T17:59:14+08:00</updated>
+    <id>http://shouya.github.io/blog/function-calling-syntax</id>
+    <content type="html"><![CDATA[<p>We use programming languages to indicate a process of
+actions/computations. Therefore programming languages tends to be more
+procedual. In other words, they are used to indicate how a thing is
+done.</p>
+
+<p>Just as the role of verbs in a nature language sentence, an action is
+the most essential part of ‘doing a task’ in programming language. Of
+course the syntax of a programming language could be complex. I’d be
+here to discuss only the simplest cases of function calling among
+different programming languages.</p>
+
+<p>Here’s a table of the terms used in different paradigms.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Paradigm</th>
+      <th>Term for the Acting Object</th>
+      <th>Term for the Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Imperative</td>
+      <td>Function/Procedure</td>
+      <td>Call/Invoke</td>
+    </tr>
+    <tr>
+      <td>OO</td>
+      <td>Method</td>
+      <td>Invoke/Send Message</td>
+    </tr>
+    <tr>
+      <td>Functional</td>
+      <td>Function/Closure</td>
+      <td>Apply</td>
+    </tr>
+    <tr>
+      <td>Stack</td>
+      <td>Operation</td>
+      <td>Act</td>
+    </tr>
+    <tr>
+      <td>Lambda Calculus</td>
+      <td>Lambda/Combinator</td>
+      <td>Apply</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="object-oriented-languages-ruby-c">Object Oriented Languages (Ruby, C++)</h2>
+
+<p>OOP is an analog of object manipulation in the real world. Actually,
+semantically <code>foo.bar(baz)</code> does not mean <code>foo</code> does an action <code>bar</code>
+on <code>baz</code>. Rather, according to the OOP mechanism, it should be
+regarded as a message <code>bar</code> send to the actor <code>foo</code> with argument
+<code>baz</code>. Look at the code snippets below in Ruby and C++.</p>
+
+<p><code>ruby
+$stdout.puts "hello"
+</code></p>
+
+<p><code>c++
+vec.push_back("hello")
+</code></p>
+
+<p>How would we translate them in English? The result is probably similar
+to these:</p>
+
+<blockquote>
+  <p>(The computer) puts “hello” on $stdout.</p>
+
+  <p>(The computer) pushes “hello” into vec.</p>
+</blockquote>
+
+<p>In such invocations, obviously the subject is uslally omitted because
+we’re always ordering the computer to do the actions.
+The receivers, or target objects, are put at the front. Then
+follows the actions we want to apply on them. And finally the
+arguments, or carried objects.</p>
+
+<p>Notice that the in Ruby the object is often omitted because it is
+implied in the current context (<code>self</code>). And in C++ <code>this</code> is
+sometimes omitted if we’re operating in a method within the same class.
+It is similar to the case omitting object in a nature language when
+we’re in a specific environment. For example, if we are working on a
+task and then we say ‘finished’, the object can be understood as the
+task we were working on.</p>
+
+<h2 id="stack-basedconcatenative-languages-dc-factor-assembly">Stack-based/Concatenative Languages (dc, Factor, Assembly)</h2>
+
+<p>The core of stack-based languages is the operation on a stack involves
+pushing and popping.</p>
+
+<p><code>dc</code> is a tiny calculator. The language of it is succinct and handy. Here’s an example:</p>
+
+<p><code>bash
+[hello]p
+</code></p>
+
+<p>The square brackets quotes a string of characters and push them into a
+stack. Then the operation <code>p</code> pops the string out and then prints it.</p>
+
+<p>Stack-based language can be as simple as dc, while also can be as
+complex as Factor. Yet either of them have the same syntax
+structure. The following Factor code reverses an array.</p>
+
+<p><code>haskell
+{1 2 3} reverse
+</code></p>
+
+<p>We cannot directly translate them into one sentence of nature
+languages because the invocation of a function should not be regarded
+as a single process. As how we can see the process more clearly in
+Assembly language:</p>
+
+<p><code>c
+push 0x0001   (0x0001 points to "world")
+push 0x0010   (0x0010 points to "hello, %s.\n")
+call 0x0100   (0x0100 points to the `printf` function in libc)
+</code></p>
+
+<p>The invocation of such functions can be seen as a kind of
+argument-free operation. Their arguments are pushed to stack before
+the function invocations and in the function the arguments would be
+popped out to be manipulated.</p>
+
+<p>If we still want to see the process of invocation as a single, we
+would derive a pattern that the actions, or the verbs, are always put
+at the last.</p>
+
+<h2 id="functional-languages-scheme">Functional languages (Scheme)</h2>
+
+<p>I consider the syntax of function invocation an opposition to the
+stack-based languages. Unlike the invocation syntax in stack-based
+languages, which put the action at the last, functional programming
+languages tend to pose the action/function as precedent to the
+arguments. I guess this phenomenon originates from the application
+syntax of FP’s ancestor lambda calculus.</p>
+
+<p>In Scheme, a typical hello world program looks like:</p>
+
+<p><code>scheme
+(display "hello world")
+</code></p>
+
+<p>It just looks like the stack-based language. In fact we can convert
+functional operations into stack operations through
+<a href="https://en.wikipedia.org/wiki/Continuation-passing_style">continuation-passing style transformation</a>,
+so easily convertible into Assembly. In fact this technique is often
+used in Scheme compilers.</p>
+
+<h2 id="references">References</h2>
+<ul>
+  <li><a href="http://factorcode.org/">Factor Programming Language</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Whitespace_(programming_language)">WP: Whitespace (PL)</a></li>
+  <li><a href="http://www.linuxmanpages.com/man1/dc.1.php">dc (1) - man</a></li>
+  <li><a href="http://concatenative.org/wiki/view/Concatenative%20language">Concatenative Languages</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Stack-based">WP: Stack-based</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Stack-oriented_programming_language">WP: Stack-oriented Programming Languages</a></li>
+  <li><a href="https://en.wikipedia.org/wiki/Word_order">WP: Word Order</a></li>
+</ul>
+]]></content>
+  </entry>
+  
+</feed>
