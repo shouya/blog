@@ -7,8 +7,8 @@ angular
   port: 6800,
   encrypt: false,
   auth: {                          // either add the token field or the user and pass field, not both.
-    user: 'shou',
-    pass: 'nopassword'
+//    user: 'shou',
+//    pass: 'nopassword'
   }
 })
 .constant('$enable', {
