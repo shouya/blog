@@ -5,12 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>DNSCrypt + DNSmasq 解決 GFW 的 DNS 投毒方案 - Shou's origin</title>
+  <title>Linux 下 GFW 的 DNS 投毒解決方案 - Shou's origin</title>
   <meta name="author" content="Shou Ya">
 
   
-  <meta name="description" content="GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS
-投毒，也就近乎於解決了大部份網站被牆的問題。 方案 DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。 &hellip;">
+  <meta name="description" content="這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。 方案 DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。dnsmasq 是一款的 DNS 服務器，我主要用其提供 DNS 緩存的功能。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -108,7 +107,7 @@ MathJax.Hub.Config({
   
   <header>
     
-      <h1 class="entry-title">DNSCrypt + DNSmasq 解決 GFW 的 DNS 投毒方案</h1>
+      <h1 class="entry-title">Linux 下 GFW 的 DNS 投毒解決方案</h1>
     
     
       <p class="meta">
@@ -131,8 +130,7 @@ MathJax.Hub.Config({
   </header>
 
 
-<div class="entry-content"><p>GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS
-投毒，也就近乎於解決了大部份網站被牆的問題。</p>
+<div class="entry-content"><p>這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。</p>
 
 <h2 id="section">方案</h2>
 
@@ -252,8 +250,6 @@ server=127.0.0.1#1053
 <pre><code>$ echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf
 </code></pre>
 
-<p>現在去瀏覽器中關代理開 https://twitter.com 應該能很快看到正常網頁了，這說明我們的配置工作了。</p>
-
 <p>所以下一步，開機啟動來一發！</p>
 
 <pre><code>$ sudo rc-update add dnscrypt-proxy default
@@ -369,7 +365,7 @@ $ sudo rc-update add dnsmasq default
       </li>
     
       <li class="post">
-        <a href="/blog/dnscrypt-plus-dnsmasq-solution/">DNSCrypt + DNSmasq 解決 GFW 的 DNS 投毒方案</a>
+        <a href="/blog/dnscrypt-plus-dnsmasq-solution/">Linux 下 GFW 的 DNS 投毒解決方案</a>
       </li>
     
       <li class="post">

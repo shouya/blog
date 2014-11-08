@@ -4,7 +4,7 @@
   <title><![CDATA[Shou's origin]]></title>
   <link href="http://shouya.github.io/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-09-09T02:54:26+08:00</updated>
+  <updated>2014-11-09T01:54:43+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -282,12 +282,11 @@ used in Scheme compilers.</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[DNSCrypt + DNSmasq 解決 GFW 的 DNS 投毒方案]]></title>
+    <title type="html"><![CDATA[Linux 下 GFW 的 DNS 投毒解決方案]]></title>
     <link href="http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution/"/>
     <updated>2014-07-26T02:27:35+08:00</updated>
     <id>http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution</id>
-    <content type="html"><![CDATA[<p>GFW 的 DNS 投毒 (DNS Poisoning) 是其最常見的封鎖方法，影響範圍極廣。也就是說，解決了 GFW 的 DNS
-投毒，也就近乎於解決了大部份網站被牆的問題。</p>
+    <content type="html"><![CDATA[<p>這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。</p>
 
 <h2 id="section">方案</h2>
 
@@ -406,8 +405,6 @@ server=127.0.0.1#1053
 
 <pre><code>$ echo nameserver 127.0.0.1 | sudo tee /etc/resolv.conf
 </code></pre>
-
-<p>現在去瀏覽器中關代理開 https://twitter.com 應該能很快看到正常網頁了，這說明我們的配置工作了。</p>
 
 <p>所以下一步，開機啟動來一發！</p>
 
