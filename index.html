@@ -9,9 +9,7 @@
   <meta name="author" content="Shou Ya">
 
   
-  <meta name="description" content="We use programming languages to indicate a process of
-actions/computations. Therefore programming languages tends to be more
-procedual. In other &hellip;">
+  <meta name="description" content="原文由 Heinrich Apfelmus 發表於 Hackhands，標題：How Lazy Evaluatoin Works in Haskell。 Lambda 醬想遲些再去打掃房間～ 惰性求值是 Haskell 用得最廣泛的代碼執行方法，通過之我們的程序可以寫得更簡單，更模塊化， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -106,6 +104,63 @@ MathJax.Hub.Config({
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/how-lazy-evaluation-works-in-haskell/">翻譯：Haskell 怎麼實現惰性求值</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-11-24T19:14:57+08:00" pubdate data-updated="true">Nov 24<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><blockquote>
+  <p>原文由 <a href="http://apfelmus.nfshost.com/blog.html">Heinrich Apfelmus</a> 發表於 <a href="https://hackhands.com/lazy-evaluation-works-haskell/">Hackhands</a>，標題：How Lazy Evaluatoin Works in Haskell。</p>
+</blockquote>
+
+<p><em>Lambda 醬想遲些再去打掃房間～</em></p>
+
+<p>惰性求值是 Haskell 用得最廣泛的代碼執行方法，通過之我們的程序可以寫得更簡單，更模塊化，不過惰性求值帶來的一個問題是不那麼直觀內存佔用，對新手來講這往往是個坑。譬如說，下面這個看起來很正常的表達式跑起來將會佔用上 G 的內存空間：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">foldl</span> <span class="p">(</span><span class="o">+</span><span class="p">)</span> <span class="mi">0</span> <span class="p">[</span><span class="mi">1</span><span class="o">..</span><span class="mi">10</span><span class="o">^</span><span class="mi">8</span><span class="p">]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>在這個教程裡，我想解釋一下惰性求值的實現原理，並講清楚 Haskell 的惰性求值在時間和空間上的佔用情況。我會先講一些關於圖規約（Graph Reduction）基礎，然後討論一下關於嚴格（Strict）的左褶疊（Left Fold），用於幫助理解內存空間洩漏問題並解決之。</p>
+
+<p>惰性求值相關的主題在很多教科書裡都有涉及，譬如 Simon Thompson 的《<a href="http://www.haskellcraft.com/">Haskell – The Craft of Functional Programming</a>》一書，但是線上版本似乎不太容易找。但願這篇教程能夠起到些幫助作用吧。</p>
+
+<p>惰性求值是一個需要權衡的語言特性。一方面，它能使代碼更模塊化。（很遺憾，這次我沒有時間演示這個作用。）另一方面，它使得我們無法完全理解在任一程序中求值的過程 – 它的確比你想像要難一些。在本文末尾，我會提供一些對付這種情況的方法。我們開始吧！</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/how-lazy-evaluation-works-in-haskell/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
   
   
     <article>
@@ -588,53 +643,6 @@ would like to get acquainted to more hackers. Good luck.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/warrior-who-fights-the-dragon/">挑戰龍的勇士</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-09-15T20:21:00+08:00" pubdate data-updated="true">Sep 15<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>我崇敬挑戰龍而失敗的勇士，<br />
-而不是皇帝。</p>
-
-<p>我期待的是一種平衡，<br />
-一種可以維持永久的，<br />
-自然而包容萬物的平衡，<br />
-將世界置於其中，<br />
-然後，把發現者燒死。
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/warrior-who-fights-the-dragon/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/browse/page/2/">&larr; Older</a>
@@ -650,6 +658,10 @@ would like to get acquainted to more hackers. Good luck.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/how-lazy-evaluation-works-in-haskell/">翻譯：Haskell 怎麼實現惰性求值</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/function-calling-syntax/">Function Calling Syntax</a>
       </li>
     
@@ -663,10 +675,6 @@ would like to get acquainted to more hackers. Good luck.</p>
     
       <li class="post">
         <a href="/blog/a-brief-journal-about-learning-coq/">A Brief Journal About Learning Coq</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/digging-in-a-dream/">夢魘</a>
       </li>
     
   </ul>
