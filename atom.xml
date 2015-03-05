@@ -4,7 +4,7 @@
   <title><![CDATA[Shou's origin]]></title>
   <link href="http://shouya.github.io/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2015-03-04T23:21:37-06:00</updated>
+  <updated>2015-03-04T23:32:52-06:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -780,6 +780,8 @@
   <li>其實不太一樣，<code>const</code>的類型是<code>a -&gt; b -&gt; a</code>。這裡應該說<code>seq</code>的類型和<code>flip const</code>類似。</li>
   <li>這裡指<code>foldl</code>，<code>foldl'</code>和<code>foldr</code>這些函數。</li>
 </ol>
+
+<p>（聲明：此文章的翻譯及發佈已經經過原文作者的許可。此譯文版權歸譯者所有，並在 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 下發佈）</p>
 ]]></content>
   </entry>
   
