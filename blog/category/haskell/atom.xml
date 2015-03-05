@@ -4,7 +4,7 @@
   <title><![CDATA[Category: haskell | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/category/haskell/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2015-03-04T23:32:52-06:00</updated>
+  <updated>2015-03-04T23:34:02-06:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -19,7 +19,7 @@
     <updated>2015-03-04T21:14:35-06:00</updated>
     <id>http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness</id>
     <content type="html"><![CDATA[<blockquote>
-  <p>原文 「<a href="http://panicsonic.blogspot.jp/2007/12/backwards-state-or-power-of-laziness.html">Backwards State, or: The Power of Laziness</a>」由 Antonie Latter 發佈於其個人<a href="http://panicsonic.blogspot.jp/">Blogger</a>上。特別地，對 Philip Wadler 及其著作的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a>表示至高感謝。</p>
+  <p>原文 「<a href="http://panicsonic.blogspot.jp/2007/12/backwards-state-or-power-of-laziness.html">Backwards State, or: The Power of Laziness</a>」由 Antoine Latter 發佈於其個人<a href="http://panicsonic.blogspot.jp/">Blogger</a>上。特別地，對 Philip Wadler 及其著作的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a>表示至高感謝。</p>
 </blockquote>
 
 <p>近期我參加了一個關於 Haskell 中自動微分（Automatic Differentiaion）的討論，因為之我拜讀了 Jerzy Karczmarczuk 的論文「<a href="http://users.info.unicaen.fr/~karczma/arpap/revpearl.pdf">Lazy Time Reversal, and Automatic Differentiation</a>」。這篇論文進一步引用了 Philip Wadler 的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a> 來介紹<em>逆向</em>（Backward） State Monad，我覺得非常有趣，在此向大家講一下這種技術。</p>
