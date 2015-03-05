@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: translated | Shou's origin]]></title>
-  <link href="http://shouya.github.io/blog/category/translated/atom.xml" rel="self"/>
+  <title><![CDATA[Category: haskell | Shou's origin]]></title>
+  <link href="http://shouya.github.io/blog/category/haskell/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-12-25T10:00:57+08:00</updated>
+  <updated>2015-03-04T23:21:37-06:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -14,9 +14,277 @@
 
   
   <entry>
+    <title type="html"><![CDATA[翻譯：逆向狀態，又：惰性之力]]></title>
+    <link href="http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness/"/>
+    <updated>2015-03-04T21:14:35-06:00</updated>
+    <id>http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>原文 「<a href="http://panicsonic.blogspot.jp/2007/12/backwards-state-or-power-of-laziness.html">Backwards State, or: The Power of Laziness</a>」由 Antonie Latter 發佈於其個人<a href="http://panicsonic.blogspot.jp/">Blogger</a>上。特別地，對 Philip Wadler 及其著作的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a>表示至高感謝。</p>
+</blockquote>
+
+<p>近期我參加了一個關於 Haskell 中自動微分（Automatic Differentiaion）的討論，因為之我拜讀了 Jerzy Karczmarczuk 的論文「<a href="http://users.info.unicaen.fr/~karczma/arpap/revpearl.pdf">Lazy Time Reversal, and Automatic Differentiation</a>」。這篇論文進一步引用了 Philip Wadler 的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a> 來介紹<em>逆向</em>（Backward） State Monad，我覺得非常有趣，在此向大家講一下這種技術。</p>
+
+<p>在此我期待讀者各位對 Haskell 的 <a href="http://haskell.org/ghc/docs/latest/html/libraries/mtl-1.1.0.0/Control-Monad-State-Lazy.html">State Monad</a> 已有所了解，其實簡單來說 State Monad 就是一個函數，從上一個狀態映射到結果以及下一個狀態。</p>
+
+<p>逆向 State Monad 和 State Monad 的區別就在於它和 State Monad 執行的順序恰好相反，也就是說，逆向 Monad 是從一個最終狀態執行到其最初狀態並產生一系列值的。</p>
+
+<!-- more -->
+
+<p>此文是一篇 <a href="http://zh.wikipedia.org/wiki/%E6%96%87%E5%AD%A6%E7%BC%96%E7%A8%8B">文學 Haskell</a> 文章，所以你可以把整個文件拷貝到一個 <code>.lhs</code> 文件中並用 Haskell 解釋器來跑之，譬如說用 GHCi。（譯者注：保留此段只為了完整性，本文並非用文學 Haskell 編寫，請讀者自行忽略此段。）</p>
+
+<p>首先，我們要引入一些需要用到的樣板代碼：</p>
+
+<p>```haskell
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RecursiveDo           #-}</p>
+
+<p>import Data.List
+import Control.Monad.State
+```</p>
+
+<h2 id="section">一個例子</h2>
+
+<p>先來做一個練習：假設給你一棵樹，你要做的是把樹的每個節點上的元素映射到整數上，這些整數從 0 開始並逐漸增加。如果有些元素出現了多次，那麼它們應該被映設到同樣的整數上。</p>
+
+<p>用到 <em>Control.Monad.State.Lazy</em> 的解決方案就是，遍歷這棵數並用 State Monad 保存至今為止見過的所有元素作為狀態。也就是說，每個節點映射到其元素在此列表上的下標。這樣子第一個出現的元素會被映射到 <code>0</code>，第二個映射到 <code>1</code>，如此不斷進行下去。</p>
+
+<p>但現在問題變了，如果我想把最後一個遇到的節點映射到 <code>0</code>，倒數第二個映射到 <code>1</code>，如此直到第一個節點，我應該怎麼做呢？對上面用 <em>Control.Monad.State.Lazy</em> 的解決方案我得改變多少才能滿足新的需求？</p>
+
+<p>答案是，只要改一點點！我只要換成<em>逆向</em> State Monad 就可以了，因為對之而言狀態流是反轉過來的。</p>
+
+<p>修改過的解決方案看起來大概是這樣子的：</p>
+
+<p>```haskell
+data Tree a = Nil | Node a (Tree a) (Tree a) deriving (Show, Eq)
+type Table a = [a]</p>
+
+<p>numberTree :: Eq a =&gt; Tree a -&gt; StateB (Table a) (Tree Int)
+numberTree Nil = return Nil
+numberTree (Node x t1 t2)
+       =  do num &lt;- atomically $ numberNode x
+             nt1 &lt;- numberTree t1
+             nt2 &lt;- numberTree t2
+             return (Node num nt1 nt2)
+   where
+    numberNode :: Eq a =&gt; a -&gt; State (Table a) Int
+    numberNode x
+       = do table &lt;- get
+            (newTable, newPos) &lt;- return (nNode x table)
+            put newTable
+            return newPos</p>
+
+<pre><code>nNode::  (Eq a) =&gt; a -&gt; Table a -&gt; (Table a, Int)
+nNode x table
+   = case elemIndex x table of
+     Nothing -&gt; (table ++ [x], length table)
+     Just i  -&gt; (table, i) ```
+</code></pre>
+
+<p>相應的狀態求值調用如下：</p>
+
+<p><code>haskell
+numTree :: (Eq a) =&gt; Tree a -&gt; Tree Int
+numTree t = evalStateB (numberTree t) []
+</code></p>
+
+<p>測試一下結果：</p>
+
+<p><code>haskell
+testTree = Node "Zero" (Node "One" (Node "Two" Nil Nil) (Node "One" (Node "Three" Nil Nil) Nil)) Nil
+</code></p>
+
+<p>跑一下 <code>numTree testTree</code> 會生成這樣的樹：</p>
+
+<p><code>haskell
+Node 3 (Node 1 (Node 2 Nil Nil) (Node 1 (Node 0 Nil Nil) Nil)) Nil
+</code></p>
+
+<p>正中吾需！</p>
+
+<p>代碼幾乎和用 <em>Control.Monad.State.Lazy</em> 的原問題解決方法一模一樣，區別在於我們用了 <code>evalStateB</code> 取代我們熟悉的 <code>evalState</code>，用了一個神奇的函數 <code>atomically</code>，以及 <code>StateB</code> Monad。我下面會詳細講他們是何方神聖乃至於究竟是怎麼實現逆轉狀態的。</p>
+
+<h2 id="api">API</h2>
+
+<p>我們現在要有一個新的 Monad：<code>StateB s</code>，其中 <code>s</code> 為其存儲的狀態的類型。<code>StateB s</code> 是 <code>MonadState s</code> 的一個實例，所以裡所應當應該實現 <code>get</code> 和 <code>put</code> 函數。</p>
+
+<p>當然還有這些：</p>
+
+<p><code>haskell
+runStateB :: StateB s a -&gt; s -&gt; (a, s)
+evalStateB :: StateB s a -&gt; s -&gt; a
+execStateB :: StateB s a -&gt; s -&gt; s
+</code></p>
+
+<p>應該很熟悉吧，對應的就是 State Monad 裡的那些操作。技巧在於我們傳給它的狀態 <code>s</code> 是最終狀態而它返回的是初始狀態。回憶在上面的例子中，在我們遍歷樹的時候最後看到的元素被賦予第一個標籤（<code>0</code>），而第一個見到的元素被賦予最後的標籤。</p>
+
+<p>在 Control.Monad.State.Class 中默認的 <code>modify</code> 函數實現如下：</p>
+
+<p><code>haskell
+modify :: MonadState s m =&gt; (s -&gt; s) -&gt; m ()
+modify f = do
+    s &lt;- get
+    put (f s)
+</code></p>
+
+<p>而在 <code>StateB</code> Monad 中，這段代碼直接就得碰壁了，因為兩個 Monadic 的行為會相互循迴依賴，<code>(&gt;&gt;=)</code> 會把現在的結果向前傳遞，而在 <code>StateB</code> 中，運算結果的方向是調轉過來的傳遞的。也就是說，上面那段代碼會產生一個循迴引用：第一行得到更新過的狀態，而這個狀態卻是來自第二行放進去的。</p>
+
+<p>要讓這樣的函數工作，我們要定義這個函數的 <code>StateB</code> 版本。</p>
+
+<p><code>haskell
+modifyB :: (s -&gt; s) -&gt; StateB s ()
+</code></p>
+
+<p>但如果你還想返回結果，你還會需要下面這位小朋友：</p>
+
+<p><code>
+atomically :: State s a -&gt; StateB s a
+</code></p>
+
+<p><code>atomically</code> 會把正常 <code>State</code> 的動作轉換為 <code>StateB</code> 的動作，這樣你可以直接用現成的代碼。（或者你也可以用 <code>mdo</code> 語法）</p>
+
+<h2 id="section-1">實現</h2>
+
+<p><strong>這裡的實現基於 Wadler 的論文。</strong></p>
+
+<p>StateB Monad 和 State Monad 幾乎一樣，每個產生 <code>a</code> 的動作都是一個類型為 <code>\s -&gt; (a, s)</code> 的函數。區別在於 <code>(&gt;&gt;=)</code> 的實現。</p>
+
+<p>讓我們開始定義！</p>
+
+<p>```haskell
+newtype StateB s a = StateB { runStateB :: s -&gt; (a,s) }</p>
+
+<p>instance Monad (StateB s) where
+    return = StateB . unitS
+    (StateB m) »= f = StateB $ m <code>bindS</code> (runStateB . f)
+```</p>
+
+<p>因為封裝解封這個 newtype 的話太麻煩，所以他們只用在被導出的函數（如 <code>return</code> 和 <code>(&gt;&gt;=)</code>）上用。剩下處理細節用的函數我都用 ‘S’ 做為其後綴了。</p>
+
+<p>```haskell
+m <code>bindS</code> k  = \s2 -&gt; let (a, s0) = m s1
+                          (b, s1) = k a s2
+                      in  (b, s0)</p>
+
+<p>unitS a = \s2 -&gt; (a, s2)
+```</p>
+
+<p>（<em>譯者：我第一次看到上面這段代碼時興奮了一個晚上！短短三行就平直地描述並實現了狀態逆流的效果，非常簡潔而優美。</em>）</p>
+
+<p>正如君所見，傳進來的狀態（<code>s2</code>）被應用於 <code>bindS</code> 的右邊的參數（<code>k</code>）上，產生的狀態被 <code>bindS</code> 左邊的參數（<code>s1</code>）消耗，並產生出最後的狀態 <code>s0</code>。就這樣就可以了嗎？嗯就這麼點！其他 API 實現如下：</p>
+
+<p>```haskell
+execStateB m = snd . runStateB m</p>
+
+<p>evalStateB m = fst . runStateB m</p>
+
+<p>modifyB = StateB . modify’
+   where modify’ f = \s -&gt; ((), f s)</p>
+
+<p>atomically = StateB . runState
+```</p>
+
+<p>還可以把這些也寫了來玩：</p>
+
+<p>```haskell
+instance Functor (StateB s) where
+    fmap f m = StateB $ mapS f (runStateB m)</p>
+
+<p>mapS f m = \s -&gt; let (a, s’) = m s in (f a, s’)</p>
+
+<p>instance MonadState s (StateB s) where
+    get = StateB get’
+     where get’ = \s -&gt; (s,s)</p>
+
+<pre><code>put = StateB . put'
+ where put' s = const ((),s)
+</code></pre>
+
+<p>instance MonadFix (StateB s) where
+    mfix = StateB . mfixS . (runStateB .)</p>
+
+<p>mfixS f = \s2 -&gt; let (a,s0) = (f b) s1
+                     (b,s1) = (f a) s2
+                 in (b,s0)
+```</p>
+
+<h2 id="section-2">變形金剛（譯者：沒錯我故意的）</h2>
+
+<p>下面這些你要稍微注意一下，因為我沒測試過，不過看起來應該是工作的，這些風格基本和 <code>Control.Monad.State.Lazy</code> 的差不多。</p>
+
+<p>```
+newtype StateBT s m a = StateBT {runStateBT :: s -&gt; m (a,s)}</p>
+
+<p>unitST a = \s -&gt; return (a,s)</p>
+
+<p>m <code>bindST</code> k = \s2 -&gt; mdo ~(a,s0) &lt;- m s1
+                          ~(b,s1) &lt;- k a s2
+                          return (b,s0)</p>
+
+<p>execStateBT :: Monad m =&gt; StateBT s m a -&gt; s -&gt; m s
+execStateBT m s = do ~(_,s’) &lt;- runStateBT m s
+                     return s’</p>
+
+<p>evalStateBT :: Monad m =&gt; StateBT s m a -&gt; s -&gt; m a
+evalStateBT m s = do ~(a,_)  &lt;- runStateBT m s
+                     return a</p>
+
+<p>modifyBT :: Monad m =&gt; (s -&gt; s) -&gt; StateBT s m ()
+modifyBT = StateBT . modify’
+ where modify’ f = \s -&gt; return ((),f s)</p>
+
+<p>atomicallyT :: Monad m =&gt; State s a -&gt; StateBT s m a
+atomicallyT m = StateBT $ \s-&gt; return $ runState m s</p>
+
+<p>atomicallyTM :: Monad m =&gt; StateT s m a -&gt; StateBT s m a
+atomicallyTM = StateBT . runStateT</p>
+
+<p>mapST f m = \s -&gt; do ~(a,s’) &lt;- m s
+                     return (f a,s’)</p>
+
+<p>liftST m = \s -&gt; do a &lt;- m
+                    return (a,s)</p>
+
+<p>mfixST f = \s2 -&gt; mdo ~(a,s0) &lt;- (f b) s1
+                      ~(b,s1) &lt;- (f a) s2
+                      return (b,s0)</p>
+
+<p>instance Monad m =&gt; Functor (StateBT s m) where
+    fmap f m = StateBT $ mapST f (runStateBT m)</p>
+
+<p>instance MonadFix m =&gt; Monad (StateBT s m) where
+    return = StateBT . unitST
+    (StateBT m) »= f = StateBT $ m <code>bindST</code> (runStateBT . f)
+    fail = StateBT . const . fail</p>
+
+<p>instance MonadTrans (StateBT s) where
+    lift = StateBT . liftST</p>
+
+<p>instance MonadFix m =&gt; MonadState s (StateBT s m) where
+    get = StateBT get’
+      where get’ = \s -&gt; return (s,s)
+    put = StateBT . put’
+     where put’ s = const $ return ((),s)</p>
+
+<p>instance MonadFix m =&gt; MonadFix (StateBT s m) where
+    mfix = StateBT . mfixST . (runStateBT .)
+```</p>
+
+<h2 id="section-3">譯後記</h2>
+
+<p>這篇文章第一次閱讀就給了我極大的震驚。我已知 Haskell 的惰性求值策略，而且也知道一些與之相關的優雅應用（譬如著名的 <code>fib = 1 : 1 : zipWith (+) fib (tail fib)</code>），不過讀到這篇文章時我還是大呼「神奇！」。此文雖然沒有在內容中著筆墨於惰性求值之中，卻在標題中直接強調了「The Power of Laziness」。從其他語言來的讀者可能會對上面 <code>bindS</code> 感到不可思議，覺得「怎麼可以直接這樣？」，是的，一般情況下當然不行，但是 Haskell 已裝備了強大的惰性求值，所以這樣寫也不是問題。</p>
+
+<p>最後再次感謝 Wadler 提出的理論和 Latter 的這篇科普向（？）文章帶我們展現了依賴惰性求值實現的這個逆向 State Monad。</p>
+
+<p>（聲明：此文章的翻譯及發佈已經經過原文作者的許可。此譯文版權歸譯者所有，
+並在 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 下發佈）</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[翻譯：Haskell 怎麼實現惰性求值]]></title>
     <link href="http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell/"/>
-    <updated>2014-11-24T19:14:57+08:00</updated>
+    <updated>2014-11-24T05:14:57-06:00</updated>
     <id>http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell</id>
     <content type="html"><![CDATA[<blockquote>
   <p>原文由 <a href="http://apfelmus.nfshost.com/blog.html">Heinrich Apfelmus</a> 發表於 <a href="https://hackhands.com/lazy-evaluation-works-haskell/">Hackhands</a>，標題：How Lazy Evaluatoin Works in Haskell。</p>

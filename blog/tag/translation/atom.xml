@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Tag: translation | Shou's origin]]></title>
+  <link href="http://shouya.github.io/blog/tag/translation/atom.xml" rel="self"/>
+  <link href="http://shouya.github.io/"/>
+  <updated>2015-03-04T23:21:37-06:00</updated>
+  <id>http://shouya.github.io/</id>
+  <author>
+    <name><![CDATA[Shou Ya]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[翻譯：逆向狀態，又：惰性之力]]></title>
+    <link href="http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness/"/>
+    <updated>2015-03-04T21:14:35-06:00</updated>
+    <id>http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>原文 「<a href="http://panicsonic.blogspot.jp/2007/12/backwards-state-or-power-of-laziness.html">Backwards State, or: The Power of Laziness</a>」由 Antonie Latter 發佈於其個人<a href="http://panicsonic.blogspot.jp/">Blogger</a>上。特別地，對 Philip Wadler 及其著作的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a>表示至高感謝。</p>
+</blockquote>
+
+<p>近期我參加了一個關於 Haskell 中自動微分（Automatic Differentiaion）的討論，因為之我拜讀了 Jerzy Karczmarczuk 的論文「<a href="http://users.info.unicaen.fr/~karczma/arpap/revpearl.pdf">Lazy Time Reversal, and Automatic Differentiation</a>」。這篇論文進一步引用了 Philip Wadler 的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a> 來介紹<em>逆向</em>（Backward） State Monad，我覺得非常有趣，在此向大家講一下這種技術。</p>
+
+<p>在此我期待讀者各位對 Haskell 的 <a href="http://haskell.org/ghc/docs/latest/html/libraries/mtl-1.1.0.0/Control-Monad-State-Lazy.html">State Monad</a> 已有所了解，其實簡單來說 State Monad 就是一個函數，從上一個狀態映射到結果以及下一個狀態。</p>
+
+<p>逆向 State Monad 和 State Monad 的區別就在於它和 State Monad 執行的順序恰好相反，也就是說，逆向 Monad 是從一個最終狀態執行到其最初狀態並產生一系列值的。</p>
+
+<!-- more -->
+
+<p>此文是一篇 <a href="http://zh.wikipedia.org/wiki/%E6%96%87%E5%AD%A6%E7%BC%96%E7%A8%8B">文學 Haskell</a> 文章，所以你可以把整個文件拷貝到一個 <code>.lhs</code> 文件中並用 Haskell 解釋器來跑之，譬如說用 GHCi。（譯者注：保留此段只為了完整性，本文並非用文學 Haskell 編寫，請讀者自行忽略此段。）</p>
+
+<p>首先，我們要引入一些需要用到的樣板代碼：</p>
+
+<p>```haskell
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RecursiveDo           #-}</p>
+
+<p>import Data.List
+import Control.Monad.State
+```</p>
+
+<h2 id="section">一個例子</h2>
+
+<p>先來做一個練習：假設給你一棵樹，你要做的是把樹的每個節點上的元素映射到整數上，這些整數從 0 開始並逐漸增加。如果有些元素出現了多次，那麼它們應該被映設到同樣的整數上。</p>
+
+<p>用到 <em>Control.Monad.State.Lazy</em> 的解決方案就是，遍歷這棵數並用 State Monad 保存至今為止見過的所有元素作為狀態。也就是說，每個節點映射到其元素在此列表上的下標。這樣子第一個出現的元素會被映射到 <code>0</code>，第二個映射到 <code>1</code>，如此不斷進行下去。</p>
+
+<p>但現在問題變了，如果我想把最後一個遇到的節點映射到 <code>0</code>，倒數第二個映射到 <code>1</code>，如此直到第一個節點，我應該怎麼做呢？對上面用 <em>Control.Monad.State.Lazy</em> 的解決方案我得改變多少才能滿足新的需求？</p>
+
+<p>答案是，只要改一點點！我只要換成<em>逆向</em> State Monad 就可以了，因為對之而言狀態流是反轉過來的。</p>
+
+<p>修改過的解決方案看起來大概是這樣子的：</p>
+
+<p>```haskell
+data Tree a = Nil | Node a (Tree a) (Tree a) deriving (Show, Eq)
+type Table a = [a]</p>
+
+<p>numberTree :: Eq a =&gt; Tree a -&gt; StateB (Table a) (Tree Int)
+numberTree Nil = return Nil
+numberTree (Node x t1 t2)
+       =  do num &lt;- atomically $ numberNode x
+             nt1 &lt;- numberTree t1
+             nt2 &lt;- numberTree t2
+             return (Node num nt1 nt2)
+   where
+    numberNode :: Eq a =&gt; a -&gt; State (Table a) Int
+    numberNode x
+       = do table &lt;- get
+            (newTable, newPos) &lt;- return (nNode x table)
+            put newTable
+            return newPos</p>
+
+<pre><code>nNode::  (Eq a) =&gt; a -&gt; Table a -&gt; (Table a, Int)
+nNode x table
+   = case elemIndex x table of
+     Nothing -&gt; (table ++ [x], length table)
+     Just i  -&gt; (table, i) ```
+</code></pre>
+
+<p>相應的狀態求值調用如下：</p>
+
+<p><code>haskell
+numTree :: (Eq a) =&gt; Tree a -&gt; Tree Int
+numTree t = evalStateB (numberTree t) []
+</code></p>
+
+<p>測試一下結果：</p>
+
+<p><code>haskell
+testTree = Node "Zero" (Node "One" (Node "Two" Nil Nil) (Node "One" (Node "Three" Nil Nil) Nil)) Nil
+</code></p>
+
+<p>跑一下 <code>numTree testTree</code> 會生成這樣的樹：</p>
+
+<p><code>haskell
+Node 3 (Node 1 (Node 2 Nil Nil) (Node 1 (Node 0 Nil Nil) Nil)) Nil
+</code></p>
+
+<p>正中吾需！</p>
+
+<p>代碼幾乎和用 <em>Control.Monad.State.Lazy</em> 的原問題解決方法一模一樣，區別在於我們用了 <code>evalStateB</code> 取代我們熟悉的 <code>evalState</code>，用了一個神奇的函數 <code>atomically</code>，以及 <code>StateB</code> Monad。我下面會詳細講他們是何方神聖乃至於究竟是怎麼實現逆轉狀態的。</p>
+
+<h2 id="api">API</h2>
+
+<p>我們現在要有一個新的 Monad：<code>StateB s</code>，其中 <code>s</code> 為其存儲的狀態的類型。<code>StateB s</code> 是 <code>MonadState s</code> 的一個實例，所以裡所應當應該實現 <code>get</code> 和 <code>put</code> 函數。</p>
+
+<p>當然還有這些：</p>
+
+<p><code>haskell
+runStateB :: StateB s a -&gt; s -&gt; (a, s)
+evalStateB :: StateB s a -&gt; s -&gt; a
+execStateB :: StateB s a -&gt; s -&gt; s
+</code></p>
+
+<p>應該很熟悉吧，對應的就是 State Monad 裡的那些操作。技巧在於我們傳給它的狀態 <code>s</code> 是最終狀態而它返回的是初始狀態。回憶在上面的例子中，在我們遍歷樹的時候最後看到的元素被賦予第一個標籤（<code>0</code>），而第一個見到的元素被賦予最後的標籤。</p>
+
+<p>在 Control.Monad.State.Class 中默認的 <code>modify</code> 函數實現如下：</p>
+
+<p><code>haskell
+modify :: MonadState s m =&gt; (s -&gt; s) -&gt; m ()
+modify f = do
+    s &lt;- get
+    put (f s)
+</code></p>
+
+<p>而在 <code>StateB</code> Monad 中，這段代碼直接就得碰壁了，因為兩個 Monadic 的行為會相互循迴依賴，<code>(&gt;&gt;=)</code> 會把現在的結果向前傳遞，而在 <code>StateB</code> 中，運算結果的方向是調轉過來的傳遞的。也就是說，上面那段代碼會產生一個循迴引用：第一行得到更新過的狀態，而這個狀態卻是來自第二行放進去的。</p>
+
+<p>要讓這樣的函數工作，我們要定義這個函數的 <code>StateB</code> 版本。</p>
+
+<p><code>haskell
+modifyB :: (s -&gt; s) -&gt; StateB s ()
+</code></p>
+
+<p>但如果你還想返回結果，你還會需要下面這位小朋友：</p>
+
+<p><code>
+atomically :: State s a -&gt; StateB s a
+</code></p>
+
+<p><code>atomically</code> 會把正常 <code>State</code> 的動作轉換為 <code>StateB</code> 的動作，這樣你可以直接用現成的代碼。（或者你也可以用 <code>mdo</code> 語法）</p>
+
+<h2 id="section-1">實現</h2>
+
+<p><strong>這裡的實現基於 Wadler 的論文。</strong></p>
+
+<p>StateB Monad 和 State Monad 幾乎一樣，每個產生 <code>a</code> 的動作都是一個類型為 <code>\s -&gt; (a, s)</code> 的函數。區別在於 <code>(&gt;&gt;=)</code> 的實現。</p>
+
+<p>讓我們開始定義！</p>
+
+<p>```haskell
+newtype StateB s a = StateB { runStateB :: s -&gt; (a,s) }</p>
+
+<p>instance Monad (StateB s) where
+    return = StateB . unitS
+    (StateB m) »= f = StateB $ m <code>bindS</code> (runStateB . f)
+```</p>
+
+<p>因為封裝解封這個 newtype 的話太麻煩，所以他們只用在被導出的函數（如 <code>return</code> 和 <code>(&gt;&gt;=)</code>）上用。剩下處理細節用的函數我都用 ‘S’ 做為其後綴了。</p>
+
+<p>```haskell
+m <code>bindS</code> k  = \s2 -&gt; let (a, s0) = m s1
+                          (b, s1) = k a s2
+                      in  (b, s0)</p>
+
+<p>unitS a = \s2 -&gt; (a, s2)
+```</p>
+
+<p>（<em>譯者：我第一次看到上面這段代碼時興奮了一個晚上！短短三行就平直地描述並實現了狀態逆流的效果，非常簡潔而優美。</em>）</p>
+
+<p>正如君所見，傳進來的狀態（<code>s2</code>）被應用於 <code>bindS</code> 的右邊的參數（<code>k</code>）上，產生的狀態被 <code>bindS</code> 左邊的參數（<code>s1</code>）消耗，並產生出最後的狀態 <code>s0</code>。就這樣就可以了嗎？嗯就這麼點！其他 API 實現如下：</p>
+
+<p>```haskell
+execStateB m = snd . runStateB m</p>
+
+<p>evalStateB m = fst . runStateB m</p>
+
+<p>modifyB = StateB . modify’
+   where modify’ f = \s -&gt; ((), f s)</p>
+
+<p>atomically = StateB . runState
+```</p>
+
+<p>還可以把這些也寫了來玩：</p>
+
+<p>```haskell
+instance Functor (StateB s) where
+    fmap f m = StateB $ mapS f (runStateB m)</p>
+
+<p>mapS f m = \s -&gt; let (a, s’) = m s in (f a, s’)</p>
+
+<p>instance MonadState s (StateB s) where
+    get = StateB get’
+     where get’ = \s -&gt; (s,s)</p>
+
+<pre><code>put = StateB . put'
+ where put' s = const ((),s)
+</code></pre>
+
+<p>instance MonadFix (StateB s) where
+    mfix = StateB . mfixS . (runStateB .)</p>
+
+<p>mfixS f = \s2 -&gt; let (a,s0) = (f b) s1
+                     (b,s1) = (f a) s2
+                 in (b,s0)
+```</p>
+
+<h2 id="section-2">變形金剛（譯者：沒錯我故意的）</h2>
+
+<p>下面這些你要稍微注意一下，因為我沒測試過，不過看起來應該是工作的，這些風格基本和 <code>Control.Monad.State.Lazy</code> 的差不多。</p>
+
+<p>```
+newtype StateBT s m a = StateBT {runStateBT :: s -&gt; m (a,s)}</p>
+
+<p>unitST a = \s -&gt; return (a,s)</p>
+
+<p>m <code>bindST</code> k = \s2 -&gt; mdo ~(a,s0) &lt;- m s1
+                          ~(b,s1) &lt;- k a s2
+                          return (b,s0)</p>
+
+<p>execStateBT :: Monad m =&gt; StateBT s m a -&gt; s -&gt; m s
+execStateBT m s = do ~(_,s’) &lt;- runStateBT m s
+                     return s’</p>
+
+<p>evalStateBT :: Monad m =&gt; StateBT s m a -&gt; s -&gt; m a
+evalStateBT m s = do ~(a,_)  &lt;- runStateBT m s
+                     return a</p>
+
+<p>modifyBT :: Monad m =&gt; (s -&gt; s) -&gt; StateBT s m ()
+modifyBT = StateBT . modify’
+ where modify’ f = \s -&gt; return ((),f s)</p>
+
+<p>atomicallyT :: Monad m =&gt; State s a -&gt; StateBT s m a
+atomicallyT m = StateBT $ \s-&gt; return $ runState m s</p>
+
+<p>atomicallyTM :: Monad m =&gt; StateT s m a -&gt; StateBT s m a
+atomicallyTM = StateBT . runStateT</p>
+
+<p>mapST f m = \s -&gt; do ~(a,s’) &lt;- m s
+                     return (f a,s’)</p>
+
+<p>liftST m = \s -&gt; do a &lt;- m
+                    return (a,s)</p>
+
+<p>mfixST f = \s2 -&gt; mdo ~(a,s0) &lt;- (f b) s1
+                      ~(b,s1) &lt;- (f a) s2
+                      return (b,s0)</p>
+
+<p>instance Monad m =&gt; Functor (StateBT s m) where
+    fmap f m = StateBT $ mapST f (runStateBT m)</p>
+
+<p>instance MonadFix m =&gt; Monad (StateBT s m) where
+    return = StateBT . unitST
+    (StateBT m) »= f = StateBT $ m <code>bindST</code> (runStateBT . f)
+    fail = StateBT . const . fail</p>
+
+<p>instance MonadTrans (StateBT s) where
+    lift = StateBT . liftST</p>
+
+<p>instance MonadFix m =&gt; MonadState s (StateBT s m) where
+    get = StateBT get’
+      where get’ = \s -&gt; return (s,s)
+    put = StateBT . put’
+     where put’ s = const $ return ((),s)</p>
+
+<p>instance MonadFix m =&gt; MonadFix (StateBT s m) where
+    mfix = StateBT . mfixST . (runStateBT .)
+```</p>
+
+<h2 id="section-3">譯後記</h2>
+
+<p>這篇文章第一次閱讀就給了我極大的震驚。我已知 Haskell 的惰性求值策略，而且也知道一些與之相關的優雅應用（譬如著名的 <code>fib = 1 : 1 : zipWith (+) fib (tail fib)</code>），不過讀到這篇文章時我還是大呼「神奇！」。此文雖然沒有在內容中著筆墨於惰性求值之中，卻在標題中直接強調了「The Power of Laziness」。從其他語言來的讀者可能會對上面 <code>bindS</code> 感到不可思議，覺得「怎麼可以直接這樣？」，是的，一般情況下當然不行，但是 Haskell 已裝備了強大的惰性求值，所以這樣寫也不是問題。</p>
+
+<p>最後再次感謝 Wadler 提出的理論和 Latter 的這篇科普向（？）文章帶我們展現了依賴惰性求值實現的這個逆向 State Monad。</p>
+
+<p>（聲明：此文章的翻譯及發佈已經經過原文作者的許可。此譯文版權歸譯者所有，
+並在 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 下發佈）</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[翻譯：Haskell 怎麼實現惰性求值]]></title>
+    <link href="http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell/"/>
+    <updated>2014-11-24T05:14:57-06:00</updated>
+    <id>http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>原文由 <a href="http://apfelmus.nfshost.com/blog.html">Heinrich Apfelmus</a> 發表於 <a href="https://hackhands.com/lazy-evaluation-works-haskell/">Hackhands</a>，標題：How Lazy Evaluatoin Works in Haskell。</p>
+</blockquote>
+
+<p><em>Lambda 醬想遲些再去打掃房間～</em></p>
+
+<p>惰性求值是 Haskell 用得最廣泛的代碼執行方法，通過之我們的程序可以寫得更簡單，更模塊化，不過惰性求值帶來的一個問題是不那麼直觀內存佔用，對新手來講這往往是個坑。譬如說，下面這個看起來很正常的表達式跑起來將會佔用上 G 的內存空間：</p>
+
+<p><code>haskell
+foldl (+) 0 [1..10^8]
+</code></p>
+
+<p>在這個教程裡，我想解釋一下惰性求值的實現原理，並講清楚 Haskell 的惰性求值在時間和空間上的佔用情況。我會先講一些關於圖規約（Graph Reduction）基礎，然後討論一下關於嚴格（Strict）的左褶疊（Left Fold），用於幫助理解內存空間洩漏問題並解決之。</p>
+
+<p>惰性求值相關的主題在很多教科書裡都有涉及，譬如 Simon Thompson 的《<a href="http://www.haskellcraft.com/">Haskell – The Craft of Functional Programming</a>》一書，但是線上版本似乎不太容易找。但願這篇教程能夠起到些幫助作用吧。</p>
+
+<p>惰性求值是一個需要權衡的語言特性。一方面，它能使代碼更模塊化。（很遺憾，這次我沒有時間演示這個作用。）另一方面，它使得我們無法完全理解在任一程序中求值的過程 – 它的確比你想像要難一些。在本文末尾，我會提供一些對付這種情況的方法。我們開始吧！</p>
+
+<!-- more -->
+
+<h2 id="section">基礎：圖規約</h2>
+
+<h3 id="redex">表達式，圖，和 Redex</h3>
+
+<p>Haskell 程式的執行就是求值表達式。這是函數式應用（Function Application）的主要思想。對於下面這個函數定義：</p>
+
+<p><code>haskell
+square x = x*x
+</code></p>
+
+<p>我們可以對下面的表達式求值：</p>
+
+<p><code>haskell
+square (1+2)
+</code></p>
+
+<p>方式是通過替換左手邊的<code>square</code>為其定義，然後將變量<code>x</code>換成實際參數：</p>
+
+<p><code>haskell
+square (1+2)
+=&gt; (1+2)*(1+2)
+</code></p>
+
+<p>再對<code>+</code>和<code>*</code>這兩個函數求值：</p>
+
+<p><code>haskell
+(1+2)*(1+2)
+=&gt; 3*(1+2)
+=&gt; 3*3
+=&gt; 9
+</code></p>
+
+<p>注意，在這個例子裡，<code>(1+2)</code> 被求值了兩次。但事實上我們知道，兩個<code>(1+2)</code>其實是一樣的。因為他們都對應同一個函數參數<code>x</code>。</p>
+
+<p>為了避免這種重複的求值，我們採用一個叫作<strong>圖規約</strong>（Graph Reduction）的方法。用這種方法，每個表達式將會被表示為一個圖。我們的例子這樣表示：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/blocks-square-0.png" alt="" /></p>
+
+<p>每個方塊對應一個函數式應用，函數名字寫在白色的區域，灰色區域指向函數參數。事實上，這種圖的標記法類似於編譯器在內存中通過指針來表示的表達式。</p>
+
+<p>每個程序員定義的函數都對應一個<strong>規約規則</strong>（Reduction Rule）。對<code>square</code>函數而言，規則如下：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/blocks-square-rule.png" alt="" /></p>
+
+<p>標記著<code>x</code>的圓圈是一個子圖的佔位符。注意<code>*</code>函數的兩個參數都指向同一個子圖。這種共享子圖的策略是避免重複求值的關鍵所在。</p>
+
+<p>有規約規則的子圖被稱為<strong>可規約表達式</strong>（Reducible Expression），或者簡單稱之 <strong>redex</strong>。只要我們有一個 redex，我們就能<strong>規約</strong>（Reduce）之，只要根據規約規則去改變高亮的方塊就行了。在我們的例子裡，我們有兩個 redex：我們能夠規約<code>square</code>函數和<code>+</code>函數。</p>
+
+<p>我們先規約<code>square</code>函數的 redex，然後進一步規約<code>+</code>函數的 redex，得到這樣一個過程：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/blocks-square-eval.png" alt="" /></p>
+
+<p>每一個步驟，我們都給正在要規約的 redex 加上顏色。在倒數第二個步驟中，產生了一個新的對應著<code>*</code>函數的 redex。對之求值，我們會得到最終的結果<code>9</code>。</p>
+
+<h3 id="section-1">模範式和弱首模範式</h3>
+
+<p>當一個表達式（圖）不包含任何 redex 時，我們就不能再進一步規約下去了，所以規約就完成了。這時，我們就稱這個表達式為<strong>規範式</strong>（Normal form），這就是求值的最終結果。在上面的例子裡，規範式是一個數字，表示為下面這樣的一個圖：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/blocks-9.png" alt="" /></p>
+
+<p>但是像<code>Just</code>，<code>Nothing</code>這樣的構建子，又如<code>:</code>和<code>[]</code>這種列表的構建子都會規約出模範式，他們看起來像是函數，但是他們是通過<code>data</code>聲明的，而且不存在像函數一樣的定義，所以他們沒有進一步規約規則。譬如說，圖：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/blocks-nf-list.png" alt="" /></p>
+
+<p>就是<code>1:2:3:[]</code>的模範式。</p>
+
+<p>事實上，一個圖要被稱為模範式還必須滿足另外兩個條件：它必須是<em>有窮</em>的（Finite），而且不能包含<em>循迴</em>結構（No Cyles）。有時遞歸就會照成這種情況。舉例來說，下面的表達式定義：</p>
+
+<p><code>haskell
+ones = 1 : ones
+</code></p>
+
+<p>就對應這樣的循迴圖（Cyclic Graph）：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/blocks-ones.png" alt="" /></p>
+
+<p>這個圖就不包含 redex，但它卻<em>不</em>是模範式，因為它包含循迴結構：列表的尾（Tail）指向列表自身，以至於這個列表是無窮的。正如這樣，很多表達式並沒有模範式，因為他們對應無窮循環。</p>
+
+<p>在 Haskell，我們並不會求值所有表達式至其模範式。相反，我們常常會在圖達到<strong>弱首模範式</strong>（Weak Head Normal Form）時就停下來，為了簡略，我們稱弱首模範式為 WHNF。只要一個圖的最上級節點是構建子，我們就稱之為 WHNF。譬如說，表達式<code>(7+12):[]</code>，或者圖</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/blocks-whnf-list.png" alt="" /></p>
+
+<p>就屬於 WHNF，因為它最上級的節點是列表構件子<code>(:)</code>。它並非模範式，因為它的第一個參數包含一個 redex。</p>
+
+<p>另一方面，任何<em>不</em>屬於 WHNF 的圖都可以被稱作<strong>待求值表達式</strong>（Unevaluated Expression）或者<strong>次程式</strong>（Thunk）。以構建子開頭的表達式都是 WHNF，但這個構建子的參數可以是待求值表達式。</p>
+
+<p>上面描述的表達式 <code>ones</code> 是一個有趣的 WHNF 圖。畢竟它的最上級節點是一個構建子。在 Haskell 中，我們能輕鬆表達無窮列表並操縱之！因而我們可以使代碼變得更模塊化。</p>
+
+<h3 id="section-2">求值順序，惰性求值</h3>
+
+<p>一個表達式常常包括多個 redex，我們以不同的順序規約他們會有區別嗎？</p>
+
+<p>一種規約順序，我們稱之為<strong>貪婪求值</strong>（Eager Evaluation）。依這種順序，我們會先對函數式應用的每個參數都規約到其規範式，然後再規約函數式應用本身。這種策略是大多數程式語言所採用的。</p>
+
+<p>然而 Haskell 編譯器採用另一種規約順序，我們稱之<strong>惰性求值</strong>（Lazy Evaluation）。惰性求值會先規約最上級的函數式應用，因而，最終一些參數會被求值，只有在必要的時候他們才會被求值。函數是通過構建子模式匹配（Pattern Matching）來定義的，所以其參數只有在其最上級節點為構造子時才會被求值。也就是說，至少在參數被規約為 WHNF 之前，這些參數會由左至右被求值。</p>
+
+<p>希望這個概念能通過下面的例子闡述清楚。讓我們想像一下<code>(&amp;&amp;)</code>函數，這個函數的作用是實現邏輯「與」的操作。它的定義如下：</p>
+
+<p><code>haskell
+(&amp;&amp;) :: Bool -&gt; Bool -&gt; Bool
+True  &amp;&amp; x = x
+False &amp;&amp; x = False
+</code></p>
+
+<p>根據第一個參數是<code>True</code>還是<code>False</code>，這個函數會有兩種求值規則：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/and-rule-true.png" alt="" />
+<img src="https://hackhands.com/wp-content/uploads/2014/11/and-rule-false.png" alt="" /></p>
+
+<p>現在，再看此表達式：</p>
+
+<p><code>haskell
+('H' == 'i') &amp;&amp; ('a' == 'm')
+</code></p>
+
+<p>圖的形式表示如下：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/and-expr-0.png" alt="" /></p>
+
+<p>它的兩個參數都是 redex，惰性求值將會從左到右求值參數，所以我們從左邊開始規約：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/and-expr-1.png" alt="" /></p>
+
+<p>現在，因為最左邊的函數變成了一個 redex，因為它的第一個參數現在成了一個構造式。惰性求值總是會先規約最上級節點，所以我們就這麼做。根據<code>(&amp;&amp;)</code>的規約規則，我們會得到：</p>
+
+<p><img src="https://hackhands.com/wp-content/uploads/2014/11/and-expr-2.png" alt="" /></p>
+
+<p>這個表達式屬於模範式，所以我們的求值就完成了！</p>
+
+<p>注意，當我們儘可能先求值<code>(&amp;&amp;)</code>的函數式應用時，我們就不再需要求值第二個參數了，以此節省我們計算所需的時間。有些命令式程式語言也用了類似的技巧，叫作「<a href="http://en.wikipedia.org/wiki/Short-circuit*evaluation">短路求值</a>」（Short-circuit Evaluation）。不過這種短路求值一般被編譯器內部實現，而且只對邏輯操作有效。但在 Haskell 裡，所有函數都能從懶惰求值裡實現到這樣的效果。</p>
+
+<p>一般而言，惰性求值一個表達式得到的最終的模範式和對其貪婪求值得到的結果沒有任何區別。因此我們可以說，不同求值順序並不會關係。然而，惰性求值會因而有更少的求值步驟，而且不像貪婪求值，惰性求值還能處理帶循迴（無窮）的圖。</p>
+
+<h3 id="section-3">文字表示法</h3>
+
+<p>但願把表達式可視化地表示圖能幫你理解惰性求值的基礎，更特別的是因為圖的形式能夠明確表示 redex 的概念和求值順序的重要性。然而，在實際的計算中，畫圖表示是有點太肥了。要追蹤規約，我們一般用 Haskell 語法的<strong>文字表示法</strong>（Textual Representation）來表達。</p>
+
+<p>圖令得我們可以清晰看到共享子圖。在文字表示法裡，我們會給他們用<code>let</code>關鍵字來<em>命名</em>，譬如說，在我們第一個例子裡的<code>square (1+2)</code>的規約可以寫為：</p>
+
+<p><code>haskell
+square (1+2)
+=&gt; let x = (1+2) in x*x
+=&gt; let x = 3 in x*x
+=&gt; 9
+</code></p>
+
+<p><code>let ... in</code> 語法使我們可以共享子表達式（Subexpression）<code>x = (1+2)</code>。再次注意<code>square</code>是被先規約的，然後才是其參數<code>x</code>。</p>
+
+<p>在我們第二個例子裡，邏輯「與」，變成了：</p>
+
+<p><code>haskell
+('H' == 'i') &amp;&amp; ('a' == 'm')
+=&gt; False &amp;&amp; ('a' == 'm')
+=&gt; False
+</code></p>
+
+<p>在這個例子裡，我們沒有共享子表達式，所以沒甚麼必要用<code>let</code>關鍵字。</p>
+
+<p>從現在開始，我們都會用文字表示法。</p>
+
+<h2 id="section-4">時間和空間</h2>
+
+<p>我們現在來看惰性求值對 Haskell 程式的時間空間佔用情況。如果你只用過貪婪求值，那麼這些可能會讓你震驚，特別是空間佔用上。</p>
+
+<h3 id="section-5">時間</h3>
+
+<p>求值一個表達式需要多少步？對貪婪求值而言，答案很簡單，對每次函數式應用，我們都把求值函數參數和求值函數體的時間加起來就可以了。而惰性求值呢？非常幸運的，惰性求值會佔的時間總有一個上限：</p>
+
+<blockquote>
+  <p><strong>定理：</strong>惰性求值不會執行比貪婪求值更多的求值步驟。</p>
+</blockquote>
+
+<p>這意味著當我們分析一個算法的運行時間時，我們總能把它當成是貪婪求值來評估。譬如說，我們可以把一個排序算法用 Haskell 改寫，並保證其算法複雜度和貪婪求值下一樣（在少數情況下甚至更佳）。</p>
+
+<p>然而呢，惰性求值器實現起來會帶來一些額外的代價。對於圖形處理和數值模擬這樣的要求高效能的應用程式，可能放棄惰性求值而直接接觸底層架構實現會更實際一些。即便除此，以和簡潔和模塊化著稱的惰性求值依然在這些領域頑強存在。一種叫作「<a href="http://stackoverflow.com/questions/578063/what-is-haskells-stream-fusion">流融合</a>」（Stream Fusion）的編譯器優化策略就能帶給高效率的數組操作一個模塊化，用起來像列表一樣的接口。這個技術就在 <a href="http://hackage.haskell.org/package/vector">vector</a> 庫裡實現了。</p>
+
+<h3 id="section-6">空間</h3>
+
+<p>不幸的是，空間佔用的情況就要複雜多了。問題的關鍵待求值表達式的內存佔用和它規約下來的規範式可以差別很大。因為一個表達式所佔用的空間等價於表示它的圖的所佔用的空間。譬如下面的表達式：</p>
+
+<p><code>haskell
+((((0 + 1) + 2) + 3) + 4)
+</code></p>
+
+<p>就比其模範式<code>10</code>所佔的空間多得多了。但再看下面表達式：</p>
+
+<p><code>haskell
+enumFromTo 1 1000
+</code></p>
+
+<p>或者表示為更常見的<code>[1..1000]</code>。這個函數式應用表達式只包含三個節點，當然空間佔用也會比其模範式，列表 <code>1:2:3:...:1000:[]</code> 佔用的空間少多了，因為後者包含上千個節點。</p>
+
+<p>當第一種情況越發嚴重導致無法控制時，我們稱之為<strong>空間洩漏</strong>（Space Leak）。解決方法就是手動控制求值過程，確保表達式僅可能早被求值。Haskell 為這種需求提供了這樣一個組合子：</p>
+
+<p><code>haskell
+seq :: a -&gt; b -&gt; b
+</code></p>
+
+<p>正如其類型表示的那樣，這個表達式會像<code>const</code>函數一樣返回其第二個參數<sub>1</sub>。然而，對<code>seq x y</code>求值確總會先把<code>x</code>求值到 WHNF 的形式，然後才會繼續求值<code>y</code>。相對的，<code>const</code>函數就沒有必要先求值其參數到 WHNF。</p>
+
+<p>每個 Haskell 程序員都應該知道怎麼用<code>seq</code>組合子，我們先來看一個具有代表性的例子：<strong>嚴格的左褶疊</strong>（Strict Left Fold）。看下面的求和 1 到 100 的代碼。我們用左褶疊，用累加參數（Accumulating Paramter）的方式求和：</p>
+
+<p><code>haskell
+foldl (+) 0 [1..100]
+</code></p>
+
+<p>作為參考，在 <a href="https://www.haskell.org/onlinereport/haskell2010/haskellch9.html">Haskell Prelude</a> 裡，<code>foldl</code>函數定義如下：</p>
+
+<p><code>haskell
+foldl :: (a -&gt; b -&gt; a) -&gt; a -&gt; [b] -&gt; a
+foldl f a []     = a
+foldl f a (x:xs) = foldl f (f a x) xs
+</code></p>
+
+<p>那麼上面例子的求值過程如下：</p>
+
+<p><code>haskell
+foldl (+) 0 [1..100]
+=&gt; foldl (+) 0 (1:[2..100])
+=&gt; foldl (+) (0 + 1) [2..100]
+=&gt; foldl (+) (0 + 1) (2:[3..100])
+=&gt; foldl (+) ((0 + 1) + 2) [3..100]
+=&gt; foldl (+) ((0 + 1) + 2) (3:[4..100])
+=&gt; foldl (+) (((0 + 1) + 2) + 3) [4..100]
+=&gt; ...
+</code></p>
+
+<p>如上所示，累加參數增長起來愈來愈多 – 空間洩漏。解決方法就是將累加參數保持在 WHNF，下面的修改過的<code>foldl</code>函數就能做到這一點：</p>
+
+<p><code>haskell
+foldl' :: (a -&gt; b -&gt; a) -&gt; a -&gt; [b] -&gt; a
+foldl' f a []     = a
+foldl' f a (x:xs) = let a' = f a x in seq a' (foldl' f a' xs)
+</code></p>
+
+<p>這個函數的定義可以在 <a href="http://hackage.haskell.org/package/base-4.7.0.1/docs/Data-List.html#v:foldl-39-">Data.List</a> 模塊裡找到。現在求值過程變成了這樣：</p>
+
+<p><code>haskell
+foldl' (+) 0 [1..100]
+=&gt; foldl' (+) 0 (1:[2..100])
+=&gt; let a' = 0 + 1 in seq a' (foldl' (+) a' [2..100])
+=&gt; let a' = 1 in seq a' (foldl' (+) a' [2..100])
+=&gt; foldl' (+) 1 [2..100]
+=&gt; foldl' (+) 1 (2:[3..100])
+=&gt; let a' = 1 + 2 in seq a' (foldl' (+) a' [3..100])
+=&gt; let a' = 3 in seq a' (foldl' (+) a' [3..100])
+=&gt; foldl' (+) 3 [3..100]
+=&gt; ...
+</code></p>
+
+<p>在求值的時候，可以看到表達式佔用的空間不再不斷增長下去了。用<code>seq</code>能確保累加參數總是先求值到 WHNF 然後才考慮剩下的元素。</p>
+
+<p>憑經驗來看，<code>foldl</code>會導致空間洩漏，所以你應該用<code>foldl'</code>或者<code>foldr</code>。</p>
+
+<p>順便一提，對於貪婪求值語言，你根本用不著寫上面這種代碼來求和<code>1</code>到<code>100</code>之間的數。因為貪婪求值會先把列表<code>[1..100]</code>規約到模範式，這樣子的空間效率佔用和我們上面低效的<code>foldl</code>版本一樣。要是想要做到高效率，那你必須把這個表達式寫成遞歸循環（Recursive Loop）才行。但得益於惰性求值，在 Haskell 裡，我們可以用通用的列表組合子<sub>2</sub>來「按需」對<code>[1..100]</code>計算。也就說明了惰性求值怎樣帶來更高的模塊化效果。</p>
+
+<p>這個例子裡我們還要注意到另一個重要的概念。我上面演示的求值過程並非完全準確，如果我們這樣定義<code>[n..m]</code>：</p>
+
+<p><code>haskell
+enumFromTo n m = if n &lt; m then n : enumFromTo (n+1) m else []
+</code></p>
+
+<p>那麼規約到 WHNF 其實是這樣的：</p>
+
+<p><code>haskell
+[1..100]
+=&gt; 1 : [(1+1)..100]
+</code></p>
+
+<p>其中第一個參數是待求值表達式<code>(1+1)</code>而非<code>2</code>。在這裡這倒沒有多大關係，關鍵是你要非常小心才能精確追蹤惰性求值過程 – 它也許並不一定按你理想當然地來。真正的<code>enumFromTo</code>的<a href="https://www.haskell.org/onlinereport/haskell2010/haskellch9.html#verbatim-226">源碼實現</a>並不是這樣的。特別地，請留意<code>[1..]</code>，它會構建一列<em>不</em>屬於 WHNF 的數。</p>
+
+<p>事實上，我只能說，除非是對像上面這樣簡單的例子，要仔細追蹤惰性求值過程幾乎不可能。所以很難去分析 Haskell 的空間佔用情況。我的建議是只有在你的程序出現嚴重的空間洩漏時才去分析它，用<a href="http://stackoverflow.com/a/3276557/403805">性能分析工具</a>來找到問題產生的源頭所在。一旦確認了問題源頭，就可以用 <a href="http://apfelmus.nfshost.com/blog/2013/08/21-space-invariants.html">Space invariants</a> 和<code>seq</code>來確保相關表達式被規約城 WHNF，而無須管惰性求值具體是怎樣工作的。</p>
+
+<p>這就是我今天要講的關於惰性求值和它空間佔用相關的內容了。其實還有另外一個有代表性的空間洩漏的例子，如下：</p>
+
+<p><code>haskell
+let small' = fst (small, large) in ... small' ...
+</code></p>
+
+<p>即使<code>fst</code>函數會把<code>large</code>丟棄，表達式<code>small'</code>還是會保存一個到<code>large</code>的引用。你可能會希望在某個時候把<code>small'</code>規約到 WHNF，這樣<code>large</code>所佔的空間就可以被釋放掉了。</p>
+
+<hr />
+
+<p><strong>譯注：</strong></p>
+
+<ol>
+  <li>其實不太一樣，<code>const</code>的類型是<code>a -&gt; b -&gt; a</code>。這裡應該說<code>seq</code>的類型和<code>flip const</code>類似。</li>
+  <li>這裡指<code>foldl</code>，<code>foldl'</code>和<code>foldr</code>這些函數。</li>
+</ol>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[翻譯：如何幸福起來]]></title>
+    <link href="http://shouya.github.io/blog/how-to-be-happy/"/>
+    <updated>2014-07-28T09:17:07-05:00</updated>
+    <id>http://shouya.github.io/blog/how-to-be-happy</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>原文由 lukeprog 發表於 <a href="http://lesswrong.com/lw/4su/how_to_be_happy/">LessWrong</a>。
+關於注釋和引用，請參見原文。</p>
+</blockquote>
+
+<p>有一天一個同事對我說：「盧克，你應該是我見過的最幸福的人了！你怎麼做到每時每刻都這麼開心的？」</p>
+
+<p>他可能只是在誇張修辭，不過我還是回答了很長。曾經的大部分人生是不令我開心的，我甚至好幾次考慮過自殺。然後我花了兩年研究幸福科學。而現在，幸福是我的自然狀態。我甚至都不記得甚麼時候我有達 20 分鐘以上的不開心過。</p>
+
+<p>這類改變並非人人都會有，甚至大部份人都不會有（<a href="http://lesswrong.com/lw/9v/beware_of_otheroptimizing/">beware of other-optimizing</a>），但不妨一試！</p>
+
+<p>我們都希望開心些，而且變得開心對其他事情也有好處。譬如說，開心有利於人的身心健康，能提高創造力，還能使你更好地做決定。（畢竟當一個人不開心時很難做到理性思考。）所以呢，本篇作為<a href="http://lesswrong.com/lw/3nn/scientific_selfhelp_the_state_of_our_knowledge/">如何</a>系列的一部分，讓我們回過頭來審視一下<strong>幸福科學</strong>。</p>
+
+<!-- more -->
+
+<h2 id="section">幸福的因素</h2>
+
+<p>以前，我就留意到過有很多關於 <em>主觀狀態</em> 因素的研究（自己對自己幸福和生活滿意度的評價）。</p>
+
+<p>但僅僅是相關性的研究遠遠不夠，我們還希望知道是甚麼 <em>導致</em> 了幸福。這一點很難測評，但是我們還是知道一點的。</p>
+
+<h2 id="section-1">幸福，性格，以及技能</h2>
+
+<p>內在因素決定了大約 50% 的幸福度差異。可能結果令人意外，中彩票的人和剛剛四肢癱瘓的患者並不像想像中的那樣誇張地變得狂喜或沮喪。所以，我們認為內在因素決定幸福感程度，表現在性格的塑造上，而據研究，性格的很大一部份來自遺傳。</p>
+
+<p>所以哪種性格特徵和幸福感相關度最高呢？內向和外向是最佳的幸福感指示計，類似的還有自身嚴謹程度，他人認同度，自尊，以及樂觀程度。</p>
+
+<p>那麼如果你沒有這些性格特徵呢？首先要說的是，你可能可以在不知道自己已經達成目的的情況下實現擁有這些令你幸福的特徵。譬如說，內向可能會看做一種 <em>社交技能的缺失</em>。如果你決定開始<a href="http://www.amazon.com/Social-Skills-Picture-School-Beyond/dp/1932565353/ref=as_li_ss_tl?ie=UTF8&amp;camp=1789&amp;creative=390957&amp;creativeASIN=0131103628&amp;linkCode=as2&amp;tag=lesswrong-20">學習</a>提高自己的社交技巧，那麼你會發現你比想像中的自己要外向多了！（此乃親歷者談。）類似的，你都能做得到提高自己謹慎度，他人認同度，自尊，以及樂觀程度。這些都僅僅是和性格關聯，而非被性格決定的。某種程度上你都可以學習（或者甚至只是單單模仿）這些技巧來提高自己的幸福感。</p>
+
+<p>第二點要說的呢，如果你缺乏這些性格特徵，並不一定會讓你不幸福。</p>
+
+<h2 id="section-2">幸福是主觀的和對比性的</h2>
+
+<p>幸福感並不由客觀因素決定，而是由你的主觀 <em>感受</em> 決定。</p>
+
+<p>幸福同時也是對比性的。在山西太原你可能月入五千元（太原人平均月收入三千元）就可以達到比上海月收入八千元（上海人均月收入一萬元）要幸福得多。(注)</p>
+
+<p>當然幸福和其他因素也有關。譬如說你的 <em>期望</em> 。我們非常不擅於預測我們未來的能力。我們常常高估失戀，升職失敗或得病帶來的傷痛程度。我們也常常高估這類，譬如說炒股賺錢，升職，或者買到超值大禮包帶來的快樂。所以為了變得更幸福，最好降低對這類快樂的期望值。</p>
+
+<p>(譯注：此處數據為捏造，僅僅為了傳達作者希望表達的意思。)</p>
+
+<h2 id="section-3">神馳和注意意識</h2>
+
+<p>你可能聽說過一些著名的研究表明人們在「<a href="http://en.wikipedia.org/wiki/Flow_(psychology)">神馳</a>」的狀態下是最幸福的。當人專注於某項有趣的，有挑戰性的，從根本上帶來成就感的工作時，就會進入一種稱之神馳的狀態。換句話說，就是「忘乎自我」，或者如運動員常講的，「進入狀態」。</p>
+
+<p>你需要做和你的技能相符合的工作來找到你的「神馳」狀態。當工作太難，你會被矬敗。而當工作太容易，你會覺得無聊。只有那些具有挑戰性卻又能夠完成得了的工作會讓你感覺很棒。這令我想起了 <a href="http://www.youtube.com/watch?v=2-9D2qUHN-E">Super Trooper</a>，她是一個薯片廠的工人，在無聊的工作中，她會收集那些碰巧和名人的臉長得有幾分相似的薯片來玩。</p>
+
+<p>如果你正在被負面情緒困惑，那麼進入神馳的狀態可能是最有效的良藥。和大眾的直覺相反，強迫自己進行積極正面的思考往往會適得其反。自己讓自己不想不開心的事情是不可能的。如果你刻意讓自己不想著這件事，你就會下意識強調這點，繼而你又會情不自禁地想起這件事了。</p>
+
+<p>在處在「忘乎自我」的時候，你的幸福感會非常高。然而研究表明，當你無法進入神馳態時，「注意意識」也能有效減少慢性病痛和抑鬱帶來的痛苦，減少壓力和焦慮，還有一系列其他積極的效果。要達到「注意意識」就要踏出你在做的事情一步，除了關心你在做的事情之外，還注意到自己的當前狀態，留意當前的動作，想法，感受等等。</p>
+
+<h2 id="section-4">如何愈來愈幸福</h2>
+
+<p>綜上，幸福一件超級複雜的事情。其實甚至更麻煩，我們還要區分開<a href="http://www.ted.com/talks/daniel_kahneman_the_riddle_of_experience_vs_memory.html">體驗性幸福和記憶性幸福</a>，但在這篇短文中我只能稍稍提及一些皮毛。總之，天堂無捷徑，沒有辦法能讓你在三分鐘內永原和悲傷告別。</p>
+
+<p>此外，不同的人有不同的幸福起來的方法。抑鬱症是由於體內化學物質不平衡導致的，所以對他們而言可能吃藥必學習社交技巧更有效。而即使一個健康，外向，謹慎且受人認同的女人，如果和不合適的人結婚，也許也會不那麼幸福。一些在父母不注意培養健康的自尊發展的環境下成長的孩子，還要花費巨大的精力重新拾回自己缺失的東西。對一些人而言，幸福之路悠長；而對另一些人而言，幸福卻容易很多。</p>
+
+<p>下面我將給出並評論一些對提升幸福度有關的方法，有一部份上面已經提到了，還有很多沒有提到的。</p>
+
+<p>這些方法大概以從重要和效果明顯到不那麼重要和效果不那麼明顯排序，給於我自己對幸福科學的學習理解。你需要自己想清楚的是你自己究竟是誰，甚麼令你開心，甚麼令你難過，還有下面哪些方法對你來說採取起來最便捷。同時，這些方法對<a href="http://lesswrong.com/lw/3w3/how_to_beat_procrastination/">治療拖延症</a>也有不錯的效果。</p>
+
+<p>下面是十四個令你愈來愈幸福的方法：</p>
+
+<ol>
+  <li>如果你有心理疾病，譬如抑鬱症，焦慮症，健忘，精神分裂，或者其他問題，<em>請先諮詢專家尋求幫助</em>。<a href="http://www.liveyourlifewell.org/go/live-your-life-well/help">這裡是一些指引</a>。</li>
+  <li>即使你不需要專家協助，你也可以受益於一些自我探索，或者聽從一些像 <a href="http://naturalism.org/consulting.htm">Tom Clark</a> 一樣的簡化主義者，自然主義者諮詢師給的 <em>開始階段的指示</em>。</li>
+  <li>開發 <em>外向</em> 相關的技能和習慣。首先，買一些得體的衣服並學習優雅的著裝。如果你是男孩子，<a href="http://www.amazon.com/Details-Mens-Style-Manual-Ultimate/dp/159240328X/ref=as_li_ss_tl?ie=UTF8&amp;camp=1789&amp;creative=390957&amp;creativeASIN=0131103628&amp;linkCode=as2&amp;tag=lesswrong-20">讀讀</a>起來。</li>
+  <li>學會變得 <em>自尊</em> 和 <em>樂觀</em> 起來。這可能有點微妙。首先，太過自尊會導致有害的自戀。其次，理性主義者可能會不習慣採用一些標準方法（偏向自我性思考，誇大自己的光榮一面，把自己想得更弱）來欺騙自己或者<a href="http://wiki.lesswrong.com/wiki/Anti-epistemology">違背自我認識</a>描述的一樣。</li>
+  <li>提升你的認同度。簡單來說，增強你和他人的共鳴（empathy）能力。但很不幸現在還沒有這類有效的（科學）方法。一般的建議是試試從他人角度看待問題，多替別人著想，把他們想作比自己不幸的人。<a href="http://www.rootsofempathy.org/">共鳴之源</a>供參考。</li>
+  <li>變得嚴謹起來。嚴謹的性格對很多事情都有幫助，譬如組織事務，工作勤勉，可靠度，計劃能力等等。<a href="http://lesswrong.com/lw/3w3/how_to_beat_procrastination/">克服拖延症</a> 之類的書籍也對他們的組織性和可靠的鍛鍊有所幫助。</li>
+  <li>培養感恩的習慣。珍惜生活的每一刻。多花時間想一下開心的回憶。每天結束前，列出五樣你感謝的對象，頭頂的屋頂，活在一個富裕的國家的運氣，此網站（Less Wrong）的存在，巧克力的美味，高潮的快感等等這些。無論如何，雖然聽起來很幼稚，但是的確有效。</li>
+  <li>找出你的生活的 <em>目的</em> 並且為之生活。宗教帶給人的好處之一在於給人們一種活著的意義和目的。並不需要神的啟示，你要自己確定好是甚麼驅使著你。你可能要在這上面花點工夫，各個領域都要考慮。當你找到一條能使你充滿動力的路，那就順著它走吧。（當然，你也可能找到很多生活的目的。）有目的，有追求的意義，這樣有很多好處。「尋找你生活的目的」描述了針對不同人的不同的方法。這點不會在幸福文學作品被強調，但對我自己而言，尋找出使我充滿動力的生活目的確確實實改變了我的人生。</li>
+  <li>找個 <em>充實</em> 的工作。極少人在以自己喜愛的事情為職業維持生計。做到這點可能非常困難。你可能留意到這個列表上的其他十件事情都 <em>首先</em> 要求你有一個充實的工作。要找出你究竟喜愛甚麼和適合甚麼工作，做一個 <a href="http://www.bigjobportal.com/riasec/">RIASEC</a> 也能幫你找到一個熱門的並符合你性格的工作。
+在美國，<a href="http://www.onetonline.org/">O*NET</a> 也能幫妳找到一個熱門的並符合妳性格的工作。</li>
+  <li>增進和你的 <em>戀人</em> 的感情，要麼就再找一個。如找一個充實的工作一樣，這一點也很難做到，但能帶來很大影響。如果你總是覺得你們之間的關係平淡而且沒有提升的空間，你可能會想要把愛情放置一邊並自己一個人工作，然而這會導致你們之間關係進一步惡化。如果你是認真對待你的戀人的，那麼你可以有很多方法來提升你們之間的關係。雖然<a href="http://zh.wikipedia.org/wiki/%E7%A9%8D%E6%A5%B5%E8%81%86%E8%81%BD">積極聆聽</a>的方法被廣為接受，它並不能保證維持良好的關係。被實驗確認的有助於提升滿足感的方法有：(1) 經常和你的戀人做些新奇的事情，(2) 向你的戀人聊積極的事情的次數要超過消極事情 5 倍以上，(3) 每週寫下你認為你和你的戀人之間優於其他人的原因，(4) 接受所有你的戀人提出的批評並附以一兩條對他好的地方的誇讚，以及 (5) 常常和對方的眼睛對視。</li>
+  <li><em>出門</em>，讓你的身體動起來。這樣可以培養你的注意力，並且對你的身體也有好處。</li>
+  <li>多花些時間處在 <em>神馳</em> 狀態。放棄一些超過你能力的，不可能的任務。並把簡單無聊的任務變得有挑戰起來，你可以通過把這些工作變成遊戲，或者自己在裡面添加額外的挑戰。</li>
+  <li>養成 <em>鍛鍊注意意識的習慣</em>。當你無法進入神馳的工作狀態的時候，走出你自己的工作，專注你的做法，行為，手段，你的心理機能，以及留意你是如何把這些工作的動作轉換並達成你的目標的。<a href="http://www.wikihow.com/Meditate">冥想</a>也許有用。</li>
+  <li><em>避免消費主義洗腦</em>。你不能讓你擁有的東西反過來控制你。消費主義帶來的更多是不開心。很不幸的是，自從你出生，你就被活在這樣一個消費主義時代。要希望扭轉這一點，你可以看看 <a href="http://en.wikipedia.org/wiki/Edward_Bernays">Edward Bernays</a>。在那之後，你也許會把很多物品賣掉或拿去送人，更重要的是，這能徹底改變你的購物習慣。</li>
+</ol>
+
+<p>注意，把尋覓幸福當作 <em>目標</em> 可能會帶來反效果。很多人都說自己在不斷檢查自己是否幸福的時候下變得反而沒那麼幸福了 – 有點像「神馳」的時候一樣。倒不如找一個實際目標作為終點，而幸福作為其副作用就好了。</p>
+
+<p>記住：只是在網路上讀這篇文章永遠不會帶給你幸福。只有當你去為幸福去 <em>實踐</em> 這些研究結果的時候，你才能感受到它。</p>
+
+<p>祝好運！</p>
+]]></content>
+  </entry>
+  
+</feed>

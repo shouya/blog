@@ -4,7 +4,7 @@
   <title><![CDATA[Category: think | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/category/think/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-12-25T10:00:57+08:00</updated>
+  <updated>2015-03-04T23:21:37-06:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[深淵]]></title>
     <link href="http://shouya.github.io/blog/the-abyss/"/>
-    <updated>2014-12-25T00:06:41+08:00</updated>
+    <updated>2014-12-24T10:06:41-06:00</updated>
     <id>http://shouya.github.io/blog/the-abyss</id>
     <content type="html"><![CDATA[<p>站在深淵面前   <br />
 驅使自己踏前一步   <br />
@@ -49,7 +49,7 @@
   <entry>
     <title type="html"><![CDATA[Function Calling Syntax]]></title>
     <link href="http://shouya.github.io/blog/function-calling-syntax/"/>
-    <updated>2014-08-03T17:59:14+08:00</updated>
+    <updated>2014-08-03T04:59:14-05:00</updated>
     <id>http://shouya.github.io/blog/function-calling-syntax</id>
     <content type="html"><![CDATA[<p>We use programming languages to indicate a process of
 actions/computations. Therefore programming languages tends to be more
@@ -221,7 +221,7 @@ used in Scheme compilers.</p>
   <entry>
     <title type="html"><![CDATA[A brief journal about learning Coq]]></title>
     <link href="http://shouya.github.io/blog/a-brief-journal-about-learning-coq/"/>
-    <updated>2014-07-05T01:08:34+08:00</updated>
+    <updated>2014-07-04T12:08:34-05:00</updated>
     <id>http://shouya.github.io/blog/a-brief-journal-about-learning-coq</id>
     <content type="html"><![CDATA[<p><em>This article is completely an informal journal about my learning process on
 Coq. It is just created as my whim prompted. Please don’t academically refer
@@ -540,7 +540,7 @@ Lisp.</p>
   <entry>
     <title type="html"><![CDATA[祭獻]]></title>
     <link href="http://shouya.github.io/blog/sacrifice/"/>
-    <updated>2012-11-13T14:16:00+08:00</updated>
+    <updated>2012-11-13T14:16:00-06:00</updated>
     <id>http://shouya.github.io/blog/sacrifice</id>
     <content type="html"><![CDATA[<p>我在黑暗中醒來  <br />
 不能看到任何東西  <br />
@@ -573,7 +573,7 @@ Lisp.</p>
   <entry>
     <title type="html"><![CDATA[朝曦]]></title>
     <link href="http://shouya.github.io/blog/shines-at-dawn/"/>
-    <updated>2012-10-14T18:26:00+08:00</updated>
+    <updated>2012-10-14T18:26:00-05:00</updated>
     <id>http://shouya.github.io/blog/shines-at-dawn</id>
     <content type="html"><![CDATA[<p>我注視著妳的眼睛 <br />
 我看不到光芒   </p>

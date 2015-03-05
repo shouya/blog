@@ -4,7 +4,7 @@
   <title><![CDATA[Category: solution | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/category/solution/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-12-25T10:00:57+08:00</updated>
+  <updated>2015-03-04T23:21:37-06:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Linux 下 GFW 的 DNS 投毒解決方案]]></title>
     <link href="http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution/"/>
-    <updated>2014-07-26T02:27:35+08:00</updated>
+    <updated>2014-07-25T13:27:35-05:00</updated>
     <id>http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution</id>
     <content type="html"><![CDATA[<p>這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。</p>
 
@@ -173,7 +173,7 @@ $ sudo rc-update add dnsmasq default
   <entry>
     <title type="html"><![CDATA[Setting up IP over ICMP with hans]]></title>
     <link href="http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/"/>
-    <updated>2014-06-02T23:19:29+08:00</updated>
+    <updated>2014-06-02T10:19:29-05:00</updated>
     <id>http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans</id>
     <content type="html"><![CDATA[<h2 id="background">Background</h2>
 <p>The ISP, China Telecom, interrupted the internet access from my home

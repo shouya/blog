@@ -4,7 +4,7 @@
   <title><![CDATA[Shou's origin]]></title>
   <link href="http://shouya.github.io/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2014-12-25T10:00:57+08:00</updated>
+  <updated>2015-03-04T23:21:37-06:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -14,9 +14,397 @@
 
   
   <entry>
+    <title type="html"><![CDATA[翻譯：逆向狀態，又：惰性之力]]></title>
+    <link href="http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness/"/>
+    <updated>2015-03-04T21:14:35-06:00</updated>
+    <id>http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness</id>
+    <content type="html"><![CDATA[<blockquote>
+  <p>原文 「<a href="http://panicsonic.blogspot.jp/2007/12/backwards-state-or-power-of-laziness.html">Backwards State, or: The Power of Laziness</a>」由 Antonie Latter 發佈於其個人<a href="http://panicsonic.blogspot.jp/">Blogger</a>上。特別地，對 Philip Wadler 及其著作的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a>表示至高感謝。</p>
+</blockquote>
+
+<p>近期我參加了一個關於 Haskell 中自動微分（Automatic Differentiaion）的討論，因為之我拜讀了 Jerzy Karczmarczuk 的論文「<a href="http://users.info.unicaen.fr/~karczma/arpap/revpearl.pdf">Lazy Time Reversal, and Automatic Differentiation</a>」。這篇論文進一步引用了 Philip Wadler 的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a> 來介紹<em>逆向</em>（Backward） State Monad，我覺得非常有趣，在此向大家講一下這種技術。</p>
+
+<p>在此我期待讀者各位對 Haskell 的 <a href="http://haskell.org/ghc/docs/latest/html/libraries/mtl-1.1.0.0/Control-Monad-State-Lazy.html">State Monad</a> 已有所了解，其實簡單來說 State Monad 就是一個函數，從上一個狀態映射到結果以及下一個狀態。</p>
+
+<p>逆向 State Monad 和 State Monad 的區別就在於它和 State Monad 執行的順序恰好相反，也就是說，逆向 Monad 是從一個最終狀態執行到其最初狀態並產生一系列值的。</p>
+
+<!-- more -->
+
+<p>此文是一篇 <a href="http://zh.wikipedia.org/wiki/%E6%96%87%E5%AD%A6%E7%BC%96%E7%A8%8B">文學 Haskell</a> 文章，所以你可以把整個文件拷貝到一個 <code>.lhs</code> 文件中並用 Haskell 解釋器來跑之，譬如說用 GHCi。（譯者注：保留此段只為了完整性，本文並非用文學 Haskell 編寫，請讀者自行忽略此段。）</p>
+
+<p>首先，我們要引入一些需要用到的樣板代碼：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="cm">{-# LANGUAGE FlexibleInstances     #-}</span>
+</span><span class="line"><span class="cm">{-# LANGUAGE MultiParamTypeClasses #-}</span>
+</span><span class="line"><span class="cm">{-# LANGUAGE RecursiveDo           #-}</span>
+</span><span class="line">
+</span><span class="line"><span class="kr">import</span> <span class="nn">Data.List</span>
+</span><span class="line"><span class="kr">import</span> <span class="nn">Control.Monad.State</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section">一個例子</h2>
+
+<p>先來做一個練習：假設給你一棵樹，你要做的是把樹的每個節點上的元素映射到整數上，這些整數從 0 開始並逐漸增加。如果有些元素出現了多次，那麼它們應該被映設到同樣的整數上。</p>
+
+<p>用到 <em>Control.Monad.State.Lazy</em> 的解決方案就是，遍歷這棵數並用 State Monad 保存至今為止見過的所有元素作為狀態。也就是說，每個節點映射到其元素在此列表上的下標。這樣子第一個出現的元素會被映射到 <code>0</code>，第二個映射到 <code>1</code>，如此不斷進行下去。</p>
+
+<p>但現在問題變了，如果我想把最後一個遇到的節點映射到 <code>0</code>，倒數第二個映射到 <code>1</code>，如此直到第一個節點，我應該怎麼做呢？對上面用 <em>Control.Monad.State.Lazy</em> 的解決方案我得改變多少才能滿足新的需求？</p>
+
+<p>答案是，只要改一點點！我只要換成<em>逆向</em> State Monad 就可以了，因為對之而言狀態流是反轉過來的。</p>
+
+<p>修改過的解決方案看起來大概是這樣子的：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">data</span> <span class="kt">Tree</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">Nil</span> <span class="o">|</span> <span class="kt">Node</span> <span class="n">a</span> <span class="p">(</span><span class="kt">Tree</span> <span class="n">a</span><span class="p">)</span> <span class="p">(</span><span class="kt">Tree</span> <span class="n">a</span><span class="p">)</span> <span class="kr">deriving</span> <span class="p">(</span><span class="kt">Show</span><span class="p">,</span> <span class="kt">Eq</span><span class="p">)</span>
+</span><span class="line"><span class="kr">type</span> <span class="kt">Table</span> <span class="n">a</span> <span class="ow">=</span> <span class="p">[</span><span class="n">a</span><span class="p">]</span>
+</span><span class="line">
+</span><span class="line">
+</span><span class="line"><span class="nf">numberTree</span> <span class="ow">::</span> <span class="kt">Eq</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="kt">Tree</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">StateB</span> <span class="p">(</span><span class="kt">Table</span> <span class="n">a</span><span class="p">)</span> <span class="p">(</span><span class="kt">Tree</span> <span class="kt">Int</span><span class="p">)</span>
+</span><span class="line"><span class="nf">numberTree</span> <span class="kt">Nil</span> <span class="ow">=</span> <span class="n">return</span> <span class="kt">Nil</span>
+</span><span class="line"><span class="nf">numberTree</span> <span class="p">(</span><span class="kt">Node</span> <span class="n">x</span> <span class="n">t1</span> <span class="n">t2</span><span class="p">)</span>
+</span><span class="line">       <span class="ow">=</span>  <span class="kr">do</span> <span class="n">num</span> <span class="ow">&lt;-</span> <span class="n">atomically</span> <span class="o">$</span> <span class="n">numberNode</span> <span class="n">x</span>
+</span><span class="line">             <span class="n">nt1</span> <span class="ow">&lt;-</span> <span class="n">numberTree</span> <span class="n">t1</span>
+</span><span class="line">             <span class="n">nt2</span> <span class="ow">&lt;-</span> <span class="n">numberTree</span> <span class="n">t2</span>
+</span><span class="line">             <span class="n">return</span> <span class="p">(</span><span class="kt">Node</span> <span class="n">num</span> <span class="n">nt1</span> <span class="n">nt2</span><span class="p">)</span>
+</span><span class="line">   <span class="kr">where</span>
+</span><span class="line">    <span class="n">numberNode</span> <span class="ow">::</span> <span class="kt">Eq</span> <span class="n">a</span> <span class="ow">=&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">State</span> <span class="p">(</span><span class="kt">Table</span> <span class="n">a</span><span class="p">)</span> <span class="kt">Int</span>
+</span><span class="line">    <span class="n">numberNode</span> <span class="n">x</span>
+</span><span class="line">       <span class="ow">=</span> <span class="kr">do</span> <span class="n">table</span> <span class="ow">&lt;-</span> <span class="n">get</span>
+</span><span class="line">            <span class="p">(</span><span class="n">newTable</span><span class="p">,</span> <span class="n">newPos</span><span class="p">)</span> <span class="ow">&lt;-</span> <span class="n">return</span> <span class="p">(</span><span class="n">nNode</span> <span class="n">x</span> <span class="n">table</span><span class="p">)</span>
+</span><span class="line">            <span class="n">put</span> <span class="n">newTable</span>
+</span><span class="line">            <span class="n">return</span> <span class="n">newPos</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">nNode</span><span class="ow">::</span>  <span class="p">(</span><span class="kt">Eq</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">Table</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Table</span> <span class="n">a</span><span class="p">,</span> <span class="kt">Int</span><span class="p">)</span>
+</span><span class="line">    <span class="n">nNode</span> <span class="n">x</span> <span class="n">table</span>
+</span><span class="line">       <span class="ow">=</span> <span class="kr">case</span> <span class="n">elemIndex</span> <span class="n">x</span> <span class="n">table</span> <span class="kr">of</span>
+</span><span class="line">         <span class="kt">Nothing</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">table</span> <span class="o">++</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span> <span class="n">length</span> <span class="n">table</span><span class="p">)</span>
+</span><span class="line">         <span class="kt">Just</span> <span class="n">i</span>  <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>相應的狀態求值調用如下：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">numTree</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Eq</span> <span class="n">a</span><span class="p">)</span> <span class="ow">=&gt;</span> <span class="kt">Tree</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">Tree</span> <span class="kt">Int</span>
+</span><span class="line"><span class="nf">numTree</span> <span class="n">t</span> <span class="ow">=</span> <span class="n">evalStateB</span> <span class="p">(</span><span class="n">numberTree</span> <span class="n">t</span><span class="p">)</span> <span class="kt">[]</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>測試一下結果：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">testTree</span> <span class="ow">=</span> <span class="kt">Node</span> <span class="s">&quot;Zero&quot;</span> <span class="p">(</span><span class="kt">Node</span> <span class="s">&quot;One&quot;</span> <span class="p">(</span><span class="kt">Node</span> <span class="s">&quot;Two&quot;</span> <span class="kt">Nil</span> <span class="kt">Nil</span><span class="p">)</span> <span class="p">(</span><span class="kt">Node</span> <span class="s">&quot;One&quot;</span> <span class="p">(</span><span class="kt">Node</span> <span class="s">&quot;Three&quot;</span> <span class="kt">Nil</span> <span class="kt">Nil</span><span class="p">)</span> <span class="kt">Nil</span><span class="p">))</span> <span class="kt">Nil</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>跑一下 <code>numTree testTree</code> 會生成這樣的樹：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kt">Node</span> <span class="mi">3</span> <span class="p">(</span><span class="kt">Node</span> <span class="mi">1</span> <span class="p">(</span><span class="kt">Node</span> <span class="mi">2</span> <span class="kt">Nil</span> <span class="kt">Nil</span><span class="p">)</span> <span class="p">(</span><span class="kt">Node</span> <span class="mi">1</span> <span class="p">(</span><span class="kt">Node</span> <span class="mi">0</span> <span class="kt">Nil</span> <span class="kt">Nil</span><span class="p">)</span> <span class="kt">Nil</span><span class="p">))</span> <span class="kt">Nil</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>正中吾需！</p>
+
+<p>代碼幾乎和用 <em>Control.Monad.State.Lazy</em> 的原問題解決方法一模一樣，區別在於我們用了 <code>evalStateB</code> 取代我們熟悉的 <code>evalState</code>，用了一個神奇的函數 <code>atomically</code>，以及 <code>StateB</code> Monad。我下面會詳細講他們是何方神聖乃至於究竟是怎麼實現逆轉狀態的。</p>
+
+<h2 id="api">API</h2>
+
+<p>我們現在要有一個新的 Monad：<code>StateB s</code>，其中 <code>s</code> 為其存儲的狀態的類型。<code>StateB s</code> 是 <code>MonadState s</code> 的一個實例，所以裡所應當應該實現 <code>get</code> 和 <code>put</code> 函數。</p>
+
+<p>當然還有這些：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">runStateB</span> <span class="ow">::</span> <span class="kt">StateB</span> <span class="n">s</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">s</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+</span><span class="line"><span class="nf">evalStateB</span> <span class="ow">::</span> <span class="kt">StateB</span> <span class="n">s</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">a</span>
+</span><span class="line"><span class="nf">execStateB</span> <span class="ow">::</span> <span class="kt">StateB</span> <span class="n">s</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">s</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>應該很熟悉吧，對應的就是 State Monad 裡的那些操作。技巧在於我們傳給它的狀態 <code>s</code> 是最終狀態而它返回的是初始狀態。回憶在上面的例子中，在我們遍歷樹的時候最後看到的元素被賦予第一個標籤（<code>0</code>），而第一個見到的元素被賦予最後的標籤。</p>
+
+<p>在 Control.Monad.State.Class 中默認的 <code>modify</code> 函數實現如下：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">modify</span> <span class="ow">::</span> <span class="kt">MonadState</span> <span class="n">s</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="p">(</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">s</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="nb">()</span>
+</span><span class="line"><span class="nf">modify</span> <span class="n">f</span> <span class="ow">=</span> <span class="kr">do</span>
+</span><span class="line">    <span class="n">s</span> <span class="ow">&lt;-</span> <span class="n">get</span>
+</span><span class="line">    <span class="n">put</span> <span class="p">(</span><span class="n">f</span> <span class="n">s</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>而在 <code>StateB</code> Monad 中，這段代碼直接就得碰壁了，因為兩個 Monadic 的行為會相互循迴依賴，<code>(&gt;&gt;=)</code> 會把現在的結果向前傳遞，而在 <code>StateB</code> 中，運算結果的方向是調轉過來的傳遞的。也就是說，上面那段代碼會產生一個循迴引用：第一行得到更新過的狀態，而這個狀態卻是來自第二行放進去的。</p>
+
+<p>要讓這樣的函數工作，我們要定義這個函數的 <code>StateB</code> 版本。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">modifyB</span> <span class="ow">::</span> <span class="p">(</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">s</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">StateB</span> <span class="n">s</span> <span class="nb">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>但如果你還想返回結果，你還會需要下面這位小朋友：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">atomically</span> <span class="ow">::</span> <span class="kt">State</span> <span class="n">s</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">StateB</span> <span class="n">s</span> <span class="n">a</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p><code>atomically</code> 會把正常 <code>State</code> 的動作轉換為 <code>StateB</code> 的動作，這樣你可以直接用現成的代碼。（或者你也可以用 <code>mdo</code> 語法）</p>
+
+<h2 id="section-1">實現</h2>
+
+<p><strong>這裡的實現基於 Wadler 的論文。</strong></p>
+
+<p>StateB Monad 和 State Monad 幾乎一樣，每個產生 <code>a</code> 的動作都是一個類型為 <code>\s -&gt; (a, s)</code> 的函數。區別在於 <code>(&gt;&gt;=)</code> 的實現。</p>
+
+<p>讓我們開始定義！</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">newtype</span> <span class="kt">StateB</span> <span class="n">s</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">StateB</span> <span class="p">{</span> <span class="n">runStateB</span> <span class="ow">::</span> <span class="n">s</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">s</span><span class="p">)</span> <span class="p">}</span>
+</span><span class="line">
+</span><span class="line"><span class="kr">instance</span> <span class="kt">Monad</span> <span class="p">(</span><span class="kt">StateB</span> <span class="n">s</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">    <span class="n">return</span> <span class="ow">=</span> <span class="kt">StateB</span> <span class="o">.</span> <span class="n">unitS</span>
+</span><span class="line">    <span class="p">(</span><span class="kt">StateB</span> <span class="n">m</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">f</span> <span class="ow">=</span> <span class="kt">StateB</span> <span class="o">$</span> <span class="n">m</span> <span class="p">`</span><span class="n">bindS</span><span class="p">`</span> <span class="p">(</span><span class="n">runStateB</span> <span class="o">.</span> <span class="n">f</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>因為封裝解封這個 newtype 的話太麻煩，所以他們只用在被導出的函數（如 <code>return</code> 和 <code>(&gt;&gt;=)</code>）上用。剩下處理細節用的函數我都用 ‘S’ 做為其後綴了。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">m</span> <span class="p">`</span><span class="n">bindS</span><span class="p">`</span> <span class="n">k</span>  <span class="ow">=</span> <span class="nf">\</span><span class="n">s2</span> <span class="ow">-&gt;</span> <span class="kr">let</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">s0</span><span class="p">)</span> <span class="ow">=</span> <span class="n">m</span> <span class="n">s1</span>
+</span><span class="line">                          <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span> <span class="ow">=</span> <span class="n">k</span> <span class="n">a</span> <span class="n">s2</span>
+</span><span class="line">                      <span class="kr">in</span>  <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">s0</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">unitS</span> <span class="n">a</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s2</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>（<em>譯者：我第一次看到上面這段代碼時興奮了一個晚上！短短三行就平直地描述並實現了狀態逆流的效果，非常簡潔而優美。</em>）</p>
+
+<p>正如君所見，傳進來的狀態（<code>s2</code>）被應用於 <code>bindS</code> 的右邊的參數（<code>k</code>）上，產生的狀態被 <code>bindS</code> 左邊的參數（<code>s1</code>）消耗，並產生出最後的狀態 <code>s0</code>。就這樣就可以了嗎？嗯就這麼點！其他 API 實現如下：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">execStateB</span> <span class="n">m</span> <span class="ow">=</span> <span class="n">snd</span> <span class="o">.</span> <span class="n">runStateB</span> <span class="n">m</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">evalStateB</span> <span class="n">m</span> <span class="ow">=</span> <span class="n">fst</span> <span class="o">.</span> <span class="n">runStateB</span> <span class="n">m</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">modifyB</span> <span class="ow">=</span> <span class="kt">StateB</span> <span class="o">.</span> <span class="n">modify&#39;</span>
+</span><span class="line">   <span class="kr">where</span> <span class="n">modify&#39;</span> <span class="n">f</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="nb">()</span><span class="p">,</span> <span class="n">f</span> <span class="n">s</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">atomically</span> <span class="ow">=</span> <span class="kt">StateB</span> <span class="o">.</span> <span class="n">runState</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>還可以把這些也寫了來玩：</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">instance</span> <span class="kt">Functor</span> <span class="p">(</span><span class="kt">StateB</span> <span class="n">s</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">    <span class="n">fmap</span> <span class="n">f</span> <span class="n">m</span> <span class="ow">=</span> <span class="kt">StateB</span> <span class="o">$</span> <span class="n">mapS</span> <span class="n">f</span> <span class="p">(</span><span class="n">runStateB</span> <span class="n">m</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">mapS</span> <span class="n">f</span> <span class="n">m</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="kr">let</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">s&#39;</span><span class="p">)</span> <span class="ow">=</span> <span class="n">m</span> <span class="n">s</span> <span class="kr">in</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span><span class="p">,</span> <span class="n">s&#39;</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="kr">instance</span> <span class="kt">MonadState</span> <span class="n">s</span> <span class="p">(</span><span class="kt">StateB</span> <span class="n">s</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">    <span class="n">get</span> <span class="ow">=</span> <span class="kt">StateB</span> <span class="n">get&#39;</span>
+</span><span class="line">     <span class="kr">where</span> <span class="n">get&#39;</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">s</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line">    <span class="n">put</span> <span class="ow">=</span> <span class="kt">StateB</span> <span class="o">.</span> <span class="n">put&#39;</span>
+</span><span class="line">     <span class="kr">where</span> <span class="n">put&#39;</span> <span class="n">s</span> <span class="ow">=</span> <span class="n">const</span> <span class="p">(</span><span class="nb">()</span><span class="p">,</span><span class="n">s</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="kr">instance</span> <span class="kt">MonadFix</span> <span class="p">(</span><span class="kt">StateB</span> <span class="n">s</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">    <span class="n">mfix</span> <span class="ow">=</span> <span class="kt">StateB</span> <span class="o">.</span> <span class="n">mfixS</span> <span class="o">.</span> <span class="p">(</span><span class="n">runStateB</span> <span class="o">.</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">mfixS</span> <span class="n">f</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s2</span> <span class="ow">-&gt;</span> <span class="kr">let</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">s0</span><span class="p">)</span> <span class="ow">=</span> <span class="p">(</span><span class="n">f</span> <span class="n">b</span><span class="p">)</span> <span class="n">s1</span>
+</span><span class="line">                     <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">s1</span><span class="p">)</span> <span class="ow">=</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span><span class="p">)</span> <span class="n">s2</span>
+</span><span class="line">                 <span class="kr">in</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">s0</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-2">變形金剛（譯者：沒錯我故意的）</h2>
+
+<p>下面這些你要稍微注意一下，因為我沒測試過，不過看起來應該是工作的，這些風格基本和 <code>Control.Monad.State.Lazy</code> 的差不多。</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+<span class="line-number">16</span>
+<span class="line-number">17</span>
+<span class="line-number">18</span>
+<span class="line-number">19</span>
+<span class="line-number">20</span>
+<span class="line-number">21</span>
+<span class="line-number">22</span>
+<span class="line-number">23</span>
+<span class="line-number">24</span>
+<span class="line-number">25</span>
+<span class="line-number">26</span>
+<span class="line-number">27</span>
+<span class="line-number">28</span>
+<span class="line-number">29</span>
+<span class="line-number">30</span>
+<span class="line-number">31</span>
+<span class="line-number">32</span>
+<span class="line-number">33</span>
+<span class="line-number">34</span>
+<span class="line-number">35</span>
+<span class="line-number">36</span>
+<span class="line-number">37</span>
+<span class="line-number">38</span>
+<span class="line-number">39</span>
+<span class="line-number">40</span>
+<span class="line-number">41</span>
+<span class="line-number">42</span>
+<span class="line-number">43</span>
+<span class="line-number">44</span>
+<span class="line-number">45</span>
+<span class="line-number">46</span>
+<span class="line-number">47</span>
+<span class="line-number">48</span>
+<span class="line-number">49</span>
+<span class="line-number">50</span>
+<span class="line-number">51</span>
+<span class="line-number">52</span>
+<span class="line-number">53</span>
+<span class="line-number">54</span>
+<span class="line-number">55</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">newtype</span> <span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="p">{</span><span class="n">runStateBT</span> <span class="ow">::</span> <span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">s</span><span class="p">)}</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">unitST</span> <span class="n">a</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">return</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">s</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">m</span> <span class="p">`</span><span class="n">bindST</span><span class="p">`</span> <span class="n">k</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s2</span> <span class="ow">-&gt;</span> <span class="n">mdo</span> <span class="o">~</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">s0</span><span class="p">)</span> <span class="ow">&lt;-</span> <span class="n">m</span> <span class="n">s1</span>
+</span><span class="line">                          <span class="o">~</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">s1</span><span class="p">)</span> <span class="ow">&lt;-</span> <span class="n">k</span> <span class="n">a</span> <span class="n">s2</span>
+</span><span class="line">                          <span class="n">return</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">s0</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">execStateBT</span> <span class="ow">::</span> <span class="kt">Monad</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="n">s</span>
+</span><span class="line"><span class="nf">execStateBT</span> <span class="n">m</span> <span class="n">s</span> <span class="ow">=</span> <span class="kr">do</span> <span class="o">~</span><span class="p">(</span><span class="kr">_</span><span class="p">,</span><span class="n">s&#39;</span><span class="p">)</span> <span class="ow">&lt;-</span> <span class="n">runStateBT</span> <span class="n">m</span> <span class="n">s</span>
+</span><span class="line">                     <span class="n">return</span> <span class="n">s&#39;</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">evalStateBT</span> <span class="ow">::</span> <span class="kt">Monad</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">m</span> <span class="n">a</span>
+</span><span class="line"><span class="nf">evalStateBT</span> <span class="n">m</span> <span class="n">s</span> <span class="ow">=</span> <span class="kr">do</span> <span class="o">~</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="kr">_</span><span class="p">)</span>  <span class="ow">&lt;-</span> <span class="n">runStateBT</span> <span class="n">m</span> <span class="n">s</span>
+</span><span class="line">                     <span class="n">return</span> <span class="n">a</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">modifyBT</span> <span class="ow">::</span> <span class="kt">Monad</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="p">(</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">s</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span> <span class="nb">()</span>
+</span><span class="line"><span class="nf">modifyBT</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">.</span> <span class="n">modify&#39;</span>
+</span><span class="line"> <span class="kr">where</span> <span class="n">modify&#39;</span> <span class="n">f</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">return</span> <span class="p">(</span><span class="nb">()</span><span class="p">,</span><span class="n">f</span> <span class="n">s</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">atomicallyT</span> <span class="ow">::</span> <span class="kt">Monad</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="kt">State</span> <span class="n">s</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span> <span class="n">a</span>
+</span><span class="line"><span class="nf">atomicallyT</span> <span class="n">m</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">$</span> <span class="nf">\</span><span class="n">s</span><span class="ow">-&gt;</span> <span class="n">return</span> <span class="o">$</span> <span class="n">runState</span> <span class="n">m</span> <span class="n">s</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">atomicallyTM</span> <span class="ow">::</span> <span class="kt">Monad</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="kt">StateT</span> <span class="n">s</span> <span class="n">m</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span> <span class="n">a</span>
+</span><span class="line"><span class="nf">atomicallyTM</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">.</span> <span class="n">runStateT</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">mapST</span> <span class="n">f</span> <span class="n">m</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="kr">do</span> <span class="o">~</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">s&#39;</span><span class="p">)</span> <span class="ow">&lt;-</span> <span class="n">m</span> <span class="n">s</span>
+</span><span class="line">                     <span class="n">return</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span><span class="p">,</span><span class="n">s&#39;</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">liftST</span> <span class="n">m</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="kr">do</span> <span class="n">a</span> <span class="ow">&lt;-</span> <span class="n">m</span>
+</span><span class="line">                    <span class="n">return</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">s</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">mfixST</span> <span class="n">f</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s2</span> <span class="ow">-&gt;</span> <span class="n">mdo</span> <span class="o">~</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">s0</span><span class="p">)</span> <span class="ow">&lt;-</span> <span class="p">(</span><span class="n">f</span> <span class="n">b</span><span class="p">)</span> <span class="n">s1</span>
+</span><span class="line">                      <span class="o">~</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">s1</span><span class="p">)</span> <span class="ow">&lt;-</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span><span class="p">)</span> <span class="n">s2</span>
+</span><span class="line">                      <span class="n">return</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">s0</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="kr">instance</span> <span class="kt">Monad</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="kt">Functor</span> <span class="p">(</span><span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">    <span class="n">fmap</span> <span class="n">f</span> <span class="n">m</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">$</span> <span class="n">mapST</span> <span class="n">f</span> <span class="p">(</span><span class="n">runStateBT</span> <span class="n">m</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="kr">instance</span> <span class="kt">MonadFix</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="kt">Monad</span> <span class="p">(</span><span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">    <span class="n">return</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">.</span> <span class="n">unitST</span>
+</span><span class="line">    <span class="p">(</span><span class="kt">StateBT</span> <span class="n">m</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">f</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">$</span> <span class="n">m</span> <span class="p">`</span><span class="n">bindST</span><span class="p">`</span> <span class="p">(</span><span class="n">runStateBT</span> <span class="o">.</span> <span class="n">f</span><span class="p">)</span>
+</span><span class="line">    <span class="n">fail</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">.</span> <span class="n">const</span> <span class="o">.</span> <span class="n">fail</span>
+</span><span class="line">
+</span><span class="line"><span class="kr">instance</span> <span class="kt">MonadTrans</span> <span class="p">(</span><span class="kt">StateBT</span> <span class="n">s</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">    <span class="n">lift</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">.</span> <span class="n">liftST</span>
+</span><span class="line">
+</span><span class="line"><span class="kr">instance</span> <span class="kt">MonadFix</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="kt">MonadState</span> <span class="n">s</span> <span class="p">(</span><span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">    <span class="n">get</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="n">get&#39;</span>
+</span><span class="line">      <span class="kr">where</span> <span class="n">get&#39;</span> <span class="ow">=</span> <span class="nf">\</span><span class="n">s</span> <span class="ow">-&gt;</span> <span class="n">return</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">s</span><span class="p">)</span>
+</span><span class="line">    <span class="n">put</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">.</span> <span class="n">put&#39;</span>
+</span><span class="line">     <span class="kr">where</span> <span class="n">put&#39;</span> <span class="n">s</span> <span class="ow">=</span> <span class="n">const</span> <span class="o">$</span> <span class="n">return</span> <span class="p">(</span><span class="nb">()</span><span class="p">,</span><span class="n">s</span><span class="p">)</span>
+</span><span class="line">
+</span><span class="line"><span class="kr">instance</span> <span class="kt">MonadFix</span> <span class="n">m</span> <span class="ow">=&gt;</span> <span class="kt">MonadFix</span> <span class="p">(</span><span class="kt">StateBT</span> <span class="n">s</span> <span class="n">m</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">    <span class="n">mfix</span> <span class="ow">=</span> <span class="kt">StateBT</span> <span class="o">.</span> <span class="n">mfixST</span> <span class="o">.</span> <span class="p">(</span><span class="n">runStateBT</span> <span class="o">.</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="section-3">譯後記</h2>
+
+<p>這篇文章第一次閱讀就給了我極大的震驚。我已知 Haskell 的惰性求值策略，而且也知道一些與之相關的優雅應用（譬如著名的 <code>fib = 1 : 1 : zipWith (+) fib (tail fib)</code>），不過讀到這篇文章時我還是大呼「神奇！」。此文雖然沒有在內容中著筆墨於惰性求值之中，卻在標題中直接強調了「The Power of Laziness」。從其他語言來的讀者可能會對上面 <code>bindS</code> 感到不可思議，覺得「怎麼可以直接這樣？」，是的，一般情況下當然不行，但是 Haskell 已裝備了強大的惰性求值，所以這樣寫也不是問題。</p>
+
+<p>最後再次感謝 Wadler 提出的理論和 Latter 的這篇科普向（？）文章帶我們展現了依賴惰性求值實現的這個逆向 State Monad。</p>
+
+<p>（聲明：此文章的翻譯及發佈已經經過原文作者的許可。此譯文版權歸譯者所有，
+並在 <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 下發佈）</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[深淵]]></title>
     <link href="http://shouya.github.io/blog/the-abyss/"/>
-    <updated>2014-12-25T00:06:41+08:00</updated>
+    <updated>2014-12-24T10:06:41-06:00</updated>
     <id>http://shouya.github.io/blog/the-abyss</id>
     <content type="html"><![CDATA[<p>站在深淵面前   <br />
 驅使自己踏前一步   <br />
@@ -49,7 +437,7 @@
   <entry>
     <title type="html"><![CDATA[翻譯：Haskell 怎麼實現惰性求值]]></title>
     <link href="http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell/"/>
-    <updated>2014-11-24T19:14:57+08:00</updated>
+    <updated>2014-11-24T05:14:57-06:00</updated>
     <id>http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell</id>
     <content type="html"><![CDATA[<blockquote>
   <p>原文由 <a href="http://apfelmus.nfshost.com/blog.html">Heinrich Apfelmus</a> 發表於 <a href="https://hackhands.com/lazy-evaluation-works-haskell/">Hackhands</a>，標題：How Lazy Evaluatoin Works in Haskell。</p>
@@ -398,7 +786,7 @@
   <entry>
     <title type="html"><![CDATA[Function Calling Syntax]]></title>
     <link href="http://shouya.github.io/blog/function-calling-syntax/"/>
-    <updated>2014-08-03T17:59:14+08:00</updated>
+    <updated>2014-08-03T04:59:14-05:00</updated>
     <id>http://shouya.github.io/blog/function-calling-syntax</id>
     <content type="html"><![CDATA[<p>We use programming languages to indicate a process of
 actions/computations. Therefore programming languages tends to be more
@@ -572,7 +960,7 @@ used in Scheme compilers.</p>
   <entry>
     <title type="html"><![CDATA[翻譯：如何幸福起來]]></title>
     <link href="http://shouya.github.io/blog/how-to-be-happy/"/>
-    <updated>2014-07-28T22:17:07+08:00</updated>
+    <updated>2014-07-28T09:17:07-05:00</updated>
     <id>http://shouya.github.io/blog/how-to-be-happy</id>
     <content type="html"><![CDATA[<blockquote>
   <p>原文由 lukeprog 發表於 <a href="http://lesswrong.com/lw/4su/how_to_be_happy/">LessWrong</a>。
@@ -666,7 +1054,7 @@ used in Scheme compilers.</p>
   <entry>
     <title type="html"><![CDATA[Linux 下 GFW 的 DNS 投毒解決方案]]></title>
     <link href="http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution/"/>
-    <updated>2014-07-26T02:27:35+08:00</updated>
+    <updated>2014-07-25T13:27:35-05:00</updated>
     <id>http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution</id>
     <content type="html"><![CDATA[<p>這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。</p>
 
@@ -823,7 +1211,7 @@ $ sudo rc-update add dnsmasq default
   <entry>
     <title type="html"><![CDATA[A Brief Journal About Learning Coq]]></title>
     <link href="http://shouya.github.io/blog/a-brief-journal-about-learning-coq/"/>
-    <updated>2014-07-05T01:08:34+08:00</updated>
+    <updated>2014-07-04T12:08:34-05:00</updated>
     <id>http://shouya.github.io/blog/a-brief-journal-about-learning-coq</id>
     <content type="html"><![CDATA[<p><em>This article is completely an informal journal about my learning process on
 Coq. It is just created as my whim prompted. Please don’t academically refer
@@ -1142,7 +1530,7 @@ Lisp.</p>
   <entry>
     <title type="html"><![CDATA[夢魘]]></title>
     <link href="http://shouya.github.io/blog/digging-in-a-dream/"/>
-    <updated>2014-06-29T18:45:29+08:00</updated>
+    <updated>2014-06-29T05:45:29-05:00</updated>
     <id>http://shouya.github.io/blog/digging-in-a-dream</id>
     <content type="html"><![CDATA[<p>晚上，我在墳地挖土，點上火炬。 <br />
 頭頂的火光把周圍照得通明。   </p>
@@ -1179,7 +1567,7 @@ Lisp.</p>
   <entry>
     <title type="html"><![CDATA[Setting Up IP Over ICMP With Hans]]></title>
     <link href="http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/"/>
-    <updated>2014-06-02T23:19:29+08:00</updated>
+    <updated>2014-06-02T10:19:29-05:00</updated>
     <id>http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans</id>
     <content type="html"><![CDATA[<h2 id="background">Background</h2>
 <p>The ISP, China Telecom, interrupted the internet access from my home
@@ -1314,7 +1702,7 @@ icmptx</a></li>
   <entry>
     <title type="html"><![CDATA[Experience About Contributing KDE Projects]]></title>
     <link href="http://shouya.github.io/blog/experience-with-kde-gci/"/>
-    <updated>2012-12-31T17:55:00+08:00</updated>
+    <updated>2012-12-31T17:55:00-06:00</updated>
     <id>http://shouya.github.io/blog/experience-with-kde-gci</id>
     <content type="html"><![CDATA[<p>It’s the first time I am involved in contributing KDE, and I think
 that’s very wonderful experience for me.</p>
@@ -1363,7 +1751,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[祭獻]]></title>
     <link href="http://shouya.github.io/blog/sacrifice/"/>
-    <updated>2012-11-13T14:16:00+08:00</updated>
+    <updated>2012-11-13T14:16:00-06:00</updated>
     <id>http://shouya.github.io/blog/sacrifice</id>
     <content type="html"><![CDATA[<p>我在黑暗中醒來  <br />
 不能看到任何東西  <br />
@@ -1396,7 +1784,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[朝曦]]></title>
     <link href="http://shouya.github.io/blog/shines-at-dawn/"/>
-    <updated>2012-10-14T18:26:00+08:00</updated>
+    <updated>2012-10-14T18:26:00-05:00</updated>
     <id>http://shouya.github.io/blog/shines-at-dawn</id>
     <content type="html"><![CDATA[<p>我注視著妳的眼睛 <br />
 我看不到光芒   </p>
@@ -1428,7 +1816,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[挑戰龍的勇士]]></title>
     <link href="http://shouya.github.io/blog/warrior-who-fights-the-dragon/"/>
-    <updated>2012-09-15T20:21:00+08:00</updated>
+    <updated>2012-09-15T20:21:00-05:00</updated>
     <id>http://shouya.github.io/blog/warrior-who-fights-the-dragon</id>
     <content type="html"><![CDATA[<p>我崇敬挑戰龍而失敗的勇士，<br />
 而不是皇帝。</p>
@@ -1460,7 +1848,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[April 2012]]></title>
     <link href="http://shouya.github.io/blog/april-2012/"/>
-    <updated>2012-04-24T06:40:00+08:00</updated>
+    <updated>2012-04-24T06:40:00-05:00</updated>
     <id>http://shouya.github.io/blog/april-2012</id>
     <content type="html"><![CDATA[<p>Another month as you see.</p>
 
@@ -1536,7 +1924,7 @@ Not longer it will be, 8 months remaining only. Good lucky.</p>
   <entry>
     <title type="html"><![CDATA[February 2012]]></title>
     <link href="http://shouya.github.io/blog/february-2012/"/>
-    <updated>2012-02-26T14:51:00+08:00</updated>
+    <updated>2012-02-26T14:51:00-06:00</updated>
     <id>http://shouya.github.io/blog/february-2012</id>
     <content type="html"><![CDATA[<p>10 months remaining.</p>
 
@@ -1565,7 +1953,7 @@ and some tricks from that.</p>
   <entry>
     <title type="html"><![CDATA[完美世界]]></title>
     <link href="http://shouya.github.io/blog/a-perfect-world/"/>
-    <updated>2012-01-03T19:29:00+08:00</updated>
+    <updated>2012-01-03T19:29:00-06:00</updated>
     <id>http://shouya.github.io/blog/a-perfect-world</id>
     <content type="html"><![CDATA[<p>這就是亞首的生平.</p>
 
@@ -1776,7 +2164,7 @@ and some tricks from that.</p>
   <entry>
     <title type="html"><![CDATA[來自倪匡「背叛」裡的一段文字]]></title>
     <link href="http://shouya.github.io/blog/quote-from-betrayal-kuangni/"/>
-    <updated>2011-12-24T14:19:00+08:00</updated>
+    <updated>2011-12-24T14:19:00-06:00</updated>
     <id>http://shouya.github.io/blog/quote-from-betrayal-kuangni</id>
     <content type="html"><![CDATA[<blockquote><p>為什么？你不明白？你們真不明白？為什么？因為我必須這樣做，一定要那樣做，非那樣做不可，我想那樣做想了不知多久，終於鼓足勇氣做了！我為自己！誰不為自己呢？把我從垃圾堆中撿出來，培育我成為一個優秀的軍人，難道全為了我？沒有一點為了自己？</p><p>我變成什么東西了？我不知道自己變成了什么東西，只知道自己不再是人！人！人！我不是人！對我好，照顧我，我就算是個人，也不再是自己，我是人家手裡捏出來的一個泥人——看，這是我捏的，好看吧，漂亮吧！<br /><!-- more --><br />知道我所承受的壓力有多重嗎？我必須按照捏我的雙手做人，這個可以，那個不可以，現在的日子多好，以前的日子多苦！</p><p>老實講，不到一年，我就寧願回垃圾堆去！我是從垃圾堆來的，讓我回垃圾堆去，這天公地道，可是我回得去嗎？四面八方，不知道有多少箍，有多 少網，把我死死地箍著，網著，壓著，你們知道我在半夜會大口吸氣嗎？知道我只有肯定在沒有人的時候才呼吸暢順嗎？可就是連這樣的機會，也少之又少，沒有單獨一個人的機會，可惜吧！一直到現在，那么多年了，都是單獨的，可是還會做惡夢，想起那可怕的日子，做什么，該怎么樣，早就安排得妥妥當當，從副排長起， 只要找不死，一條直路，可以讓你看到若干年之后的副總司令！我打仗勇敢？屁！我是想在戰場上找死！</p><p>對我好？當然對我好，我沒說有什么人 對我不好，可是我能無法拒絕？可不可以不受？我沒法報答，永遠無法報答，我也不想報答，因為我根本不要。對，我揀的時機很卑鄙，打仗，不是輸就是贏，你贏 了，人家就輸，你輸了，人家就贏，輸和贏都要死人，沒有什么不衕，你想想，除了這個機會之外，我還有 什么逃走的可能？對我太好了，當他把你也讓給我的時候，我就知道，再不逃走，我這一輩子就只是一個沒頓的人！</p><p>以后？我一點也沒有后悔過，以后我一座一座深山走，完完全全是我自己，最后我揀了這裡，這裡象不象垃圾堆，多么自在逍遙，多么快樂，絕沒有人象看猴子一樣地打量你，絕沒有人夸獎你，勉勵你，要你不斷照別人的意思去做人！</p><p>我當然有權這樣做，每個人都有權照自己喜歡的方式處理自己的生命！不錯，我害了一些人，被害的人之中，有對我極好極好的，我說過，我為自己打算，我一刻也無法再忍下去，在那個山洞中，我陡然之間，有了決定。</p><p>什 么？外來力量的影響？當然沒有，全都是我內心世界的爆炸。背叛！徹底的背叛，背叛的是一個假的自我，得回的是真正的自我。告訴你們，你們 沒有資格責備我是叛徒，沒有一個人可以責備另一個人是叛徒，因為人人心中都懷著信念，沒有人可以例外，那是人的天性，人有背叛的天性，看只看什么時候發 作！</p><p>什么？外星人？什么外星人，我是人，別看我身形高大，力大無窮，當然是人，什么外星人裡星人，你他媽的在放什么狗屁！</p><p>現 在明白了沒有，不背叛，那種日子我過不下去，人人都看看，以為我日子過得快樂得很，只有我自己才知道苦，連你都不懂，以為我真的快樂，你 不應該跟我下山，應該和他留在山上，我會拼命攻上去，死在你們面前，你也不該把他讓給我，那叫我更無法忍受下去，你們都不把我當一個平等的人，都把我當成 一個要盡一切力量對他好的人！</p><p>沒有什么不對，對你們賜給者來說，當然沒有什么不對，可是對我這受惠者來說，我要拒絕，我要大聲叫：夠了！夠了！你們會聽嗎？</p><footer><strong>背叛, 倪匡</strong> <cite><a href="https://zh.wikipedia.org/zh/%E8%83%8C%E5%8F%9B_(%E5%B0%8F%E8%AA%AA)">Wikipedia (背叛)</a></cite></footer></blockquote>
 
@@ -1787,7 +2175,7 @@ and some tricks from that.</p>
   <entry>
     <title type="html"><![CDATA[「偉大」的想法]]></title>
     <link href="http://shouya.github.io/blog/a-great-thought/"/>
-    <updated>2011-09-15T13:12:00+08:00</updated>
+    <updated>2011-09-15T13:12:00-05:00</updated>
     <id>http://shouya.github.io/blog/a-great-thought</id>
     <content type="html"><![CDATA[<p>那傢伙化為烏有了，他徹底被滅絕了。</p>
 
@@ -1807,7 +2195,7 @@ and some tricks from that.</p>
   <entry>
     <title type="html"><![CDATA[夢]]></title>
     <link href="http://shouya.github.io/blog/dream-no-longer/"/>
-    <updated>2011-05-19T17:13:00+08:00</updated>
+    <updated>2011-05-19T17:13:00-05:00</updated>
     <id>http://shouya.github.io/blog/dream-no-longer</id>
     <content type="html"><![CDATA[<p>從今以後, 我不再有自己的夢.</p>
 
