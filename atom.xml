@@ -4,7 +4,7 @@
   <title><![CDATA[Shou's origin]]></title>
   <link href="http://shouya.github.io/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2015-04-09T00:32:07-05:00</updated>
+  <updated>2015-05-03T21:19:41-05:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -12,6 +12,25 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[誡之一]]></title>
+    <link href="http://shouya.github.io/blog/admonition-sono-ichi/"/>
+    <updated>2015-05-03T21:17:11-05:00</updated>
+    <id>http://shouya.github.io/blog/admonition-sono-ichi</id>
+    <content type="html"><![CDATA[<p>分離，融合  <br />
+形影不離  <br />
+恥辱，榮耀    </p>
+
+<p>注視卻無視  <br />
+偉大卻無名  <br />
+萬能卻不為    </p>
+
+<p>他是你的 host，你的聖人  <br />
+那你呢？    </p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[翻譯：逆向狀態，又：惰性之力]]></title>

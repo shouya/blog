@@ -5,13 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Setting Up IP Over ICMP With Hans - Shou's origin</title>
+  <title>誡之一 - Shou's origin</title>
   <meta name="author" content="Shou Ya">
 
   
-  <meta name="description" content="Background
-The ISP, China Telecom, interrupted the internet access from my home
-yesterday due to the expiration of annually subscription of the &hellip;">
+  <meta name="description" content="分離，融合 形影不離 恥辱，榮耀 注視卻無視 偉大卻無名 萬能卻不為 他是你的 host，你的聖人 那你呢？ ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +18,7 @@ yesterday due to the expiration of annually subscription of the &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans">
+  <link rel="canonical" href="http://shouya.github.io/blog/admonition-sono-ichi">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css">
@@ -109,7 +107,7 @@ MathJax.Hub.Config({
   
   <header>
     
-      <h1 class="entry-title">Setting Up IP Over ICMP With Hans</h1>
+      <h1 class="entry-title">誡之一</h1>
     
     
       <p class="meta">
@@ -125,140 +123,24 @@ MathJax.Hub.Config({
   
 
 
-<time datetime="2014-06-02T10:19:29-05:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2014</time>
+<time datetime="2015-05-03T21:17:11-05:00" pubdate data-updated="true">May 3<span>rd</span>, 2015</time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><h2 id="background">Background</h2>
-<p>The ISP, China Telecom, interrupted the internet access from my home
-yesterday due to the expiration of annually subscription of the
-internet service. While I found that ICMP packets are not blocked.
-Even though I can’t even do a DNS query, I can ping any server as usual.</p>
+<div class="entry-content"><p>分離，融合  <br />
+形影不離  <br />
+恥辱，榮耀    </p>
 
-<p>The inaccessibility of internet has greatly evoked my anxiety on
-seeking changes. Well, it’s theoretically possible to carry data in
-ICMP packets. Therefore, according to the hacker community’s
-principle, there should already been hackers who made use of this and
-opened the sources of their programs.</p>
+<p>注視卻無視  <br />
+偉大卻無名  <br />
+萬能卻不為    </p>
 
-<p>Indeed, searching ‘ICMP tunneling’, I found
-<a href="http://code.gerade.org/hans/">hans</a> and
-<a href="http://thomer.com/icmptx/">icmptx</a>. The latter one is more
-primitive and complicated to use. After several trials and failures, I
-decide to give <strong>icmptx</strong> up, and try <strong>hans</strong> instead.</p>
+<p>他是你的 host，你的聖人  <br />
+那你呢？    </p>
 
-<p>This article is a tutorial/note about how to establish normal internet
-connection in the condition that only ICMP packets are allowed to pass
-through the firewall with <strong>hans</strong>.</p>
-
-<!-- more -->
-
-<h2 id="step-1-establish-the-tunnel">Step 1: Establish the tunnel</h2>
-<p>From the server side, first start the server.</p>
-
-<pre><code>  # ./hans -s 10.2.0.1 -m 10000
-</code></pre>
-
-<p>The option <code>-s</code> specifies the inet address for the tunnel interface,
-and the <code>-m</code> specifies the size of mtu.</p>
-
-<p>Then try to connect from the client.</p>
-
-<pre><code> # ./hans -c &lt;server_ip&gt; -m 10000
-</code></pre>
-
-<p>Please beware the mtu should be matched between the server and the
-client,
-otherwise it might cause problems.</p>
-
-<p>In addition, you should switch off the normal response to ICMP echo
-request.</p>
-
-<pre><code> # sysctl net.ipv4.icmp_echo_ignore_all=1
-</code></pre>
-
-<p>Because the ICMP packets should now be handled all by hans.
-But if you still want to have it working, add <code>-s</code> option whiling
-launching the server side of hans.</p>
-
-<h3 id="choosing-the-size-of-mtu">Choosing the size of MTU</h3>
-
-<p>Without specifying the mtu manually in the command’s argument,
-hans will automatically choose the system default one.
-It will normally be around 1500. But this would be a little bit
-small to communicate over ICMP. In practice, with a default mtu
-value of 1500, the download speed can hardly reach 7 KiB/second.
-While as it changes 10 000, the speed went around 10 KiB/second.</p>
-
-<p>Nonetheless, you can try various values of mtu and find your
-best fit.</p>
-
-<h3 id="testing-the-tunnel">Testing the tunnel</h3>
-<p>Now the tunnel should be established. From the client side,
-you should see that the inet address of <code>tun0</code> is chosen automatically
-according to the server’s configuration. Otherwise, if you
-haven’t seen any valid inet address for the client <code>tun0</code>
-interface, the connection is not established successfully. At this
-time,
-check if the operations above take effect and ensure you have a
-working
-internet connection (at least ICMP packet is not blocked).</p>
-
-<p>From the server, you can ping the the ip of <code>tun0</code> in the client-side
-and it should work good.
-While pinging from the client-side would possibly be not working
-except
-you have specified the <code>-s</code> option to <code>hans</code> command.</p>
-
-<h2 id="step-2-configure-forwarding-routing-on-the-server">Step 2: Configure forwarding routing on the server</h2>
-<p>On the server:</p>
-
-<pre><code> # iptables -F
- # iptables -F -t nat
- # iptables -A FORWARD -i tun0 -j ACCEPT
- # iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-</code></pre>
-
-<p>Don’t forget to enable IP forwarding:</p>
-
-<pre><code> # sysctl net.ipv4.ip_forwarding=1
-</code></pre>
-
-<h2 id="step-3-configure-the-routing-table">Step 3: Configure the routing table</h2>
-
-<p>We should now redirect all packets through the tunnel
-to the server.</p>
-
-<pre><code> # ip route del default
- # ip route add default via 10.2.0.1
-</code></pre>
-
-<p>It’s necessary to specify how the server side can be reached.</p>
-
-<pre><code> # ip route add &lt;server_ip&gt; via &lt;original_router&gt;
-</code></pre>
-
-<p>So there won’t be a circular packet transmission.</p>
-
-<p>Done.</p>
-
-<h2 id="resources-that-might-help">Resources that might help</h2>
-<ul>
-  <li><a href="https://github.com/friedrich/hans">github: friedrich/hans</a></li>
-  <li><a href="http://code.gerade.org/hans/">official guide of hans</a></li>
-  <li><a href="http://thomer.com/icmptx/">icmptx: how to</a></li>
-  <li><a href="http://github.com/jakkarth/icmptx">github: jakkarth/icmptx</a></li>
-  <li><a href="http://www.faqs.org/docs/iptables/traversingoftables.html">iptables theory: traversing of
-tables</a></li>
-  <li><a href="http://www.howtogeek.com/177621/the-beginners-guide-to-iptables-the-linux-firewall/">a beginner’s guide to
-iptables</a></li>
-  <li><a href="http://wiki.gentoo.org/wiki/Home_Router">home router - gentoo wiki</a></li>
-  <li><a href="http://itsecworks.com/2013/02/15/fire-in-the-hole-of-the-firewall/">another person log about the usage of
-icmptx</a></li>
-</ul>
 </div>
 
 
@@ -281,12 +163,12 @@ icmptx</a></li>
   
 
 
-<time datetime="2014-06-02T10:19:29-05:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2014</time>
+<time datetime="2015-05-03T21:17:11-05:00" pubdate data-updated="true">May 3<span>rd</span>, 2015</time>
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/category/solution/'>solution</a>
+    <a class='category' href='/blog/category/think/'>think</a>
   
 </span>
 
@@ -295,7 +177,7 @@ icmptx</a></li>
 
 <span class="tags">
   
-    <a class='tag' href='/blog/tag/networking/'>networking</a>, <a class='tag' href='/blog/tag/unix/'>unix</a>
+    <a class='tag' href='/blog/tag/poem/'>poem</a>
   
 </span>
 
@@ -304,7 +186,7 @@ icmptx</a></li>
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/" data-via="" data-counturl="http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://shouya.github.io/blog/admonition-sono-ichi/" data-via="" data-counturl="http://shouya.github.io/blog/admonition-sono-ichi/" >Tweet</a>
   
   
   
@@ -313,10 +195,8 @@ icmptx</a></li>
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/experience-with-kde-gci/" title="Previous Post: Experience about contributing KDE projects">&laquo; Experience about contributing KDE projects</a>
+        <a class="basic-alignment left" href="/blog/backwards-state-or-the-power-of-laziness/" title="Previous Post: 翻譯：逆向狀態，又：惰性之力">&laquo; 翻譯：逆向狀態，又：惰性之力</a>
       
-      
-        <a class="basic-alignment right" href="/blog/digging-in-a-dream/" title="Next Post: 夢魘">夢魘 &raquo;</a>
       
     </p>
   </footer>
@@ -421,8 +301,8 @@ icmptx</a></li>
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/';
-        var disqus_url = 'http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/';
+        var disqus_identifier = 'http://shouya.github.io/blog/admonition-sono-ichi/';
+        var disqus_url = 'http://shouya.github.io/blog/admonition-sono-ichi/';
         var disqus_script = 'embed.js';
       
     (function () {
