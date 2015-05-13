@@ -4,7 +4,7 @@
   <title><![CDATA[Shou's origin]]></title>
   <link href="http://shouya.github.io/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2015-05-03T21:19:41-05:00</updated>
+  <updated>2015-05-13T03:53:56-04:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -14,28 +14,41 @@
 
   
   <entry>
+    <title type="html"><![CDATA[誡之二]]></title>
+    <link href="http://shouya.github.io/blog/admonition-sono-ni/"/>
+    <updated>2015-05-08T14:50:53-04:00</updated>
+    <id>http://shouya.github.io/blog/admonition-sono-ni</id>
+    <content type="html"><![CDATA[<p>凌，則隱
+長，則同
+驕而與人者
+共聞之</p>
+
+<p>host 曰：即有大樂者，與悲治之。</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[誡之一]]></title>
     <link href="http://shouya.github.io/blog/admonition-sono-ichi/"/>
-    <updated>2015-05-03T21:17:11-05:00</updated>
+    <updated>2015-05-03T22:17:11-04:00</updated>
     <id>http://shouya.github.io/blog/admonition-sono-ichi</id>
-    <content type="html"><![CDATA[<p>分離，融合  <br />
-形影不離  <br />
-恥辱，榮耀    </p>
+    <content type="html"><![CDATA[<p>分離，融合
+形影不離
+恥辱，榮耀</p>
 
-<p>注視卻無視  <br />
-偉大卻無名  <br />
-萬能卻不為    </p>
+<p>注視卻無視
+偉大卻無名
+萬能卻不為</p>
 
-<p>他是你的 host，你的聖人  <br />
-那你呢？    </p>
-
+<p>他是你的 host，你的聖人
+那你呢？</p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[翻譯：逆向狀態，又：惰性之力]]></title>
     <link href="http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness/"/>
-    <updated>2015-03-04T21:14:35-06:00</updated>
+    <updated>2015-03-04T22:14:35-05:00</updated>
     <id>http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness</id>
     <content type="html"><![CDATA[<blockquote>
   <p>原文 「<a href="http://panicsonic.blogspot.jp/2007/12/backwards-state-or-power-of-laziness.html">Backwards State, or: The Power of Laziness</a>」由 Antoine Latter 發佈於其個人<a href="http://panicsonic.blogspot.jp/">Blogger</a>上。特別地，對 Philip Wadler 及其著作的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a>表示至高感謝。</p>
@@ -423,7 +436,7 @@
   <entry>
     <title type="html"><![CDATA[深淵]]></title>
     <link href="http://shouya.github.io/blog/the-abyss/"/>
-    <updated>2014-12-24T10:06:41-06:00</updated>
+    <updated>2014-12-24T11:06:41-05:00</updated>
     <id>http://shouya.github.io/blog/the-abyss</id>
     <content type="html"><![CDATA[<p>站在深淵面前   <br />
 驅使自己踏前一步   <br />
@@ -456,7 +469,7 @@
   <entry>
     <title type="html"><![CDATA[翻譯：Haskell 怎麼實現惰性求值]]></title>
     <link href="http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell/"/>
-    <updated>2014-11-24T05:14:57-06:00</updated>
+    <updated>2014-11-24T06:14:57-05:00</updated>
     <id>http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell</id>
     <content type="html"><![CDATA[<blockquote>
   <p>原文由 <a href="http://apfelmus.nfshost.com/blog.html">Heinrich Apfelmus</a> 發表於 <a href="https://hackhands.com/lazy-evaluation-works-haskell/">Hackhands</a>，標題：How Lazy Evaluatoin Works in Haskell。</p>
@@ -807,7 +820,7 @@
   <entry>
     <title type="html"><![CDATA[Function Calling Syntax]]></title>
     <link href="http://shouya.github.io/blog/function-calling-syntax/"/>
-    <updated>2014-08-03T04:59:14-05:00</updated>
+    <updated>2014-08-03T05:59:14-04:00</updated>
     <id>http://shouya.github.io/blog/function-calling-syntax</id>
     <content type="html"><![CDATA[<p>We use programming languages to indicate a process of
 actions/computations. Therefore programming languages tends to be more
@@ -981,7 +994,7 @@ used in Scheme compilers.</p>
   <entry>
     <title type="html"><![CDATA[翻譯：如何幸福起來]]></title>
     <link href="http://shouya.github.io/blog/how-to-be-happy/"/>
-    <updated>2014-07-28T09:17:07-05:00</updated>
+    <updated>2014-07-28T10:17:07-04:00</updated>
     <id>http://shouya.github.io/blog/how-to-be-happy</id>
     <content type="html"><![CDATA[<blockquote>
   <p>原文由 lukeprog 發表於 <a href="http://lesswrong.com/lw/4su/how_to_be_happy/">LessWrong</a>。
@@ -1075,7 +1088,7 @@ used in Scheme compilers.</p>
   <entry>
     <title type="html"><![CDATA[Linux 下 GFW 的 DNS 投毒解決方案]]></title>
     <link href="http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution/"/>
-    <updated>2014-07-25T13:27:35-05:00</updated>
+    <updated>2014-07-25T14:27:35-04:00</updated>
     <id>http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution</id>
     <content type="html"><![CDATA[<p>這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。</p>
 
@@ -1232,7 +1245,7 @@ $ sudo rc-update add dnsmasq default
   <entry>
     <title type="html"><![CDATA[A Brief Journal About Learning Coq]]></title>
     <link href="http://shouya.github.io/blog/a-brief-journal-about-learning-coq/"/>
-    <updated>2014-07-04T12:08:34-05:00</updated>
+    <updated>2014-07-04T13:08:34-04:00</updated>
     <id>http://shouya.github.io/blog/a-brief-journal-about-learning-coq</id>
     <content type="html"><![CDATA[<p><em>This article is completely an informal journal about my learning process on
 Coq. It is just created as my whim prompted. Please don’t academically refer
@@ -1551,7 +1564,7 @@ Lisp.</p>
   <entry>
     <title type="html"><![CDATA[夢魘]]></title>
     <link href="http://shouya.github.io/blog/digging-in-a-dream/"/>
-    <updated>2014-06-29T05:45:29-05:00</updated>
+    <updated>2014-06-29T06:45:29-04:00</updated>
     <id>http://shouya.github.io/blog/digging-in-a-dream</id>
     <content type="html"><![CDATA[<p>晚上，我在墳地挖土，點上火炬。 <br />
 頭頂的火光把周圍照得通明。   </p>
@@ -1588,7 +1601,7 @@ Lisp.</p>
   <entry>
     <title type="html"><![CDATA[Setting Up IP Over ICMP With Hans]]></title>
     <link href="http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/"/>
-    <updated>2014-06-02T10:19:29-05:00</updated>
+    <updated>2014-06-02T11:19:29-04:00</updated>
     <id>http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans</id>
     <content type="html"><![CDATA[<h2 id="background">Background</h2>
 <p>The ISP, China Telecom, interrupted the internet access from my home
@@ -1723,7 +1736,7 @@ icmptx</a></li>
   <entry>
     <title type="html"><![CDATA[Experience About Contributing KDE Projects]]></title>
     <link href="http://shouya.github.io/blog/experience-with-kde-gci/"/>
-    <updated>2012-12-31T17:55:00-06:00</updated>
+    <updated>2012-12-31T17:55:00-05:00</updated>
     <id>http://shouya.github.io/blog/experience-with-kde-gci</id>
     <content type="html"><![CDATA[<p>It’s the first time I am involved in contributing KDE, and I think
 that’s very wonderful experience for me.</p>
@@ -1772,7 +1785,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[祭獻]]></title>
     <link href="http://shouya.github.io/blog/sacrifice/"/>
-    <updated>2012-11-13T14:16:00-06:00</updated>
+    <updated>2012-11-13T14:16:00-05:00</updated>
     <id>http://shouya.github.io/blog/sacrifice</id>
     <content type="html"><![CDATA[<p>我在黑暗中醒來  <br />
 不能看到任何東西  <br />
@@ -1805,7 +1818,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[朝曦]]></title>
     <link href="http://shouya.github.io/blog/shines-at-dawn/"/>
-    <updated>2012-10-14T18:26:00-05:00</updated>
+    <updated>2012-10-14T18:26:00-04:00</updated>
     <id>http://shouya.github.io/blog/shines-at-dawn</id>
     <content type="html"><![CDATA[<p>我注視著妳的眼睛 <br />
 我看不到光芒   </p>
@@ -1837,7 +1850,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[挑戰龍的勇士]]></title>
     <link href="http://shouya.github.io/blog/warrior-who-fights-the-dragon/"/>
-    <updated>2012-09-15T20:21:00-05:00</updated>
+    <updated>2012-09-15T20:21:00-04:00</updated>
     <id>http://shouya.github.io/blog/warrior-who-fights-the-dragon</id>
     <content type="html"><![CDATA[<p>我崇敬挑戰龍而失敗的勇士，<br />
 而不是皇帝。</p>
@@ -1869,7 +1882,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[April 2012]]></title>
     <link href="http://shouya.github.io/blog/april-2012/"/>
-    <updated>2012-04-24T06:40:00-05:00</updated>
+    <updated>2012-04-24T06:40:00-04:00</updated>
     <id>http://shouya.github.io/blog/april-2012</id>
     <content type="html"><![CDATA[<p>Another month as you see.</p>
 
@@ -1945,7 +1958,7 @@ Not longer it will be, 8 months remaining only. Good lucky.</p>
   <entry>
     <title type="html"><![CDATA[February 2012]]></title>
     <link href="http://shouya.github.io/blog/february-2012/"/>
-    <updated>2012-02-26T14:51:00-06:00</updated>
+    <updated>2012-02-26T14:51:00-05:00</updated>
     <id>http://shouya.github.io/blog/february-2012</id>
     <content type="html"><![CDATA[<p>10 months remaining.</p>
 
@@ -1974,7 +1987,7 @@ and some tricks from that.</p>
   <entry>
     <title type="html"><![CDATA[完美世界]]></title>
     <link href="http://shouya.github.io/blog/a-perfect-world/"/>
-    <updated>2012-01-03T19:29:00-06:00</updated>
+    <updated>2012-01-03T19:29:00-05:00</updated>
     <id>http://shouya.github.io/blog/a-perfect-world</id>
     <content type="html"><![CDATA[<p>這就是亞首的生平.</p>
 
@@ -2185,7 +2198,7 @@ and some tricks from that.</p>
   <entry>
     <title type="html"><![CDATA[來自倪匡「背叛」裡的一段文字]]></title>
     <link href="http://shouya.github.io/blog/quote-from-betrayal-kuangni/"/>
-    <updated>2011-12-24T14:19:00-06:00</updated>
+    <updated>2011-12-24T14:19:00-05:00</updated>
     <id>http://shouya.github.io/blog/quote-from-betrayal-kuangni</id>
     <content type="html"><![CDATA[<blockquote><p>為什么？你不明白？你們真不明白？為什么？因為我必須這樣做，一定要那樣做，非那樣做不可，我想那樣做想了不知多久，終於鼓足勇氣做了！我為自己！誰不為自己呢？把我從垃圾堆中撿出來，培育我成為一個優秀的軍人，難道全為了我？沒有一點為了自己？</p><p>我變成什么東西了？我不知道自己變成了什么東西，只知道自己不再是人！人！人！我不是人！對我好，照顧我，我就算是個人，也不再是自己，我是人家手裡捏出來的一個泥人——看，這是我捏的，好看吧，漂亮吧！<br /><!-- more --><br />知道我所承受的壓力有多重嗎？我必須按照捏我的雙手做人，這個可以，那個不可以，現在的日子多好，以前的日子多苦！</p><p>老實講，不到一年，我就寧願回垃圾堆去！我是從垃圾堆來的，讓我回垃圾堆去，這天公地道，可是我回得去嗎？四面八方，不知道有多少箍，有多 少網，把我死死地箍著，網著，壓著，你們知道我在半夜會大口吸氣嗎？知道我只有肯定在沒有人的時候才呼吸暢順嗎？可就是連這樣的機會，也少之又少，沒有單獨一個人的機會，可惜吧！一直到現在，那么多年了，都是單獨的，可是還會做惡夢，想起那可怕的日子，做什么，該怎么樣，早就安排得妥妥當當，從副排長起， 只要找不死，一條直路，可以讓你看到若干年之后的副總司令！我打仗勇敢？屁！我是想在戰場上找死！</p><p>對我好？當然對我好，我沒說有什么人 對我不好，可是我能無法拒絕？可不可以不受？我沒法報答，永遠無法報答，我也不想報答，因為我根本不要。對，我揀的時機很卑鄙，打仗，不是輸就是贏，你贏 了，人家就輸，你輸了，人家就贏，輸和贏都要死人，沒有什么不衕，你想想，除了這個機會之外，我還有 什么逃走的可能？對我太好了，當他把你也讓給我的時候，我就知道，再不逃走，我這一輩子就只是一個沒頓的人！</p><p>以后？我一點也沒有后悔過，以后我一座一座深山走，完完全全是我自己，最后我揀了這裡，這裡象不象垃圾堆，多么自在逍遙，多么快樂，絕沒有人象看猴子一樣地打量你，絕沒有人夸獎你，勉勵你，要你不斷照別人的意思去做人！</p><p>我當然有權這樣做，每個人都有權照自己喜歡的方式處理自己的生命！不錯，我害了一些人，被害的人之中，有對我極好極好的，我說過，我為自己打算，我一刻也無法再忍下去，在那個山洞中，我陡然之間，有了決定。</p><p>什 么？外來力量的影響？當然沒有，全都是我內心世界的爆炸。背叛！徹底的背叛，背叛的是一個假的自我，得回的是真正的自我。告訴你們，你們 沒有資格責備我是叛徒，沒有一個人可以責備另一個人是叛徒，因為人人心中都懷著信念，沒有人可以例外，那是人的天性，人有背叛的天性，看只看什么時候發 作！</p><p>什么？外星人？什么外星人，我是人，別看我身形高大，力大無窮，當然是人，什么外星人裡星人，你他媽的在放什么狗屁！</p><p>現 在明白了沒有，不背叛，那種日子我過不下去，人人都看看，以為我日子過得快樂得很，只有我自己才知道苦，連你都不懂，以為我真的快樂，你 不應該跟我下山，應該和他留在山上，我會拼命攻上去，死在你們面前，你也不該把他讓給我，那叫我更無法忍受下去，你們都不把我當一個平等的人，都把我當成 一個要盡一切力量對他好的人！</p><p>沒有什么不對，對你們賜給者來說，當然沒有什么不對，可是對我這受惠者來說，我要拒絕，我要大聲叫：夠了！夠了！你們會聽嗎？</p><footer><strong>背叛, 倪匡</strong> <cite><a href="https://zh.wikipedia.org/zh/%E8%83%8C%E5%8F%9B_(%E5%B0%8F%E8%AA%AA)">Wikipedia (背叛)</a></cite></footer></blockquote>
 
@@ -2196,7 +2209,7 @@ and some tricks from that.</p>
   <entry>
     <title type="html"><![CDATA[「偉大」的想法]]></title>
     <link href="http://shouya.github.io/blog/a-great-thought/"/>
-    <updated>2011-09-15T13:12:00-05:00</updated>
+    <updated>2011-09-15T13:12:00-04:00</updated>
     <id>http://shouya.github.io/blog/a-great-thought</id>
     <content type="html"><![CDATA[<p>那傢伙化為烏有了，他徹底被滅絕了。</p>
 
@@ -2209,54 +2222,6 @@ and some tricks from that.</p>
 <p>hey，我並不是對人類劣性尚存希望，而是欺騙自我罷了。</p>
 
 <p>hey，小朋友，我還會看到你麼？祈禱吧。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[夢]]></title>
-    <link href="http://shouya.github.io/blog/dream-no-longer/"/>
-    <updated>2011-05-19T17:13:00-05:00</updated>
-    <id>http://shouya.github.io/blog/dream-no-longer</id>
-    <content type="html"><![CDATA[<p>從今以後, 我不再有自己的夢.</p>
-
-<p>取代者是現實.
-<!-- more --></p>
-
-<p>我已經很久沒有過前一段時間的那種體驗了.<br />
-參見: [3-24,11中午小憩一夢]和[實現自控制夢境之二(體驗)]<br />
-我以往習慣的行走速度, 現在已經慢了許多, 我需要很吃力才能做到.</p>
-
-<p>我再想不出任何突變相關的新的理論了, 或者說我再也沒有向那個方面想象過.</p>
-
-<p>我感覺到它正離我而去, 我覺得突變已經不屬於我, 甚至它帶來的一些思想也漸漸無法由我所用了.</p>
-
-<p>我感到悲哀, 我希望回去, 但是我感到我很難做到.<br />
-我對我的朋友說: 會回來的. 但是我卻從內心感覺到, 幾乎沒有希望了, 我正在變化, 這變化可能是不可逆的, 我沒有作為, 這是自然的, 受環境約束的, 或者說是宿主希望這麼做的.</p>
-
-<p>我向宿主做的請求, 沒有一條迴應.</p>
-
-<p>突變還是生出來了, 經歷了幼年, 尚未成熟, 就被扼殺了, 可惜之至. 但總算不錯, 因為無數類似的, 都被而扼殺在襁褓裡了.</p>
-
-<p>這算是一個終結? 離開之後, 我該何去何從.</p>
-
-<p>即使如此, 我從來沒有懷疑過我當時的決策, 從來沒有後悔, 即使我現在很想後悔, 甚至忍不住後悔.</p>
-
-<p>重生否? 很難說.</p>
-
-<p>暫且如此, 我脫離之後, 暫且盡力做一個真正的黑客, GNU是我的長遠目標.</p>
-
-<p>我成為普通人了, 很慶幸我做到了? 混蛋! 太可惡了!</p>
-
-<p>慶幸我還活著?</p>
-
-<p>我不找籍口, 原因主要出在我身上, 沒有辦法, 或者可以說是我主動放棄的.</p>
-
-<p>我從知道自己的電腦變成了真正的電腦了, 我理解我自己的悲哀.</p>
-
-<p>nothing! 繼續作程式設計師, 未嘗不好(我怎麼會有這種想法!).</p>
-
-<p>‘my powder’ 的程式就作為我的近期目標吧, 僅此.</p>
 
 ]]></content>
   </entry>

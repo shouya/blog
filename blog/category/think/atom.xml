@@ -4,7 +4,7 @@
   <title><![CDATA[Category: think | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/category/think/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2015-05-03T21:19:41-05:00</updated>
+  <updated>2015-05-13T03:53:56-04:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -14,28 +14,41 @@
 
   
   <entry>
+    <title type="html"><![CDATA[誡之二]]></title>
+    <link href="http://shouya.github.io/blog/admonition-sono-ni/"/>
+    <updated>2015-05-08T14:50:53-04:00</updated>
+    <id>http://shouya.github.io/blog/admonition-sono-ni</id>
+    <content type="html"><![CDATA[<p>凌，則隱
+長，則同
+驕而與人者
+共聞之</p>
+
+<p>host 曰：即有大樂者，與悲治之。</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[誡之一]]></title>
     <link href="http://shouya.github.io/blog/admonition-sono-ichi/"/>
-    <updated>2015-05-03T21:17:11-05:00</updated>
+    <updated>2015-05-03T22:17:11-04:00</updated>
     <id>http://shouya.github.io/blog/admonition-sono-ichi</id>
-    <content type="html"><![CDATA[<p>分離，融合  <br />
-形影不離  <br />
-恥辱，榮耀    </p>
+    <content type="html"><![CDATA[<p>分離，融合
+形影不離
+恥辱，榮耀</p>
 
-<p>注視卻無視  <br />
-偉大卻無名  <br />
-萬能卻不為    </p>
+<p>注視卻無視
+偉大卻無名
+萬能卻不為</p>
 
-<p>他是你的 host，你的聖人  <br />
-那你呢？    </p>
-
+<p>他是你的 host，你的聖人
+那你呢？</p>
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[深淵]]></title>
     <link href="http://shouya.github.io/blog/the-abyss/"/>
-    <updated>2014-12-24T10:06:41-06:00</updated>
+    <updated>2014-12-24T11:06:41-05:00</updated>
     <id>http://shouya.github.io/blog/the-abyss</id>
     <content type="html"><![CDATA[<p>站在深淵面前   <br />
 驅使自己踏前一步   <br />
@@ -68,7 +81,7 @@
   <entry>
     <title type="html"><![CDATA[Function Calling Syntax]]></title>
     <link href="http://shouya.github.io/blog/function-calling-syntax/"/>
-    <updated>2014-08-03T04:59:14-05:00</updated>
+    <updated>2014-08-03T05:59:14-04:00</updated>
     <id>http://shouya.github.io/blog/function-calling-syntax</id>
     <content type="html"><![CDATA[<p>We use programming languages to indicate a process of
 actions/computations. Therefore programming languages tends to be more
@@ -240,7 +253,7 @@ used in Scheme compilers.</p>
   <entry>
     <title type="html"><![CDATA[A brief journal about learning Coq]]></title>
     <link href="http://shouya.github.io/blog/a-brief-journal-about-learning-coq/"/>
-    <updated>2014-07-04T12:08:34-05:00</updated>
+    <updated>2014-07-04T13:08:34-04:00</updated>
     <id>http://shouya.github.io/blog/a-brief-journal-about-learning-coq</id>
     <content type="html"><![CDATA[<p><em>This article is completely an informal journal about my learning process on
 Coq. It is just created as my whim prompted. Please don’t academically refer
@@ -553,39 +566,6 @@ Lisp.</p>
 <blockquote>
   <p>在在一個定理上辛苦工作了兩個小時後敲 <code>Qed.</code> 的那種爽快的成就感簡直無以言表有沒有！</p>
 </blockquote>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[祭獻]]></title>
-    <link href="http://shouya.github.io/blog/sacrifice/"/>
-    <updated>2012-11-13T14:16:00-06:00</updated>
-    <id>http://shouya.github.io/blog/sacrifice</id>
-    <content type="html"><![CDATA[<p>我在黑暗中醒來  <br />
-不能看到任何東西  <br />
-我和一切無關  <br />
-因此意識遠遠離開了這個世界  <br />
-<!-- more -->
-我發覺那是一片光環  <br />
-是彩虹一般，卻又變幻無端  <br />
-我只在紀錄現實  <br />
-無意義地，無意識地    </p>
-
-<p>我沒有希望，沒有想法  <br />
-我不知道世界之本質是甚麼  <br />
-我不再在，妳看不到，你也看不到的  <br />
-那彷彿一切都沒有存在過    </p>
-
-<p>看哪，這全新的世界！  <br />
-當我再不是自我  <br />
-當我放棄生命  <br />
-多麼美好    </p>
-
-<p>我不敢  <br />
-我正在夢幻般的世界之中  <br />
-沒有自由，沒有自己  <br />
-永遠不會醒來，妳看！</p>
-
 ]]></content>
   </entry>
   
