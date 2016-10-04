@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Tag: tutorial | Shou's origin]]></title>
+  <link href="http://shouya.github.io/blog/tag/tutorial/atom.xml" rel="self"/>
+  <link href="http://shouya.github.io/"/>
+  <updated>2016-10-04T23:02:32+08:00</updated>
+  <id>http://shouya.github.io/</id>
+  <author>
+    <name><![CDATA[Shou Ya]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Undeepening Continuations]]></title>
+    <link href="http://shouya.github.io/blog/undeepening-continuations/"/>
+    <updated>2015-03-14T04:40:18+08:00</updated>
+    <id>http://shouya.github.io/blog/undeepening-continuations</id>
+    <content type="html"><![CDATA[<p>Continuation was always a mystery to me since I started to learn
+monad.</p>
+
+<p>My friend Javran once sent me a link to ‘the mother of all monads’,
+from where I start to rethink the significance of the continuation
+monad. That article, to me as a novice, wasn’t enough explanative for
+me to comprehend. Therefore, to demystify the significance of the
+continuation monad, I spend several hours to read through articles
+about it last night. In the final, I eventually carried my
+understanding to continuation out into code and
+<a href="http://learnyouanagda.liamoc.net/">achieved enlightenment</a>. (not
+really)</p>
+
+<p>So let’s get started. First of all, we need to know, at least have a
+primitive concept of, what continuation is used for. So here is my
+understanding,</p>
+
+<blockquote>
+  <p>A continuation is an intermediate state that allows computation to
+run at that point.</p>
+</blockquote>
+
+<p>You don’t need to try hardly on comprehending the statement above. By
+going through this tutorial you will make your own understanding out.</p>
+
+<!-- more -->
+
+<h2 id="computation-with-holes">Computation with Holes</h2>
+
+<p>As we said above a continuation is a <em>intermediate</em> state that we can
+delay the computation to the future. Let’s see how these functions
+look like:</p>
+
+<p>```haskell
+transformOne = ??? 1</p>
+
+<p>doSomethingOnOne = do
+  putStrLn “before execution”
+  ??? 1
+  putStrLn “after execution”
+```</p>
+
+<p>So we’re defining two functions with this feature. The first one is
+rather easy to see, on the blank (<code>???</code>) there should be a function,
+which takes an integer and yields whatever things. In the
+<code>doSomethingOnOne</code> there should also be a function like that in the
+first, expect being constrained to return an <code>IO a</code>.</p>
+
+<p>Here’s the modified finished functions and their corresponding types:</p>
+
+<p>```haskell
+transformOne :: (Int -&gt; r) -&gt; r
+transformOne f = f 1</p>
+
+<p>doSomethingOnOne :: (Int -&gt; IO a) -&gt; IO ()
+doSomethingOnOne f = do
+  putStrLn “before execution”
+  val &lt;- f 1
+  putStrLn (“we get “ ++ show val)
+```</p>
+
+<p>If you have other experiences about <code>Control.Monad.Cont</code>, you might be
+able to recognize the pattern in the types. Strictly, the latter one
+isn’t what continuation monad looks like because <code>IO a</code> is not the
+same as <code>IO ()</code>. Well, this is normal in our real life programming,
+but we can’t call them continuation because they’re not
+composable. And one of the main purposes we want to generalize
+continuation is to make them composable so they could be an instance
+of <code>Monad</code>. <del>Why? Well, a monad is just a MONOID in the category
+endofunctors, monoid implies composablity, what’s the problem?  Why?
+Well, a monoid is a just a SEMIGROUP in combine with an identity
+object, what’s the problem? But why? Well, that’s how semigroup is
+defined, what’s the problem?</del></p>
+
+<p>Anyway, we’ll see if we can make a continuation stronger, that is, in
+type of <code>(a -&gt; r) -&gt; r</code>, we make our life easier. For now, just
+remember it, that <code>(a -&gt; r) -&gt; r</code> is the type of continuation. Which
+means we can’t have the second piece of code above unless we add a
+<code>return val</code> at the end of the <code>do</code> notation. It also means you can’t
+have continuation like <code>foo f = show (f 1)</code>, which modifies the
+result.</p>
+
+<p>These functions are what we called <code>continuations</code>. It’s intuitive to
+think them as functions with a hole to be filled. To fill the hole in
+a continuation we need to feed it with a function that takes the
+passed in value and return something we needed from outside of the
+hole. I call these functions fed to a continuation <em>hole-filler</em>
+functions. For the arguments these hole-fillers take, I call them
+<em>seed</em> and the returning thing was barely named <em>yield</em>. I made these
+names just for referring the components more intuitively.</p>
+
+<h2 id="how-to-fill-in-the-holes">How to Fill in the Holes</h2>
+
+<p>We now see how <code>(a -&gt; r) -&gt; r</code> tastes like. You might think, well,
+continuation is weak that we are even restricted from modifying with
+the hole-filler’s yield. Well, yes, we cannot modify the yield. But
+continuation is not as weak as you might think, because modifying the
+yield is not the <em>correct</em> way to use a continuation.</p>
+
+<p>If you just want to modify the result of a passed in function and
+carry on the computation, you want a Monad instead of a continuation.
+Yet without being capable to modify the yield, you’re allowed to modify
+the seed freely.</p>
+
+<p>The significance of continuation is, in my understanding, just
+<strong>hole-filling</strong>. It’s like, if we’re playing with continuation, our
+aim will be giving out a seed to a incoming hole-filler, for which we
+don’t know what it is or what it will do. In the other words, we pass
+our result of computation IN instead of return it OUT.</p>
+
+<p>If we’ve composed a bunch of continuation together, that is, we get a
+very deeply nested continuations, how can we take the result out?
+Since the computation always throw their results inwards, by the
+seeds. Can we acquire the seed out of the continuation? Just think of
+the simplest example: <code>transformOne f = f 1</code>. The answer is, <code>id</code>
+(<code>id x = x</code>). If we feed the continuation with <code>id</code> function as
+hole-filler, it will yield the seed without any modification and then
+we can acquire it.</p>
+
+<p>As we take out the result, we can do whatever we want with it. Also we
+can take some actions directly onto the result. Think of feed a
+continuation with a <code>print</code> hole-filler, then we will see the seed
+printed out as expect.</p>
+
+<p>Now let’s think, how do we generate a continuation from a single
+value such that we can take out result out by feeding the continuation
+with <code>id</code>? The solution isn’t very hard:</p>
+
+<p><code>haskell
+genCont :: a -&gt; (a -&gt; r) -&gt; r
+genCont val f = f val
+</code></p>
+
+<p>or more point-<del>lessly</del>freely:</p>
+
+<p><code>haskell
+genCont = flip ($)
+</code></p>
+
+<p>So far, we have gain a basic concept how continuations are created and
+composed together.</p>
+
+<h2 id="functor-property-of-continuations">Functor Property of Continuations</h2>
+
+<p>We now look on how to transform the seed with a function.  If we have
+a function <code>f :: a -&gt; b</code>, we hope we can use it to transform a
+continuation with type <code>(a -&gt; r) -&gt; r</code> into <code>(b -&gt; r) -&gt; r</code>. What does
+it mean? If I have a continuation with seed of type <code>Int</code>, how can use
+feed it with a hole-filler that eats <code>String</code>s? The answer is to have
+a transforming function of type <code>Int -&gt; String</code>.</p>
+
+<p>Here’s how we might these functions look like:</p>
+
+<p>```haskell
+toStr :: Int -&gt; String
+toStr = show</p>
+
+<p>foo :: (Int -&gt; r) -&gt; r
+foo f = f 1</p>
+
+<p>bar :: (String -&gt; r) -&gt; r
+bar f = f “1”
+```</p>
+
+<p>If now we have <code>toStr</code> and <code>foo</code>, how should we combine them together
+to form <code>bar</code>?</p>
+
+<p>Some might recognize what we’re trying to implement is
+just <code>fmap</code>, if we make continuation an instance of
+<code>Functor</code>. We can do that, let’s try. First we wrap the function in
+this pattern it into a <code>newtype</code>, call it ‘Cont’.</p>
+
+<p><code>haskell
+newtype Cont r a = Cont { runCont :: (a -&gt; r) -&gt; r }
+</code></p>
+
+<p>The reason I write <code>Cont r a</code> instead of <code>Cont a r</code> is, the varying
+type for a continuation is its type of seed, rather than that of
+yield. So now we try:</p>
+
+<p><code>haskell
+instance Functor (Cont r) where
+  fmap f (Cont cnt) = ???
+</code></p>
+
+<p>The returning value of fmap should be a continuation with seed type
+<code>b</code>. So first of all, we should have a continuation that takes an
+argument with a hole-filler with type <code>b -&gt; r</code>.</p>
+
+<p><code>haskell
+fmap :: (a -&gt; b) -&gt; (Cont r a) -&gt; (Cont r b)
+fmap f (Cont cnt) = Cont $ \(hf :: b -&gt; r) -&gt; (??? :: r)
+</code></p>
+
+<p>We need a <code>r</code> as result, which should be generated by the passed in
+<code>hf</code>. And <code>hf</code> takes a value with type <code>b</code>. Obviously, this <code>b</code> should
+be transformed by <code>f</code> from <code>a</code>, i.e. <code>f (??? ::: a)</code>. So now we would
+have:</p>
+
+<p><code>haskell
+fmap :: (a -&gt; b) -&gt; (Cont r a) -&gt; (Cont r b)
+fmap f (Cont cnt) = Cont $ \hf -&gt; hf (f (??? :: a))
+</code></p>
+
+<p>Now the problem has been converted to, how can we extract <code>a</code> from the
+passed in continuation <code>cnt</code>? The word <code>extract</code> implies that we have
+to get INTO it for what we want. Just as what we did above with
+<code>id</code>. <code>(cnt id)</code> will give us <code>a</code>, pretty cool. For some purpose, here
+I will expand the definition of <code>id</code>, which is <code>\x -&gt; x</code>, you’ll see
+why I do it in that way soon:</p>
+
+<p><code>haskell
+fmap :: (a -&gt; b) -&gt; (Cont r a) -&gt; (Cont r b)
+fmap f (Cont cnt) = Cont $ \hf -&gt; hf (f (cnt (\a -&gt; a)))
+</code></p>
+
+<p>Looks good, seems in this way we can extract <code>a</code> out of <code>cnt</code>. But
+wait, it doesn’t typecheck? Let’s see what happens. Without the type
+constrain above, the code compiles. When we query the type of <code>fmap</code>,
+it was in type <code>(a -&gt; b) -&gt; (Cont a a) -&gt; (Cont r b)</code>.</p>
+
+<p>This is not what we want. The returning type of <code>cnt</code> shouldn’t be
+restricted to <code>a</code> as what it is, rather, it should share the same <code>r</code>
+with the one in <code>Cont r b</code> as <code>fmap</code> finally returns. So we start to
+see how we can achieve that.</p>
+
+<p><code>haskell
+fmap :: (a -&gt; b) -&gt; (Cont r a) -&gt; (Cont r b)
+fmap f (Cont cnt) = Cont $ \hf -&gt; hf (f (cnt (\a -&gt; (??? :: r))))
+</code></p>
+
+<p>However, <code>f</code> expects to have an argument with type <code>a</code> isn’t it? How
+can we have the <code>a</code> in the context of <code>f</code> while keeping the returning
+type of <code>cnt</code> to be <code>r</code>?</p>
+
+<p>Okay, we look for where <code>r</code> is needed in the context and we easily
+found it:</p>
+
+<p><code>haskell
+fmap :: (a -&gt; b) -&gt; (Cont r a) -&gt; (Cont r b)
+fmap f (Cont cnt) = Cont $ \hf -&gt; ((hf (f a)) :: r)
+</code></p>
+
+<p>That means, if we have the <code>a</code> to feed into <code>f</code>, then we get a <code>b</code> to
+feed into the hole-filler <code>hf</code>, and the hole-filler will yield an <code>r</code>,
+which is what we wanted. But we don’t have an <code>a</code> for <code>f</code> at this
+point. The solution is to wrap the extraction of <code>a</code> around <code>hf (f
+a)</code>:</p>
+
+<p><code>haskell
+fmap :: (a -&gt; b) -&gt; (Cont r a) -&gt; (Cont r b)
+fmap f (Cont cnt) = Cont $ \hf -&gt; cnt (\a -&gt; (hf (f a)))
+</code></p>
+
+<p>It typechecks, so it should be correct. Try it out:</p>
+
+<p><code>haskell
+(fmap (+1) $ genCont 3) id     -- =&gt; 4
+</code></p>
+
+<p>Good.</p>
+
+<h2 id="monadic-continuations">Monadic Continuations</h2>
+
+<p>We now make continuation an instance of a monad:</p>
+
+<p><code>haskell
+instance Monad (Cont r) where
+  return           = ???
+  (Cont cnt) &gt;&gt;= f = ???
+</code></p>
+
+<p>The type of <code>return</code> is <code>a -&gt; Cont r a</code>. Unwrap the <code>Cont</code> we have
+<code>a -&gt; (a -&gt; r) -&gt; r</code>. Looks familiar? Yup it is just <code>genCont</code> we have
+above. The aim of <code>return</code> is to create a continuation from a value,
+the same as what <code>genCont</code> does. So this part is easy.</p>
+
+<p>```haskell
+return x = Cont $ \hf -&gt; hf x</p>
+
+<p>– or pointlessly
+return = Cont . flip ($)
+```</p>
+
+<p>Actually, after we deduced <code>fmap</code>, we’ll feel much easier to catch
+<code>&gt;&gt;=</code>. The significance is to take the value out from the continuation
+supplied as the first argument of <code>&gt;&gt;=</code>. The way to do this is similar
+to <code>fmap</code>.</p>
+
+<p>```haskell
+– cnt     :: (a -&gt; r) -&gt; r
+– f       :: a -&gt; Cont r b
+– (»=)   :: (Cont r a) -&gt; (a -&gt; Cont r b) -&gt; Cont r b
+– hf      :: b -&gt; r
+– runCont :: (Cont r b) -&gt; ((b -&gt; r) -&gt; r)</p>
+
+<p>(Cont cnt) »= f = Cont $ \hf -&gt; cnt (\x -&gt; runCont (f x) hf)
+```</p>
+
+<p>This solution typechecks. Let’s look into it to see what it does in
+<code>&gt;&gt;=</code>. First of all, a holefiller</p>
+
+<h2 id="why-monad">Why monad?</h2>
+
+<p>Disclaimer: DO NOT READ THIS SECTION. This section was purely my OWN
+understanding to continuation monad. I try to write correct things but
+my thought was specific and could be quite misleading to beginners. If
+you think you haven’t understood continuation yet, don’t read this
+section because it will muddle you up once again. Otherwise, you’ve
+understood continuation well, you don’t need to read on my premitive
+and partial and inaccurate opinion. Anyway, don’t read it.</p>
+
+<p>Continuation, is just a kind of computations. A continuation could
+generate a dependent output that relies on a value, either a plain
+value or the output of another continuation, we call it composability
+property. (Although I used some general terms here, the way
+continuations take input is still very different from that of
+functions) On the other hand, we know we can produce a continuation
+that will generate a specified plain output. Therefore a continuation
+is a monad, whose ‘bind’ operation is the ‘compose’ operation of
+continuations.</p>
+
+<p>composed. ‘Composing’ two computations means to collapse them into
+one. On the other hand, computations are definitely the arrows in the
+category of inputs and outputs. On the third hand, we know we can
+always create a computation that gives no matter what input,
+because it is a  at the</p>
+
+<p>We’re now entering the domain of monad, so we now need to make use of
+our knowledge of how to implement <code>(&gt;&gt;=)</code>.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="https://wiki.haskell.org/All_about_monads#The_Continuation_monad">All about monads: Continuation</a></li>
+  <li><a href="https://www.fpcomplete.com/user/jwiegley/understanding-continuations">Understanding continuations</a></li>
+  <li><a href="http://www.haskellforall.com/2014/04/how-continuation-monad-works.html">How continuation monad works</a></li>
+  <li><a href="http://blog.sigfpe.com/2008/12/mother-of-all-monads.html">The mother of all monads</a></li>
+</ul>
+]]></content>
+  </entry>
+  
+</feed>

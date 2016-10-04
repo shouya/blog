@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Tag: typing | Shou's origin]]></title>
+  <link href="http://shouya.github.io/blog/tag/typing/atom.xml" rel="self"/>
+  <link href="http://shouya.github.io/"/>
+  <updated>2016-10-04T23:02:32+08:00</updated>
+  <id>http://shouya.github.io/</id>
+  <author>
+    <name><![CDATA[Shou Ya]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[thinking in typing system]]></title>
+    <link href="http://shouya.github.io/blog/thinking-in-typing-system/"/>
+    <updated>2014-06-03T03:28:27+08:00</updated>
+    <id>http://shouya.github.io/blog/thinking-in-typing-system</id>
+    <content type="html"><![CDATA[<p>I am reading the paper ‘Practical type inference for arbitrary-rank
+types’ [<a href="http://research.microsoft.com/en-us/um/people/simonpj/papers/higher-rank/putting.pdf">pdf</a>, <a href="https://research.microsoft.com/en-us/um/people/simonpj/papers/higher-rank/">official webpage</a>]. Here are some ideas raised while I
+was reading the paper. Those ideas might be not complete or not
+conscientious.</p>
+
+<h2 id="concept-of-subsumption">Concept of “subsumption”</h2>
+
+<p><strong>DISCLAIMER</strong>: In this section I have a misunderstanding about the
+subsumption relation. Please check on
+<a href="http://stackoverflow.com/questions/24084808/what-do-we-mean-when-we-say-t1-is-more-polymorphic-than-t2">my question</a>
+on stackoverflow.</p>
+
+<p>In the article it poses that we call types A and B in the relation
+‘subsumption’ if A is more polymorphic than B.</p>
+
+<p>The concept <em>polymorphism</em> is studied elsewhere and has different
+meanings accordingly. Referring to
+<a href="http://en.wikipedia.org/wiki/Polymorphism_(computer_science)#Parametric_polymorphism">wikipedia</a>,
+there are three types of polymorphism. One is some like overloading
+with different types <em>overloading</em>, another one <em>sub-typing</em> in object
+oriented programming. We’re discussing the polymorphism in haskell, in
+which a polymorphic function/data type is regarded as a kind of
+function/data type written generically. This kind of polymorphism is
+called <em>parametric polymorphism</em>.</p>
+
+<p>So what exactly is the relation ‘more polymorphic than’ understood? I
+conceived the definition myself, not sure if it’s accurate.</p>
+
+<blockquote>
+  <p>To say a type <code>T1</code> is more polymorphic than <code>T2</code>, is to say that,
+all instances that satisfy the type T2, satisfy T1.</p>
+</blockquote>
+
+<p>Below I will also use term ‘subsumption’ to represent this relation.
+Obviously, the equivalence relation is also regarded as subsumption.
+In this defintion, or exactly we can define the equivalent relation
+as:</p>
+
+<blockquote>
+  <p>T1 is equivalent to T2 if and only if
+T1 subsumes T2 AND T2 subsumes T1.</p>
+</blockquote>
+
+<p>Let me give some examples to illustrate the relation subsumption’.</p>
+
+<pre><code>k1: a -&gt; b -&gt; b
+k2: a -&gt; a -&gt; a
+k3: Int -&gt; String
+k4: Int -&gt; Int
+</code></pre>
+
+<p>In this case, <code>k1</code> is more polymorphic than <code>k2</code> because all objects
+that satisfy type <code>k2</code> satisfy <code>k1</code>. While reversely the relation
+doesn’t apply. While looking at <code>k3</code> and <code>k4</code>, we know that they are
+only rank-0 types. Therefore there are no saying of subsumption on
+these types. If type matches, <code>k3</code> and <code>k4</code> are least polymorphic
+types. (e.g. <code>k1</code> subsumes <code>k3</code>, <code>k2</code> subsumes <code>k4</code>) If the types do
+not match, we cannot use <em>subsumption</em> describe their
+relations. (e.g. <code>k3</code> and <code>k4</code>) Okay, there are the basic description,
+let’s go on the usage of subsumption predication in argument type
+checking.</p>
+
+<p>As mentioned in section 3.3,</p>
+
+<blockquote>
+  <p>an argument is acceptable to a function if its type is more
+polymorphic than the function’s argument type.</p>
+</blockquote>
+
+<p>Given,</p>
+
+<pre><code>foo: (a -&gt; a -&gt; a) -&gt; Int
+bar: (a -&gt; b -&gt; b) -&gt; Int
+</code></pre>
+
+<p>Obviously, <code>foo k4</code> is valid, as we only need to substitute <code>a</code> with
+<code>Int</code>. Similarly obviously, <code>foo k2</code> is valid as the <code>foo</code>’s argument
+type completely matches the <code>k2</code>’s type. Then how about <code>foo k1</code>?
+Let’s reason in this way. <code>foo</code> requires an argument of a function
+that takes two arguments that are in identical type.</p>
+
+<h2 id="what-is-a-polymorphic-kind-type">What is a polymorphic kind type</h2>
+<p>(to be updated)</p>
+
+<h2 id="what-is-a-type-class">What is a type class</h2>
+<p>(to be updated)</p>
+
+<p>On <code>ghci</code>, we can check the <em>kind</em> of a type with <code>:k[ind]</code> command</p>
+
+]]></content>
+  </entry>
+  
+</feed>

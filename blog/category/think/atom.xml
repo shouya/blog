@@ -4,7 +4,7 @@
   <title><![CDATA[Category: think | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/category/think/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2015-05-13T03:55:59-04:00</updated>
+  <updated>2016-10-04T23:02:32+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[誡之二]]></title>
     <link href="http://shouya.github.io/blog/admonition-sono-ni/"/>
-    <updated>2015-05-08T14:50:53-04:00</updated>
+    <updated>2015-05-09T02:50:53+08:00</updated>
     <id>http://shouya.github.io/blog/admonition-sono-ni</id>
     <content type="html"><![CDATA[<p>凌，則隱  <br />
 長，則同  <br />
@@ -30,7 +30,7 @@
   <entry>
     <title type="html"><![CDATA[誡之一]]></title>
     <link href="http://shouya.github.io/blog/admonition-sono-ichi/"/>
-    <updated>2015-05-03T22:17:11-04:00</updated>
+    <updated>2015-05-04T10:17:11+08:00</updated>
     <id>http://shouya.github.io/blog/admonition-sono-ichi</id>
     <content type="html"><![CDATA[<p>分離，融合  <br />
 形影不離  <br />
@@ -48,7 +48,7 @@
   <entry>
     <title type="html"><![CDATA[深淵]]></title>
     <link href="http://shouya.github.io/blog/the-abyss/"/>
-    <updated>2014-12-24T11:06:41-05:00</updated>
+    <updated>2014-12-25T00:06:41+08:00</updated>
     <id>http://shouya.github.io/blog/the-abyss</id>
     <content type="html"><![CDATA[<p>站在深淵面前   <br />
 驅使自己踏前一步   <br />
@@ -81,7 +81,7 @@
   <entry>
     <title type="html"><![CDATA[Function Calling Syntax]]></title>
     <link href="http://shouya.github.io/blog/function-calling-syntax/"/>
-    <updated>2014-08-03T05:59:14-04:00</updated>
+    <updated>2014-08-03T17:59:14+08:00</updated>
     <id>http://shouya.github.io/blog/function-calling-syntax</id>
     <content type="html"><![CDATA[<p>We use programming languages to indicate a process of
 actions/computations. Therefore programming languages tends to be more
@@ -253,7 +253,7 @@ used in Scheme compilers.</p>
   <entry>
     <title type="html"><![CDATA[A brief journal about learning Coq]]></title>
     <link href="http://shouya.github.io/blog/a-brief-journal-about-learning-coq/"/>
-    <updated>2014-07-04T13:08:34-04:00</updated>
+    <updated>2014-07-05T01:08:34+08:00</updated>
     <id>http://shouya.github.io/blog/a-brief-journal-about-learning-coq</id>
     <content type="html"><![CDATA[<p><em>This article is completely an informal journal about my learning process on
 Coq. It is just created as my whim prompted. Please don’t academically refer

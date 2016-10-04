@@ -9,9 +9,7 @@
   <meta name="author" content="Shou Ya">
 
   
-  <meta name="description" content="Background
-The ISP, China Telecom, interrupted the internet access from my home
-yesterday due to the expiration of annually subscription of the &hellip;">
+  <meta name="description" content="這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。 方案 DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。dnsmasq 是一款的 DNS 服務器，我主要用其提供 DNS 緩存的功能。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -112,6 +110,284 @@ MathJax.Hub.Config({
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/dnscrypt-plus-dnsmasq-solution/">Linux 下 GFW 的 DNS 投毒解決方案</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-26T02:27:35+08:00" pubdate data-updated="true">Jul 26<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。</p>
+
+<h2 id="section">方案</h2>
+
+<p>DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。dnsmasq 是一款的 DNS 服務器，我主要用其提供 DNS 緩存的功能。</p>
+
+<p>我將用 dnsmasq 設置本地的 DNS 服務器，然後配置 dnsmasq 從 dnscrypt 獲得結果並返回給請求者。而 dnscrypt 會把來自 dnsmasq 的請求加密丟到 opendns 的服務器，然後把解析結果返回回來。</p>
+
+<p>那麼 dnsmasq 將偵聽 <code>53</code> 端口，而 dnscrypt 的端口隨意，只要和 dnsmasq 裡的配置匹配就可以了。我隨便用了 <code>1053</code> 作為 dnscrypt 的端口。</p>
+
+<p>最後，把系統的 DNS 服務器設置為本機就可以了。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/dnscrypt-plus-dnsmasq-solution/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/a-brief-journal-about-learning-coq/">A Brief Journal About Learning Coq</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-07-05T01:08:34+08:00" pubdate data-updated="true">Jul 5<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><em>This article is completely an informal journal about my learning process on
+Coq. It is just created as my whim prompted. Please don’t academically refer
+any part of it as studying material to learn Coq.</em></p>
+
+<h2 id="pre">Pre</h2>
+
+<p>I first heard of Coq in my admiring mathematician,
+<a href="https://twitter.com/txyyss">@txyyss</a>’s tweets. At the time I saw him talked
+that he’s glad and immersed in re-proving all the theorems he had learned.
+He also said, as deepening in Coq, he found a boost on other related
+academic aspects. Driven by curiosity, I went to know about what a heck Coq
+is. Then I saw it describe itself as a ‘Proof Assistant’. I felt something
+uneven about it. Looking through all the programming languages I had
+learned, even those as logically abstract as Prolog, were not capable to do a
+proof.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/a-brief-journal-about-learning-coq/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/digging-in-a-dream/">夢魘</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-29T18:45:29+08:00" pubdate data-updated="true">Jun 29<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>晚上，我在墳地挖土，點上火炬。 <br />
+頭頂的火光把周圍照得通明。   </p>
+
+<p>我抓著幻想中的水平懸絲，  <br />
+在各式燒給他們的物件中跳躍。   </p>
+
+<p>到白天，這裡卻成了一座鬼城。   <br />
+四處盡是餐館酒店，一片繁華。   </p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/digging-in-a-dream/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/thinking-in-typing-system/">Thinking in Typing System</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-03T03:28:27+08:00" pubdate data-updated="true">Jun 3<span>rd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I am reading the paper ‘Practical type inference for arbitrary-rank
+types’ [<a href="http://research.microsoft.com/en-us/um/people/simonpj/papers/higher-rank/putting.pdf">pdf</a>, <a href="https://research.microsoft.com/en-us/um/people/simonpj/papers/higher-rank/">official webpage</a>]. Here are some ideas raised while I
+was reading the paper. Those ideas might be not complete or not
+conscientious.</p>
+
+<h2 id="concept-of-subsumption">Concept of “subsumption”</h2>
+
+<p><strong>DISCLAIMER</strong>: In this section I have a misunderstanding about the
+subsumption relation. Please check on
+<a href="http://stackoverflow.com/questions/24084808/what-do-we-mean-when-we-say-t1-is-more-polymorphic-than-t2">my question</a>
+on stackoverflow.</p>
+
+<p>In the article it poses that we call types A and B in the relation
+‘subsumption’ if A is more polymorphic than B.</p>
+
+<p>The concept <em>polymorphism</em> is studied elsewhere and has different
+meanings accordingly. Referring to
+<a href="http://en.wikipedia.org/wiki/Polymorphism_(computer_science)#Parametric_polymorphism">wikipedia</a>,
+there are three types of polymorphism. One is some like overloading
+with different types <em>overloading</em>, another one <em>sub-typing</em> in object
+oriented programming. We’re discussing the polymorphism in haskell, in
+which a polymorphic function/data type is regarded as a kind of
+function/data type written generically. This kind of polymorphism is
+called <em>parametric polymorphism</em>.</p>
+
+<p>So what exactly is the relation ‘more polymorphic than’ understood? I
+conceived the definition myself, not sure if it’s accurate.</p>
+
+<blockquote>
+  <p>To say a type <code>T1</code> is more polymorphic than <code>T2</code>, is to say that,
+all instances that satisfy the type T2, satisfy T1.</p>
+</blockquote>
+
+<p>Below I will also use term ‘subsumption’ to represent this relation.
+Obviously, the equivalence relation is also regarded as subsumption.
+In this defintion, or exactly we can define the equivalent relation
+as:</p>
+
+<blockquote>
+  <p>T1 is equivalent to T2 if and only if
+T1 subsumes T2 AND T2 subsumes T1.</p>
+</blockquote>
+
+<p>Let me give some examples to illustrate the relation subsumption’.</p>
+
+<pre><code>k1: a -&gt; b -&gt; b
+k2: a -&gt; a -&gt; a
+k3: Int -&gt; String
+k4: Int -&gt; Int
+</code></pre>
+
+<p>In this case, <code>k1</code> is more polymorphic than <code>k2</code> because all objects
+that satisfy type <code>k2</code> satisfy <code>k1</code>. While reversely the relation
+doesn’t apply. While looking at <code>k3</code> and <code>k4</code>, we know that they are
+only rank-0 types. Therefore there are no saying of subsumption on
+these types. If type matches, <code>k3</code> and <code>k4</code> are least polymorphic
+types. (e.g. <code>k1</code> subsumes <code>k3</code>, <code>k2</code> subsumes <code>k4</code>) If the types do
+not match, we cannot use <em>subsumption</em> describe their
+relations. (e.g. <code>k3</code> and <code>k4</code>) Okay, there are the basic description,
+let’s go on the usage of subsumption predication in argument type
+checking.</p>
+
+<p>As mentioned in section 3.3,</p>
+
+<blockquote>
+  <p>an argument is acceptable to a function if its type is more
+polymorphic than the function’s argument type.</p>
+</blockquote>
+
+<p>Given,</p>
+
+<pre><code>foo: (a -&gt; a -&gt; a) -&gt; Int
+bar: (a -&gt; b -&gt; b) -&gt; Int
+</code></pre>
+
+<p>Obviously, <code>foo k4</code> is valid, as we only need to substitute <code>a</code> with
+<code>Int</code>. Similarly obviously, <code>foo k2</code> is valid as the <code>foo</code>’s argument
+type completely matches the <code>k2</code>’s type. Then how about <code>foo k1</code>?
+Let’s reason in this way. <code>foo</code> requires an argument of a function
+that takes two arguments that are in identical type.</p>
+
+<h2 id="what-is-a-polymorphic-kind-type">What is a polymorphic kind type</h2>
+<p>(to be updated)</p>
+
+<h2 id="what-is-a-type-class">What is a type class</h2>
+<p>(to be updated)</p>
+
+<p>On <code>ghci</code>, we can check the <em>kind</em> of a type with <code>:k[ind]</code> command</p>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/setting-up-ip-over-icmp-with-hans/">Setting Up IP Over ICMP With Hans</a></h1>
     
     
@@ -128,7 +404,7 @@ MathJax.Hub.Config({
   
 
 
-<time datetime="2014-06-02T11:19:29-04:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2014</time>
+<time datetime="2014-06-02T23:19:29+08:00" pubdate data-updated="true">Jun 2<span>nd</span>, 2014</time>
         
       </p>
     
@@ -173,6 +449,64 @@ through the firewall with <strong>hans</strong>.</p>
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/efficiently-determining-whether-a-number-is-pan-digtal/">Efficiently Determining Whether a Number Is Pan-digital</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-03-02T23:12:00+08:00" pubdate data-updated="true">Mar 2<span>nd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Today I spent nearly a whole afternoon on solving
+<a href="http://projecteuler.net">projecteuler</a> problems, from where I started to
+consider some kinds of ‘efficiencies’.</p>
+
+<p>At the end while I was solving the
+<a href="https://projecteuler.net/problem=38">problem 38</a>, I planned to write
+a method that returns if a number’s pandigital.</p>
+
+<p>Firstly my basic idea is converting a number into a string, then split
+it into chars, sort &amp; unique it, and finally see if its length’s the
+same as before:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">def</span> <span class="nf">pandigital?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class="line">  <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/efficiently-determining-whether-a-number-is-pan-digtal/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/experience-with-kde-gci/">Experience About Contributing KDE Projects</a></h1>
     
     
@@ -189,7 +523,7 @@ through the firewall with <strong>hans</strong>.</p>
   
 
 
-<time datetime="2012-12-31T17:55:00-05:00" pubdate data-updated="true">Dec 31<span>st</span>, 2012</time>
+<time datetime="2012-12-31T17:55:00+08:00" pubdate data-updated="true">Dec 31<span>st</span>, 2012</time>
         
       </p>
     
@@ -265,7 +599,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   
 
 
-<time datetime="2012-11-13T14:16:00-05:00" pubdate data-updated="true">Nov 13<span>th</span>, 2012</time>
+<time datetime="2012-11-13T14:16:00+08:00" pubdate data-updated="true">Nov 13<span>th</span>, 2012</time>
         
       </p>
     
@@ -308,7 +642,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   
 
 
-<time datetime="2012-10-14T18:26:00-04:00" pubdate data-updated="true">Oct 14<span>th</span>, 2012</time>
+<time datetime="2012-10-14T18:26:00+08:00" pubdate data-updated="true">Oct 14<span>th</span>, 2012</time>
         
       </p>
     
@@ -353,7 +687,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   
 
 
-<time datetime="2012-09-15T20:21:00-04:00" pubdate data-updated="true">Sep 15<span>th</span>, 2012</time>
+<time datetime="2012-09-15T20:21:00+08:00" pubdate data-updated="true">Sep 15<span>th</span>, 2012</time>
         
       </p>
     
@@ -379,254 +713,6 @@ would like to get acquainted to more hackers. Good luck.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/april-2012/">April 2012</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-04-24T06:40:00-04:00" pubdate data-updated="true">Apr 24<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Another month as you see.</p>
-
-<p>While it seems that I changed nothing and actually base on Mutation I
-was a completely new guy from the previous second.</p>
-
-<p>Leave the useless words aside, I’m not a mutant as I always
-concern. Yes, I know you all do not think how it does matter, while
-you should know, I just seem like a bare body with soul losted(I’m
-sorry as Mutation does not support souls), and rather, I
-could touch the soul as it is just in the front, and watch completely
-throughout all that stuff but, what the most important thing is that
-the goddamn soul does not ever belong to it.</p>
-
-<p>I walked out from the shadow, but I didn’t see the light. Just like a
-fish that got to the dryland, with loneliness and helplessness.
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/april-2012/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/february-2012/">February 2012</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-02-26T14:51:00-05:00" pubdate data-updated="true">Feb 26<span>th</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>10 months remaining.</p>
-
-<p>Well, the month could be summarized as the word ‘dream’.</p>
-
-<p>Since the short dreamworld control last month, I have been
-experienced up to five or six times of wonderful dreamworld controls.
-Not exactly, some of my dream, actually, are nightmare, while
-the protagonist knows who himself is.</p>
-
-<p>And currently I’m keeping to write my
-<a href="https://github.com/shouya/ruby-cscript">cscript</a>, which will be a
-script language with c-like syntax.</p>
-
-<p>While the period, I learnt some
-<a href="https://en.wikipedia.org/wiki/Yacc">yacc</a>/<a href="https://en.wikipedia.org/wiki/Lex_programming_tool">lex</a>
-and some tricks from that.</p>
-
-<p>For programming, I even touched a bit Ruby and django framework for python.</p>
-
-<blockquote><p>I was cured, all right!</p><footer><strong>Alex, A Clockwork Orange</strong> <cite><a href="http://www.imdb.com/title/tt0066921/quotes?qt0424884">www.imdb.com/title/tt0066921/&hellip;</a></cite></footer></blockquote>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/a-perfect-world/">完美世界</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2012-01-03T19:29:00-05:00" pubdate data-updated="true">Jan 3<span>rd</span>, 2012</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>這就是亞首的生平.</p>
-
-<p>亞首發現自己在一個地方.</p>
-
-<p>亞首擁有思想, 但無法控制這身體, 他通過眼睛觀察這個世界, 然而看到的是模糊的一片混沌, 什麼也沒有.</p>
-
-<p>當亞首想方法向這個世界的表示他的想法, 這個身體卻完全不受他的控制, 他感到很不舒服. 他的大腦結構非常簡單, 甚至令他難以進行稍微高速一點或者複雜一點的運算.</p>
-
-<p>他想的東西太多的時候, 會受不了, 然後在不知不覺中睡著.</p>
-
-<p>他竭力向這個世界表示自己不是白癡, 卻做不到, 一切都完全受到動物本能的控制.</p>
-
-<p>他不知道發生了什麼事情.
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/a-perfect-world/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/quote-from-betrayal-kuangni/">來自倪匡「背叛」裡的一段文字</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-12-24T14:19:00-05:00" pubdate data-updated="true">Dec 24<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><blockquote><p>為什么？你不明白？你們真不明白？為什么？因為我必須這樣做，一定要那樣做，非那樣做不可，我想那樣做想了不知多久，終於鼓足勇氣做了！我為自己！誰不為自己呢？把我從垃圾堆中撿出來，培育我成為一個優秀的軍人，難道全為了我？沒有一點為了自己？</p><p>我變成什么東西了？我不知道自己變成了什么東西，只知道自己不再是人！人！人！我不是人！對我好，照顧我，我就算是個人，也不再是自己，我是人家手裡捏出來的一個泥人——看，這是我捏的，好看吧，漂亮吧！<br /></div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/quote-from-betrayal-kuangni/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/a-great-thought/">「偉大」的想法</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2011-09-15T13:12:00-04:00" pubdate data-updated="true">Sep 15<span>th</span>, 2011</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>那傢伙化為烏有了，他徹底被滅絕了。</p>
-
-<p>妄想什麼？已經不容你幻想了。</p>
-
-<p>這是怎麼樣的一個決定呢？那傢伙的潛意識可能有答案，但那傢伙自己沒有。</p>
-
-<p>hey，我多次提醒你，絕對不要讓它例項化，不可能成立的，為甚麼還要那麼做？</p>
-
-<p>hey，我並不是對人類劣性尚存希望，而是欺騙自我罷了。</p>
-
-<p>hey，小朋友，我還會看到你麼？祈禱吧。</p>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/browse/page/3/">&larr; Older</a>
@@ -644,6 +730,14 @@ and some tricks from that.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/my-vps-was-hacked/">服務器被入侵手記</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/banana-algebra/">Banana Algebra</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/admonition-sono-ni/">誡之二</a>
       </li>
     
@@ -652,15 +746,7 @@ and some tricks from that.</p>
       </li>
     
       <li class="post">
-        <a href="/blog/backwards-state-or-the-power-of-laziness/">翻譯：逆向狀態，又：惰性之力</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/the-abyss/">深淵</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/how-lazy-evaluation-works-in-haskell/">翻譯：Haskell 怎麼實現惰性求值</a>
+        <a href="/blog/undeepening-continuations/">Undeepening Continuations</a>
       </li>
     
   </ul>
@@ -714,7 +800,7 @@ and some tricks from that.</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015
+  Copyright &copy; 2016
 - Shou Ya
 - <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>

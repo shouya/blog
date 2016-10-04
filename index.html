@@ -9,8 +9,7 @@
   <meta name="author" content="Shou Ya">
 
   
-  <meta name="description" content="凌，則隱 長，則同 驕而與人者 共聞之 host 曰：即有大樂者，與悲治之。
-">
+  <meta name="description" content="背景與起因 我想趁放假幾天玩一下 Docker 集群，順便跑個 shipyard 通過網頁管理自己 VPS 上運行的服務。 因為是完全的新手，在這之前甚至連 Swarm 是什麼都不知道，所以完全按照 shipyard 官方文檔說的配置來都沒成功。 最後發現是很愚蠢的錯誤， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -111,6 +110,172 @@ MathJax.Hub.Config({
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/my-vps-was-hacked/">服務器被入侵手記</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-10-04T22:43:45+08:00" pubdate data-updated="true">Oct 4<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2 id="section">背景與起因</h2>
+
+<p>我想趁放假幾天玩一下 Docker 集群，順便跑個 shipyard 通過網頁管理自己 VPS 上運行的服務。</p>
+
+<p>因為是完全的新手，在這之前甚至連 Swarm 是什麼都不知道，所以完全按照 shipyard 官方文檔說的配置來都沒成功。</p>
+
+<p>最後發現是很愚蠢的錯誤，只是因為其中一步要使用一個服務把 <code>/var/run/docker.sock</code> 代理到 TCP/2375 端口上，而 swarm-agent 不知為何不能使用 <code>127.0.0.1:2375</code> 連接到本機，一定要用公網兜一圈才能找到本機的控制，而我忘記在防火牆上打開此特例。開了此特例，故問題解決。</p>
+
+<p>因為以前一直是在本機跑 Docker，也未暴露任何端口，故沒有啟用任何加密措施。事實上 <a href="http://shipyard-project.com/docs/deploy/automated/">shipyard 的手冊</a> 已經提醒過開放此端口相當於把 Docker 控制權給出去，應該設置好 Docker 通訊用 Socket 的 TLS 加密再玩，但我忽視了這個警告。</p>
+
+<p>shipyard 終於成功跑起來了，我玩了一會，得意之至，忘記了上面的警告和自己親手暴露的端口。接著我就折騰 Jenkins 之類的去了，玩得不亦樂乎。</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/my-vps-was-hacked/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/banana-algebra/">Banana Algebra</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-06-08T00:00:00+08:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Abstract: I’ll be talking about the F-Algebra Category and related
+applications of F-Algebra in function programming in this post.</p>
+
+<h2 id="f-algebra">F-Algebra</h2>
+
+<p>So first of all, an algebra over a type $a$ is set of functions that
+converts an algebra structure $f a$ to $a$ <a href="http://web.cecs.pdx.edu/~sheard/course/AdvancedFP/notes/CoAlgebras/Code.html" title="Advanced Functional Programming, Tim Sheard's course notes.">CoAlg</a>. An algebra consists of:</p>
+
+<ul>
+  <li>An algebra structure: $\rm{F}$</li>
+  <li>A carrier type: $\rm{a}$</li>
+  <li>A total function: $\rm{F(a)} \to \rm{a}$</li>
+</ul>
+
+<p>An example of an algebra looks like:</p>
+
+<ul>
+  <li>Algebra struct: <code>data F1 a = Zero | One | Plus a a</code></li>
+  <li>A carrier type: it could be any instance of <code>a</code>: <code>Int</code>, <code>String</code>, etc.</li>
+  <li>A total function:</li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">f1</span> <span class="ow">::</span> <span class="kt">F1</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">Int</span>
+</span><span class="line"><span class="nf">f1</span> <span class="kt">Zero</span>       <span class="ow">=</span> <span class="mi">0</span>
+</span><span class="line"><span class="nf">f1</span> <span class="kt">One</span>        <span class="ow">=</span> <span class="mi">1</span>
+</span><span class="line"><span class="nf">f1</span> <span class="p">(</span><span class="kt">Plus</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="ow">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Or we can have:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">f1&#39;</span> <span class="ow">::</span> <span class="kt">F1</span> <span class="kt">String</span> <span class="ow">-&gt;</span> <span class="kt">String</span>
+</span><span class="line"><span class="nf">f1&#39;</span> <span class="kt">Zero</span>       <span class="ow">=</span> <span class="s">&quot;&quot;</span>
+</span><span class="line"><span class="nf">f1&#39;</span> <span class="kt">One</span>        <span class="ow">=</span> <span class="s">&quot;1&quot;</span>
+</span><span class="line"><span class="nf">f1&#39;</span> <span class="p">(</span><span class="kt">Plus</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="ow">=</span> <span class="n">a</span> <span class="o">++</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="f-algebra-arrows">F-Algebra Arrows</h2>
+
+<p>All algebras for an algebra structure $\rm{F}$ forms a category
+$\cal{C}$. The objects are, of course, the algebras, while the arrows
+are defined as morphisms between each two pair of algebras that
+transforming the carrier type:
+$\hom_{\cal{C}}(\rm{Alg}(\rm{F},\rm{a}), \rm{Alg}(\rm{F},\rm{b}))$.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="text"><span class="line">   Alg(F,a)
+</span><span class="line">F a --------------&gt; a
+</span><span class="line">      |
+</span><span class="line">      |
+</span><span class="line">      | &lt;- hom(Alg(F,a), Alg(F,b))
+</span><span class="line">      |
+</span><span class="line">      v
+</span><span class="line">F b --------------&gt; b
+</span><span class="line">  Alg(F,b)
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>For an arrow in F-algebra category, we need a transformation from <code>F a</code>
+to <code>a</code>.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li></li>
+</ul>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/admonition-sono-ni/">誡之二</a></h1>
     
     
@@ -127,7 +292,7 @@ MathJax.Hub.Config({
   
 
 
-<time datetime="2015-05-08T14:50:53-04:00" pubdate data-updated="true">May 8<span>th</span>, 2015</time>
+<time datetime="2015-05-09T02:50:53+08:00" pubdate data-updated="true">May 9<span>th</span>, 2015</time>
         
       </p>
     
@@ -168,7 +333,7 @@ MathJax.Hub.Config({
   
 
 
-<time datetime="2015-05-03T22:17:11-04:00" pubdate data-updated="true">May 3<span>rd</span>, 2015</time>
+<time datetime="2015-05-04T10:17:11+08:00" pubdate data-updated="true">May 4<span>th</span>, 2015</time>
         
       </p>
     
@@ -197,6 +362,70 @@ MathJax.Hub.Config({
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/undeepening-continuations/">Undeepening Continuations</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-14T04:40:18+08:00" pubdate data-updated="true">Mar 14<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Continuation was always a mystery to me since I started to learn
+monad.</p>
+
+<p>My friend Javran once sent me a link to ‘the mother of all monads’,
+from where I start to rethink the significance of the continuation
+monad. That article, to me as a novice, wasn’t enough explanative for
+me to comprehend. Therefore, to demystify the significance of the
+continuation monad, I spend several hours to read through articles
+about it last night. In the final, I eventually carried my
+understanding to continuation out into code and
+<a href="http://learnyouanagda.liamoc.net/">achieved enlightenment</a>. (not
+really)</p>
+
+<p>So let’s get started. First of all, we need to know, at least have a
+primitive concept of, what continuation is used for. So here is my
+understanding,</p>
+
+<blockquote>
+  <p>A continuation is an intermediate state that allows computation to
+run at that point.</p>
+</blockquote>
+
+<p>You don’t need to try hardly on comprehending the statement above. By
+going through this tutorial you will make your own understanding out.</p>
+
+</div>
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/undeepening-continuations/">Read on &rarr;</a>
+    </footer>
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/backwards-state-or-the-power-of-laziness/">翻譯：逆向狀態，又：惰性之力</a></h1>
     
     
@@ -213,7 +442,7 @@ MathJax.Hub.Config({
   
 
 
-<time datetime="2015-03-04T22:14:35-05:00" pubdate data-updated="true">Mar 4<span>th</span>, 2015</time>
+<time datetime="2015-03-05T11:14:35+08:00" pubdate data-updated="true">Mar 5<span>th</span>, 2015</time>
         
       </p>
     
@@ -262,7 +491,7 @@ MathJax.Hub.Config({
   
 
 
-<time datetime="2014-12-24T11:06:41-05:00" pubdate data-updated="true">Dec 24<span>th</span>, 2014</time>
+<time datetime="2014-12-25T00:06:41+08:00" pubdate data-updated="true">Dec 25<span>th</span>, 2014</time>
         
       </p>
     
@@ -315,7 +544,7 @@ MathJax.Hub.Config({
   
 
 
-<time datetime="2014-11-24T06:14:57-05:00" pubdate data-updated="true">Nov 24<span>th</span>, 2014</time>
+<time datetime="2014-11-24T19:14:57+08:00" pubdate data-updated="true">Nov 24<span>th</span>, 2014</time>
         
       </p>
     
@@ -372,7 +601,7 @@ MathJax.Hub.Config({
   
 
 
-<time datetime="2014-08-03T05:59:14-04:00" pubdate data-updated="true">Aug 3<span>rd</span>, 2014</time>
+<time datetime="2014-08-03T17:59:14+08:00" pubdate data-updated="true">Aug 3<span>rd</span>, 2014</time>
         
       </p>
     
@@ -422,7 +651,7 @@ different programming languages.</p>
   
 
 
-<time datetime="2014-07-28T10:17:07-04:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time>
+<time datetime="2014-07-28T22:17:07+08:00" pubdate data-updated="true">Jul 28<span>th</span>, 2014</time>
         
       </p>
     
@@ -453,160 +682,6 @@ different programming languages.</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/dnscrypt-plus-dnsmasq-solution/">Linux 下 GFW 的 DNS 投毒解決方案</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-25T14:27:35-04:00" pubdate data-updated="true">Jul 25<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。</p>
-
-<h2 id="section">方案</h2>
-
-<p>DNSCrypt 是 OpenDNS 推出的一個用來加密 DNS 請求的代理，我用這個來繞開 GFW 的檢查。dnsmasq 是一款的 DNS 服務器，我主要用其提供 DNS 緩存的功能。</p>
-
-<p>我將用 dnsmasq 設置本地的 DNS 服務器，然後配置 dnsmasq 從 dnscrypt 獲得結果並返回給請求者。而 dnscrypt 會把來自 dnsmasq 的請求加密丟到 opendns 的服務器，然後把解析結果返回回來。</p>
-
-<p>那麼 dnsmasq 將偵聽 <code>53</code> 端口，而 dnscrypt 的端口隨意，只要和 dnsmasq 裡的配置匹配就可以了。我隨便用了 <code>1053</code> 作為 dnscrypt 的端口。</p>
-
-<p>最後，把系統的 DNS 服務器設置為本機就可以了。</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/dnscrypt-plus-dnsmasq-solution/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/a-brief-journal-about-learning-coq/">A Brief Journal About Learning Coq</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-07-04T13:08:34-04:00" pubdate data-updated="true">Jul 4<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p><em>This article is completely an informal journal about my learning process on
-Coq. It is just created as my whim prompted. Please don’t academically refer
-any part of it as studying material to learn Coq.</em></p>
-
-<h2 id="pre">Pre</h2>
-
-<p>I first heard of Coq in my admiring mathematician,
-<a href="https://twitter.com/txyyss">@txyyss</a>’s tweets. At the time I saw him talked
-that he’s glad and immersed in re-proving all the theorems he had learned.
-He also said, as deepening in Coq, he found a boost on other related
-academic aspects. Driven by curiosity, I went to know about what a heck Coq
-is. Then I saw it describe itself as a ‘Proof Assistant’. I felt something
-uneven about it. Looking through all the programming languages I had
-learned, even those as logically abstract as Prolog, were not capable to do a
-proof.</p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/a-brief-journal-about-learning-coq/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/digging-in-a-dream/">夢魘</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-29T06:45:29-04:00" pubdate data-updated="true">Jun 29<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>晚上，我在墳地挖土，點上火炬。 <br />
-頭頂的火光把周圍照得通明。   </p>
-
-<p>我抓著幻想中的水平懸絲，  <br />
-在各式燒給他們的物件中跳躍。   </p>
-
-<p>到白天，這裡卻成了一座鬼城。   <br />
-四處盡是餐館酒店，一片繁華。   </p>
-
-</div>
-  
-  
-    <footer>
-      <a rel="full-article" href="/blog/digging-in-a-dream/">Read on &rarr;</a>
-    </footer>
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/browse/page/2/">&larr; Older</a>
@@ -622,6 +697,14 @@ proof.</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/my-vps-was-hacked/">服務器被入侵手記</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/banana-algebra/">Banana Algebra</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/admonition-sono-ni/">誡之二</a>
       </li>
     
@@ -630,15 +713,7 @@ proof.</p>
       </li>
     
       <li class="post">
-        <a href="/blog/backwards-state-or-the-power-of-laziness/">翻譯：逆向狀態，又：惰性之力</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/the-abyss/">深淵</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/how-lazy-evaluation-works-in-haskell/">翻譯：Haskell 怎麼實現惰性求值</a>
+        <a href="/blog/undeepening-continuations/">Undeepening Continuations</a>
       </li>
     
   </ul>
@@ -692,7 +767,7 @@ proof.</p>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2015
+  Copyright &copy; 2016
 - Shou Ya
 - <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>

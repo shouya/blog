@@ -4,7 +4,7 @@
   <title><![CDATA[Category: solution | Shou's origin]]></title>
   <link href="http://shouya.github.io/blog/category/solution/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2015-05-13T03:55:59-04:00</updated>
+  <updated>2016-10-04T23:02:32+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Linux 下 GFW 的 DNS 投毒解決方案]]></title>
     <link href="http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution/"/>
-    <updated>2014-07-25T14:27:35-04:00</updated>
+    <updated>2014-07-26T02:27:35+08:00</updated>
     <id>http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution</id>
     <content type="html"><![CDATA[<p>這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。</p>
 
@@ -171,137 +171,223 @@ $ sudo rc-update add dnsmasq default
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Setting up IP over ICMP with hans]]></title>
-    <link href="http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/"/>
-    <updated>2014-06-02T11:19:29-04:00</updated>
-    <id>http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans</id>
-    <content type="html"><![CDATA[<h2 id="background">Background</h2>
-<p>The ISP, China Telecom, interrupted the internet access from my home
-yesterday due to the expiration of annually subscription of the
-internet service. While I found that ICMP packets are not blocked.
-Even though I can’t even do a DNS query, I can ping any server as usual.</p>
+    <title type="html"><![CDATA[Efficiently determining whether a number is pan-digital]]></title>
+    <link href="http://shouya.github.io/blog/efficiently-determining-whether-a-number-is-pan-digtal/"/>
+    <updated>2013-03-02T23:12:00+08:00</updated>
+    <id>http://shouya.github.io/blog/efficiently-determining-whether-a-number-is-pan-digtal</id>
+    <content type="html"><![CDATA[<p>Today I spent nearly a whole afternoon on solving
+<a href="http://projecteuler.net">projecteuler</a> problems, from where I started to
+consider some kinds of ‘efficiencies’.</p>
 
-<p>The inaccessibility of internet has greatly evoked my anxiety on
-seeking changes. Well, it’s theoretically possible to carry data in
-ICMP packets. Therefore, according to the hacker community’s
-principle, there should already been hackers who made use of this and
-opened the sources of their programs.</p>
+<p>At the end while I was solving the
+<a href="https://projecteuler.net/problem=38">problem 38</a>, I planned to write
+a method that returns if a number’s pandigital.</p>
 
-<p>Indeed, searching ‘ICMP tunneling’, I found
-<a href="http://code.gerade.org/hans/">hans</a> and
-<a href="http://thomer.com/icmptx/">icmptx</a>. The latter one is more
-primitive and complicated to use. After several trials and failures, I
-decide to give <strong>icmptx</strong> up, and try <strong>hans</strong> instead.</p>
+<p>Firstly my basic idea is converting a number into a string, then split
+it into chars, sort &amp; unique it, and finally see if its length’s the
+same as before:</p>
 
-<p>This article is a tutorial/note about how to establish normal internet
-connection in the condition that only ICMP packets are allowed to pass
-through the firewall with <strong>hans</strong>.</p>
-
+<p><code>ruby
+def pandigital?(n)
+  n.to_s.chars.sort.uniq.length == n.to_s.length
+end
+</code>
 <!-- more -->
+This is a good method &amp; intuitive to everyone. Whilst I started to
+consider the efficiency problem. I seldom deal with these as I thought
+efficiency’s not a big deal on modern computers mostly in
+practice. However, the former examples of solving problems gave me a
+concept that even a smaller improvement on a fundamental level method can
+save a huge amount of time. Then I started to consider to optimize
+this. (by nothing, mostly it’s just for fun.)</p>
 
-<h2 id="step-1-establish-the-tunnel">Step 1: Establish the tunnel</h2>
-<p>From the server side, first start the server.</p>
+<p>Soon i conceived this, to transfer a double used <code>n.to_s</code> to a local variable:
+<code>ruby
+s = n.to_s
+s.chars.sort.uniq.length == s.length
+</code></p>
 
-<pre><code>  # ./hans -s 10.2.0.1 -m 10000
-</code></pre>
+<p>It had not very obvious improvement. I think it is some kind of that
+it had to deal with one more local variable that drains some
+efficiencies from it.</p>
 
-<p>The option <code>-s</code> specifies the inet address for the tunnel interface,
-and the <code>-m</code> specifies the size of mtu.</p>
+<p>That’s cool, then I had an idea to suppress the last calling,
+<code>s.length</code>, as I still thought function calling is a key-point of
+efficiency factor.</p>
 
-<p>Then try to connect from the client.</p>
+<p><code>ruby
+n.to_s.chars.sort.uniq == (1..9).to_a
+</code>
+Or,
+<code>ruby
+n.to_s.chars.sort.uniq == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code>
+to prevent extra calling.</p>
 
-<pre><code> # ./hans -c &lt;server_ip&gt; -m 10000
-</code></pre>
+<p>In this way it does work better, but it’s still not enough good.</p>
 
-<p>Please beware the mtu should be matched between the server and the
-client,
-otherwise it might cause problems.</p>
+<p>Then I thought about that a pandigital number’s limitation, so I added
+a checking process in the beginning:
+<code>ruby
+return false if n.to_s.length != 9
+n.to_s.chars.sort.uniq == [1, 2, 3, 4, 5, 6, 7, 8, 9]
+</code></p>
 
-<p>In addition, you should switch off the normal response to ICMP echo
-request.</p>
+<p>As I tested my code with a randomly generated number with this:
+<code>ruby
+Benchmark.bm do |b|
+  b.report do
+    n = (rand * 10 ** 9).floor
+    # do the test
+  end
+end
+</code></p>
 
-<pre><code> # sysctl net.ipv4.icmp_echo_ignore_all=1
-</code></pre>
+<p>Therefore the terms with improper length accounts about 10% of all, so this
+code has reduced the time by nearly 10%, really. Which was really cool.</p>
 
-<p>Because the ICMP packets should now be handled all by hans.
-But if you still want to have it working, add <code>-s</code> option whiling
-launching the server side of hans.</p>
+<p>Not longer I brainstormed another limitation of pandigits, that
+there shouldn’t be any zero in digits allowed.</p>
 
-<h3 id="choosing-the-size-of-mtu">Choosing the size of MTU</h3>
+<p>So the updated code is:
+<code>ruby
+return false if n.to_s.length != 9
+return false if n.to_s.include? '0'
+# blah blah blah
+</code></p>
 
-<p>Without specifying the mtu manually in the command’s argument,
-hans will automatically choose the system default one.
-It will normally be around 1500. But this would be a little bit
-small to communicate over ICMP. In practice, with a default mtu
-value of 1500, the download speed can hardly reach 7 KiB/second.
-While as it changes 10 000, the speed went around 10 KiB/second.</p>
+<p>A ‘0’ appears on any bits of a nine digital integer is <code>1/10</code>, so in
+this way, a probability of <code>1-((1-1/10)^9)</code> which be the total chance
+of when a ‘0’ will appear in an 9-digit number. It’s about 61%, so
+after adding that statement, the efficiency was improved by more than
+one half.</p>
 
-<p>Nonetheless, you can try various values of mtu and find your
-best fit.</p>
+<p>I know the <code>sort</code> method will sort a duplicated array as process;
+the same is <code>uniq</code>. So I suppressed this two into their ‘bang’ mode,
+since <code>uniq!</code> can return a result whether it has compressed the array,
+I am possible to inverse the result to a boolean directly.
+This is what I did:
+<code>ruby
+not n.to_s.chars.to_a.sort!.uniq!
+</code></p>
 
-<h3 id="testing-the-tunnel">Testing the tunnel</h3>
-<p>Now the tunnel should be established. From the client side,
-you should see that the inet address of <code>tun0</code> is chosen automatically
-according to the server’s configuration. Otherwise, if you
-haven’t seen any valid inet address for the client <code>tun0</code>
-interface, the connection is not established successfully. At this
-time,
-check if the operations above take effect and ensure you have a
-working
-internet connection (at least ICMP packet is not blocked).</p>
+<p>Cool it was, then I started to consider to optimize the sort &amp; uniq
+line, since I thought it was not elegant and very feasible. A good
+method is compact the process of recognizing pandigits with a set, of
+course basically I have brought hashes, which perform the same as
+sets.
+<code>ruby
+return false if n.to_s.length != 9
+return false if n.to_s.include? '0'
+ns = {}
+n.to_s.each_char {|c| return false if ns.key? c; ns[c] = true }
+true
+</code></p>
 
-<p>From the server, you can ping the the ip of <code>tun0</code> in the client-side
-and it should work good.
-While pinging from the client-side would possibly be not working
-except
-you have specified the <code>-s</code> option to <code>hans</code> command.</p>
+<p>This method doesn’t only compacted the process. Consider the former
+program, <code>sort</code> method in ruby is implemented by quick sort algorithm,
+which has the time complexity of O(Nlog(N)), and beside the <code>uniq</code>
+took an O(N) as well. These are two significant and obvious efficiency
+losts and the new algorithm doesn’t have this problem. A hash table
+accounts O(1) to store and O(1) to check, and the most time it will just
+be fled by the iteration of the characters, which took O(N) to run.</p>
 
-<h2 id="step-2-configure-forwarding-routing-on-the-server">Step 2: Configure forwarding routing on the server</h2>
-<p>On the server:</p>
+<p>There I found another point to optimize it – the hash table. A hash
+table, in this case, was created and destroyed frequently, and a hash
+table’s usually a big object so that will cause a large memory
+exchange that might take time. On the other hand, the hash table
+needs a hash function for each characters. I don’t know how ruby might
+implement it, but the hash algorithm will still account some
+time, as I know.</p>
 
-<pre><code> # iptables -F
- # iptables -F -t nat
- # iptables -A FORWARD -i tun0 -j ACCEPT
- # iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-</code></pre>
+<p>Then I reduced it into array:
+<code>ruby
+return false if n.to_s.length != 9
+return false if n.to_s.include? '0'
+ns = []
+n.to_s.each_char {|c| return false if ns[c.to_i]; ns[c.to_i] = true }
+true
+</code></p>
 
-<p>Don’t forget to enable IP forwarding:</p>
+<p>Cool but there’s still a place to improve: the <code>c.to_i</code> part. <code>atoi</code>
+function in C implementation is linear proportional to the string’s
+length. But in this case I don’t need to deal with that much cases. So
+I considered to change them to <code>ns[c.ord - '0'.ord]</code>.</p>
 
-<pre><code> # sysctl net.ipv4.ip_forwarding=1
-</code></pre>
+<p>An static array could prevent it from dynamically allocating memories:
+<code>ruby
+ns = Array.new(10)
+</code></p>
 
-<h2 id="step-3-configure-the-routing-table">Step 3: Configure the routing table</h2>
+<p>And in the final I did some small tweaks, such as, to hard code some lexical
+constants in, optimize the multiple used calls. The result’s as below:
+<code>
+class Integer
+  def pandigital?
+    s = to_s
+    return if s.length != 9
+    return if s.include? '0'
+    ns = Array.new(10)
+    s.each_char do |c|
+      return false if ns.at(c.ord-48)
+      ns[c.ord-48] = true
+    end
+    true
+  end
+end
+</code></p>
 
-<p>We should now redirect all packets through the tunnel
-to the server.</p>
+<p>Compare this result to the most former one; the new program has improved
+it’s efficiency to 2/3 of the origin, here’s the result in a bench
+mark test:
+<code>plain
+            user       system     total       real
+       old  0.920000   0.000000   0.920000 (  0.915701)
+       new  0.300000   0.000000   0.300000 (  0.304713)
+</code></p>
 
-<pre><code> # ip route del default
- # ip route add default via 10.2.0.1
-</code></pre>
+<p>Seems cool and I was in some extent like such challenges. I don’t
+still consider a lot of efficiency, of course, in practice use. But
+I enjoy the pleasure to dig deeply, to drain the extreme. That’s where
+I find fun in.</p>
 
-<p>It’s necessary to specify how the server side can be reached.</p>
+<p>Good luck.</p>
 
-<pre><code> # ip route add &lt;server_ip&gt; via &lt;original_router&gt;
-</code></pre>
+<h2 id="update">UPDATE</h2>
+<p>I am currently reading the book
+“<a href="http://netlib.bell-labs.com/cm/cs/pearls/">Programming Pearls</a>”, in
+which I’ve had a lot of amazes about algorithms and programming thinking.
+So when I picked the previous code, I found that method should be not
+the final solution.</p>
 
-<p>So there won’t be a circular packet transmission.</p>
+<p>I just wrote an more optimized version, which improved the speed by
+25% extra.</p>
 
-<p>Done.</p>
+<p>Here goes the code:
+<code>ruby
+def pandigital?(n)
+  s = n.to_s
+  return false if s.length != 9
+  return false if s.include? '0'
+  return false unless s.include? '1'
+  return false unless s.include? '2'
+  return false unless s.include? '3'
+  return false unless s.include? '4'
+  return false unless s.include? '5'
+  return false unless s.include? '6'
+  return false unless s.include? '7'
+  return false unless s.include? '8'
+  return false unless s.include? '9'
+  return true
+end
+</code></p>
 
-<h2 id="resources-that-might-help">Resources that might help</h2>
-<ul>
-  <li><a href="https://github.com/friedrich/hans">github: friedrich/hans</a></li>
-  <li><a href="http://code.gerade.org/hans/">official guide of hans</a></li>
-  <li><a href="http://thomer.com/icmptx/">icmptx: how to</a></li>
-  <li><a href="http://github.com/jakkarth/icmptx">github: jakkarth/icmptx</a></li>
-  <li><a href="http://www.faqs.org/docs/iptables/traversingoftables.html">iptables theory: traversing of
-tables</a></li>
-  <li><a href="http://www.howtogeek.com/177621/the-beginners-guide-to-iptables-the-linux-firewall/">a beginner’s guide to
-iptables</a></li>
-  <li><a href="http://wiki.gentoo.org/wiki/Home_Router">home router - gentoo wiki</a></li>
-  <li><a href="http://itsecworks.com/2013/02/15/fire-in-the-hole-of-the-firewall/">another person log about the usage of
-icmptx</a></li>
-</ul>
+<p>This method wasn’t so cool, and I know it looks a little tedious. In
+fact I don’t like such repeating code. However, it works so good. This
+method is learnt from Programming Pearls, page 94, an expanded loop
+for a binary search algorithm with that the maximum number of elements is
+1000. It optimized an <em><a href="https://en.wikipedia.org/wiki/Big_O_notation">O(log N)</a></em> algorithm into <em>O(1)</em>, which is
+really awesome.</p>
 ]]></content>
   </entry>
   

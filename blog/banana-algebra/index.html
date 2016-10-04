@@ -1,0 +1,80 @@
+<p>Abstract: I’ll be talking about the F-Algebra Category and related
+applications of F-Algebra in function programming in this post.</p>
+
+<h2 id="f-algebra">F-Algebra</h2>
+
+<p>So first of all, an algebra over a type $a$ is set of functions that
+converts an algebra structure $f a$ to $a$ <a href="http://web.cecs.pdx.edu/~sheard/course/AdvancedFP/notes/CoAlgebras/Code.html" title="Advanced Functional Programming, Tim Sheard's course notes.">CoAlg</a>. An algebra consists of:</p>
+
+<ul>
+  <li>An algebra structure: $\rm{F}$</li>
+  <li>A carrier type: $\rm{a}$</li>
+  <li>A total function: $\rm{F(a)} \to \rm{a}$</li>
+</ul>
+
+<p>An example of an algebra looks like:</p>
+
+<ul>
+  <li>Algebra struct: <code>data F1 a = Zero | One | Plus a a</code></li>
+  <li>A carrier type: it could be any instance of <code>a</code>: <code>Int</code>, <code>String</code>, etc.</li>
+  <li>A total function:</li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">f1</span> <span class="ow">::</span> <span class="kt">F1</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">Int</span>
+</span><span class="line"><span class="nf">f1</span> <span class="kt">Zero</span>       <span class="ow">=</span> <span class="mi">0</span>
+</span><span class="line"><span class="nf">f1</span> <span class="kt">One</span>        <span class="ow">=</span> <span class="mi">1</span>
+</span><span class="line"><span class="nf">f1</span> <span class="p">(</span><span class="kt">Plus</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="ow">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Or we can have:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">f1&#39;</span> <span class="ow">::</span> <span class="kt">F1</span> <span class="kt">String</span> <span class="ow">-&gt;</span> <span class="kt">String</span>
+</span><span class="line"><span class="nf">f1&#39;</span> <span class="kt">Zero</span>       <span class="ow">=</span> <span class="s">&quot;&quot;</span>
+</span><span class="line"><span class="nf">f1&#39;</span> <span class="kt">One</span>        <span class="ow">=</span> <span class="s">&quot;1&quot;</span>
+</span><span class="line"><span class="nf">f1&#39;</span> <span class="p">(</span><span class="kt">Plus</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="ow">=</span> <span class="n">a</span> <span class="o">++</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="f-algebra-arrows">F-Algebra Arrows</h2>
+
+<p>All algebras for an algebra structure $\rm{F}$ forms a category
+$\cal{C}$. The objects are, of course, the algebras, while the arrows
+are defined as morphisms between each two pair of algebras that
+transforming the carrier type:
+$\hom_{\cal{C}}(\rm{Alg}(\rm{F},\rm{a}), \rm{Alg}(\rm{F},\rm{b}))$.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="text"><span class="line">   Alg(F,a)
+</span><span class="line">F a --------------&gt; a
+</span><span class="line">      |
+</span><span class="line">      |
+</span><span class="line">      | &lt;- hom(Alg(F,a), Alg(F,b))
+</span><span class="line">      |
+</span><span class="line">      v
+</span><span class="line">F b --------------&gt; b
+</span><span class="line">  Alg(F,b)
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>For an arrow in F-algebra category, we need a transformation from <code>F a</code>
+to <code>a</code>.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li></li>
+</ul>

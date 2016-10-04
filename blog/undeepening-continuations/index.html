@@ -1,0 +1,706 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Undeepening Continuations - Shou's origin</title>
+  <meta name="author" content="Shou Ya">
+
+  
+  <meta name="description" content="Continuation was always a mystery to me since I started to learn
+monad. My friend Javran once sent me a link to ‘the mother of all monads’,
+from &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://shouya.github.io/blog/undeepening-continuations">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/stylesheets/data-table.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Shou's origin" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<!-- <link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+-->
+<!--
+<link href="/assets/fonts/PT_Sans_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Sans_Bold.woff" rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Regular.woff"
+      rel="stylesheet" type="text/css">
+<link href="/assets/fonts/PT_Serif_Bold.woff" rel="stylesheet" type="text/css">
+-->
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-33282225-3']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Shou's origin</a></h1>
+  
+    <h2>Source of everything</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:shouya.github.io" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/page/sicp-notes/">SICP Notes</a></li>
+  <li><a href="/about/">About</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Undeepening Continuations</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-14T04:40:18+08:00" pubdate data-updated="true">Mar 14<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Continuation was always a mystery to me since I started to learn
+monad.</p>
+
+<p>My friend Javran once sent me a link to ‘the mother of all monads’,
+from where I start to rethink the significance of the continuation
+monad. That article, to me as a novice, wasn’t enough explanative for
+me to comprehend. Therefore, to demystify the significance of the
+continuation monad, I spend several hours to read through articles
+about it last night. In the final, I eventually carried my
+understanding to continuation out into code and
+<a href="http://learnyouanagda.liamoc.net/">achieved enlightenment</a>. (not
+really)</p>
+
+<p>So let’s get started. First of all, we need to know, at least have a
+primitive concept of, what continuation is used for. So here is my
+understanding,</p>
+
+<blockquote>
+  <p>A continuation is an intermediate state that allows computation to
+run at that point.</p>
+</blockquote>
+
+<p>You don’t need to try hardly on comprehending the statement above. By
+going through this tutorial you will make your own understanding out.</p>
+
+<!-- more -->
+
+<h2 id="computation-with-holes">Computation with Holes</h2>
+
+<p>As we said above a continuation is a <em>intermediate</em> state that we can
+delay the computation to the future. Let’s see how these functions
+look like:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">transformOne</span> <span class="ow">=</span> <span class="o">???</span> <span class="mi">1</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">doSomethingOnOne</span> <span class="ow">=</span> <span class="kr">do</span>
+</span><span class="line">  <span class="n">putStrLn</span> <span class="s">&quot;before execution&quot;</span>
+</span><span class="line">  <span class="o">???</span> <span class="mi">1</span>
+</span><span class="line">  <span class="n">putStrLn</span> <span class="s">&quot;after execution&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So we’re defining two functions with this feature. The first one is
+rather easy to see, on the blank (<code>???</code>) there should be a function,
+which takes an integer and yields whatever things. In the
+<code>doSomethingOnOne</code> there should also be a function like that in the
+first, expect being constrained to return an <code>IO a</code>.</p>
+
+<p>Here’s the modified finished functions and their corresponding types:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">transformOne</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+</span><span class="line"><span class="nf">transformOne</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">f</span> <span class="mi">1</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">doSomethingOnOne</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">IO</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
+</span><span class="line"><span class="nf">doSomethingOnOne</span> <span class="n">f</span> <span class="ow">=</span> <span class="kr">do</span>
+</span><span class="line">  <span class="n">putStrLn</span> <span class="s">&quot;before execution&quot;</span>
+</span><span class="line">  <span class="n">val</span> <span class="ow">&lt;-</span> <span class="n">f</span> <span class="mi">1</span>
+</span><span class="line">  <span class="n">putStrLn</span> <span class="p">(</span><span class="s">&quot;we get &quot;</span> <span class="o">++</span> <span class="n">show</span> <span class="n">val</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>If you have other experiences about <code>Control.Monad.Cont</code>, you might be
+able to recognize the pattern in the types. Strictly, the latter one
+isn’t what continuation monad looks like because <code>IO a</code> is not the
+same as <code>IO ()</code>. Well, this is normal in our real life programming,
+but we can’t call them continuation because they’re not
+composable. And one of the main purposes we want to generalize
+continuation is to make them composable so they could be an instance
+of <code>Monad</code>. <del>Why? Well, a monad is just a MONOID in the category
+endofunctors, monoid implies composablity, what’s the problem?  Why?
+Well, a monoid is a just a SEMIGROUP in combine with an identity
+object, what’s the problem? But why? Well, that’s how semigroup is
+defined, what’s the problem?</del></p>
+
+<p>Anyway, we’ll see if we can make a continuation stronger, that is, in
+type of <code>(a -&gt; r) -&gt; r</code>, we make our life easier. For now, just
+remember it, that <code>(a -&gt; r) -&gt; r</code> is the type of continuation. Which
+means we can’t have the second piece of code above unless we add a
+<code>return val</code> at the end of the <code>do</code> notation. It also means you can’t
+have continuation like <code>foo f = show (f 1)</code>, which modifies the
+result.</p>
+
+<p>These functions are what we called <code>continuations</code>. It’s intuitive to
+think them as functions with a hole to be filled. To fill the hole in
+a continuation we need to feed it with a function that takes the
+passed in value and return something we needed from outside of the
+hole. I call these functions fed to a continuation <em>hole-filler</em>
+functions. For the arguments these hole-fillers take, I call them
+<em>seed</em> and the returning thing was barely named <em>yield</em>. I made these
+names just for referring the components more intuitively.</p>
+
+<h2 id="how-to-fill-in-the-holes">How to Fill in the Holes</h2>
+
+<p>We now see how <code>(a -&gt; r) -&gt; r</code> tastes like. You might think, well,
+continuation is weak that we are even restricted from modifying with
+the hole-filler’s yield. Well, yes, we cannot modify the yield. But
+continuation is not as weak as you might think, because modifying the
+yield is not the <em>correct</em> way to use a continuation.</p>
+
+<p>If you just want to modify the result of a passed in function and
+carry on the computation, you want a Monad instead of a continuation.
+Yet without being capable to modify the yield, you’re allowed to modify
+the seed freely.</p>
+
+<p>The significance of continuation is, in my understanding, just
+<strong>hole-filling</strong>. It’s like, if we’re playing with continuation, our
+aim will be giving out a seed to a incoming hole-filler, for which we
+don’t know what it is or what it will do. In the other words, we pass
+our result of computation IN instead of return it OUT.</p>
+
+<p>If we’ve composed a bunch of continuation together, that is, we get a
+very deeply nested continuations, how can we take the result out?
+Since the computation always throw their results inwards, by the
+seeds. Can we acquire the seed out of the continuation? Just think of
+the simplest example: <code>transformOne f = f 1</code>. The answer is, <code>id</code>
+(<code>id x = x</code>). If we feed the continuation with <code>id</code> function as
+hole-filler, it will yield the seed without any modification and then
+we can acquire it.</p>
+
+<p>As we take out the result, we can do whatever we want with it. Also we
+can take some actions directly onto the result. Think of feed a
+continuation with a <code>print</code> hole-filler, then we will see the seed
+printed out as expect.</p>
+
+<p>Now let’s think, how do we generate a continuation from a single
+value such that we can take out result out by feeding the continuation
+with <code>id</code>? The solution isn’t very hard:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">genCont</span> <span class="ow">::</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+</span><span class="line"><span class="nf">genCont</span> <span class="n">val</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">f</span> <span class="n">val</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>or more point-<del>lessly</del>freely:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">genCont</span> <span class="ow">=</span> <span class="n">flip</span> <span class="p">(</span><span class="o">$</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So far, we have gain a basic concept how continuations are created and
+composed together.</p>
+
+<h2 id="functor-property-of-continuations">Functor Property of Continuations</h2>
+
+<p>We now look on how to transform the seed with a function.  If we have
+a function <code>f :: a -&gt; b</code>, we hope we can use it to transform a
+continuation with type <code>(a -&gt; r) -&gt; r</code> into <code>(b -&gt; r) -&gt; r</code>. What does
+it mean? If I have a continuation with seed of type <code>Int</code>, how can use
+feed it with a hole-filler that eats <code>String</code>s? The answer is to have
+a transforming function of type <code>Int -&gt; String</code>.</p>
+
+<p>Here’s how we might these functions look like:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">toStr</span> <span class="ow">::</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">String</span>
+</span><span class="line"><span class="nf">toStr</span> <span class="ow">=</span> <span class="n">show</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">foo</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+</span><span class="line"><span class="nf">foo</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">f</span> <span class="mi">1</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">bar</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">String</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+</span><span class="line"><span class="nf">bar</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">f</span> <span class="s">&quot;1&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>If now we have <code>toStr</code> and <code>foo</code>, how should we combine them together
+to form <code>bar</code>?</p>
+
+<p>Some might recognize what we’re trying to implement is
+just <code>fmap</code>, if we make continuation an instance of
+<code>Functor</code>. We can do that, let’s try. First we wrap the function in
+this pattern it into a <code>newtype</code>, call it ‘Cont’.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">newtype</span> <span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="p">{</span> <span class="n">runCont</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The reason I write <code>Cont r a</code> instead of <code>Cont a r</code> is, the varying
+type for a continuation is its type of seed, rather than that of
+yield. So now we try:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">instance</span> <span class="kt">Functor</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">  <span class="n">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="o">???</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The returning value of fmap should be a continuation with seed type
+<code>b</code>. So first of all, we should have a continuation that takes an
+argument with a hole-filler with type <code>b -&gt; r</code>.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="p">(</span><span class="n">hf</span> <span class="ow">::</span> <span class="n">b</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="o">???</span> <span class="ow">::</span> <span class="n">r</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>We need a <code>r</code> as result, which should be generated by the passed in
+<code>hf</code>. And <code>hf</code> takes a value with type <code>b</code>. Obviously, this <code>b</code> should
+be transformed by <code>f</code> from <code>a</code>, i.e. <code>f (??? ::: a)</code>. So now we would
+have:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="p">(</span><span class="o">???</span> <span class="ow">::</span> <span class="n">a</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Now the problem has been converted to, how can we extract <code>a</code> from the
+passed in continuation <code>cnt</code>? The word <code>extract</code> implies that we have
+to get INTO it for what we want. Just as what we did above with
+<code>id</code>. <code>(cnt id)</code> will give us <code>a</code>, pretty cool. For some purpose, here
+I will expand the definition of <code>id</code>, which is <code>\x -&gt; x</code>, you’ll see
+why I do it in that way soon:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="p">(</span><span class="n">cnt</span> <span class="p">(</span><span class="nf">\</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Looks good, seems in this way we can extract <code>a</code> out of <code>cnt</code>. But
+wait, it doesn’t typecheck? Let’s see what happens. Without the type
+constrain above, the code compiles. When we query the type of <code>fmap</code>,
+it was in type <code>(a -&gt; b) -&gt; (Cont a a) -&gt; (Cont r b)</code>.</p>
+
+<p>This is not what we want. The returning type of <code>cnt</code> shouldn’t be
+restricted to <code>a</code> as what it is, rather, it should share the same <code>r</code>
+with the one in <code>Cont r b</code> as <code>fmap</code> finally returns. So we start to
+see how we can achieve that.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="p">(</span><span class="n">cnt</span> <span class="p">(</span><span class="nf">\</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="o">???</span> <span class="ow">::</span> <span class="n">r</span><span class="p">))))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>However, <code>f</code> expects to have an argument with type <code>a</code> isn’t it? How
+can we have the <code>a</code> in the context of <code>f</code> while keeping the returning
+type of <code>cnt</code> to be <code>r</code>?</p>
+
+<p>Okay, we look for where <code>r</code> is needed in the context and we easily
+found it:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="p">((</span><span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span><span class="p">))</span> <span class="ow">::</span> <span class="n">r</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>That means, if we have the <code>a</code> to feed into <code>f</code>, then we get a <code>b</code> to
+feed into the hole-filler <code>hf</code>, and the hole-filler will yield an <code>r</code>,
+which is what we wanted. But we don’t have an <code>a</code> for <code>f</code> at this
+point. The solution is to wrap the extraction of <code>a</code> around <code>hf (f
+a)</code>:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">cnt</span> <span class="p">(</span><span class="nf">\</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>It typechecks, so it should be correct. Try it out:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="p">(</span><span class="n">fmap</span> <span class="p">(</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">$</span> <span class="n">genCont</span> <span class="mi">3</span><span class="p">)</span> <span class="n">id</span>     <span class="c1">-- =&gt; 4</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Good.</p>
+
+<h2 id="monadic-continuations">Monadic Continuations</h2>
+
+<p>We now make continuation an instance of a monad:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">instance</span> <span class="kt">Monad</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">  <span class="n">return</span>           <span class="ow">=</span> <span class="o">???</span>
+</span><span class="line">  <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">f</span> <span class="ow">=</span> <span class="o">???</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The type of <code>return</code> is <code>a -&gt; Cont r a</code>. Unwrap the <code>Cont</code> we have
+<code>a -&gt; (a -&gt; r) -&gt; r</code>. Looks familiar? Yup it is just <code>genCont</code> we have
+above. The aim of <code>return</code> is to create a continuation from a value,
+the same as what <code>genCont</code> does. So this part is easy.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">return</span> <span class="n">x</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">hf</span> <span class="n">x</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">-- or pointlessly</span>
+</span><span class="line"><span class="nf">return</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">.</span> <span class="n">flip</span> <span class="p">(</span><span class="o">$</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Actually, after we deduced <code>fmap</code>, we’ll feel much easier to catch
+<code>&gt;&gt;=</code>. The significance is to take the value out from the continuation
+supplied as the first argument of <code>&gt;&gt;=</code>. The way to do this is similar
+to <code>fmap</code>.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="c1">-- cnt     :: (a -&gt; r) -&gt; r</span>
+</span><span class="line"><span class="c1">-- f       :: a -&gt; Cont r b</span>
+</span><span class="line"><span class="c1">-- (&gt;&gt;=)   :: (Cont r a) -&gt; (a -&gt; Cont r b) -&gt; Cont r b</span>
+</span><span class="line"><span class="c1">-- hf      :: b -&gt; r</span>
+</span><span class="line"><span class="c1">-- runCont :: (Cont r b) -&gt; ((b -&gt; r) -&gt; r)</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">f</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">cnt</span> <span class="p">(</span><span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">runCont</span> <span class="p">(</span><span class="n">f</span> <span class="n">x</span><span class="p">)</span> <span class="n">hf</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>This solution typechecks. Let’s look into it to see what it does in
+<code>&gt;&gt;=</code>. First of all, a holefiller</p>
+
+<h2 id="why-monad">Why monad?</h2>
+
+<p>Disclaimer: DO NOT READ THIS SECTION. This section was purely my OWN
+understanding to continuation monad. I try to write correct things but
+my thought was specific and could be quite misleading to beginners. If
+you think you haven’t understood continuation yet, don’t read this
+section because it will muddle you up once again. Otherwise, you’ve
+understood continuation well, you don’t need to read on my premitive
+and partial and inaccurate opinion. Anyway, don’t read it.</p>
+
+<p>Continuation, is just a kind of computations. A continuation could
+generate a dependent output that relies on a value, either a plain
+value or the output of another continuation, we call it composability
+property. (Although I used some general terms here, the way
+continuations take input is still very different from that of
+functions) On the other hand, we know we can produce a continuation
+that will generate a specified plain output. Therefore a continuation
+is a monad, whose ‘bind’ operation is the ‘compose’ operation of
+continuations.</p>
+
+<p>composed. ‘Composing’ two computations means to collapse them into
+one. On the other hand, computations are definitely the arrows in the
+category of inputs and outputs. On the third hand, we know we can
+always create a computation that gives no matter what input,
+because it is a  at the</p>
+
+<p>We’re now entering the domain of monad, so we now need to make use of
+our knowledge of how to implement <code>(&gt;&gt;=)</code>.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="https://wiki.haskell.org/All_about_monads#The_Continuation_monad">All about monads: Continuation</a></li>
+  <li><a href="https://www.fpcomplete.com/user/jwiegley/understanding-continuations">Understanding continuations</a></li>
+  <li><a href="http://www.haskellforall.com/2014/04/how-continuation-monad-works.html">How continuation monad works</a></li>
+  <li><a href="http://blog.sigfpe.com/2008/12/mother-of-all-monads.html">The mother of all monads</a></li>
+</ul>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Shou Ya</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-03-14T04:40:18+08:00" pubdate data-updated="true">Mar 14<span>th</span>, 2015</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/category/haskell/'>haskell</a>
+  
+</span>
+
+
+      
+
+<span class="tags">
+  
+    <a class='tag' href='/blog/tag/tutorial/'>tutorial</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://shouya.github.io/blog/undeepening-continuations/" data-via="" data-counturl="http://shouya.github.io/blog/undeepening-continuations/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/backwards-state-or-the-power-of-laziness/" title="Previous Post: 翻譯：逆向狀態，又：惰性之力">&laquo; 翻譯：逆向狀態，又：惰性之力</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/admonition-sono-ichi/" title="Next Post: 誡之一">誡之一 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/my-vps-was-hacked/">服務器被入侵手記</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/banana-algebra/">Banana Algebra</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/admonition-sono-ni/">誡之二</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/admonition-sono-ichi/">誡之一</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/undeepening-continuations/">Undeepening Continuations</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/shouya">@shouya</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'shouya',
+            count: 3,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+<section class="googleplus googleplus-hidden">
+  <h1>
+    <a href="https://plus.google.com/shouyatf@gmail.com?rel=author">
+      <img src="http://www.google.com/images/icons/ui/gprofile_button-32.png" width="32" height="32">
+      Google+
+    </a>
+  </h1>
+</section>
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016
+- Shou Ya
+- <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'shousorigin';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://shouya.github.io/blog/undeepening-continuations/';
+        var disqus_url = 'http://shouya.github.io/blog/undeepening-continuations/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

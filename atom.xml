@@ -4,7 +4,7 @@
   <title><![CDATA[Shou's origin]]></title>
   <link href="http://shouya.github.io/atom.xml" rel="self"/>
   <link href="http://shouya.github.io/"/>
-  <updated>2015-05-13T03:55:59-04:00</updated>
+  <updated>2016-10-04T23:02:32+08:00</updated>
   <id>http://shouya.github.io/</id>
   <author>
     <name><![CDATA[Shou Ya]]></name>
@@ -14,9 +14,291 @@
 
   
   <entry>
+    <title type="html"><![CDATA[服務器被入侵手記]]></title>
+    <link href="http://shouya.github.io/blog/my-vps-was-hacked/"/>
+    <updated>2016-10-04T22:43:45+08:00</updated>
+    <id>http://shouya.github.io/blog/my-vps-was-hacked</id>
+    <content type="html"><![CDATA[<h2 id="section">背景與起因</h2>
+
+<p>我想趁放假幾天玩一下 Docker 集群，順便跑個 shipyard 通過網頁管理自己 VPS 上運行的服務。</p>
+
+<p>因為是完全的新手，在這之前甚至連 Swarm 是什麼都不知道，所以完全按照 shipyard 官方文檔說的配置來都沒成功。</p>
+
+<p>最後發現是很愚蠢的錯誤，只是因為其中一步要使用一個服務把 <code>/var/run/docker.sock</code> 代理到 TCP/2375 端口上，而 swarm-agent 不知為何不能使用 <code>127.0.0.1:2375</code> 連接到本機，一定要用公網兜一圈才能找到本機的控制，而我忘記在防火牆上打開此特例。開了此特例，故問題解決。</p>
+
+<p>因為以前一直是在本機跑 Docker，也未暴露任何端口，故沒有啟用任何加密措施。事實上 <a href="http://shipyard-project.com/docs/deploy/automated/">shipyard 的手冊</a> 已經提醒過開放此端口相當於把 Docker 控制權給出去，應該設置好 Docker 通訊用 Socket 的 TLS 加密再玩，但我忽視了這個警告。</p>
+
+<p>shipyard 終於成功跑起來了，我玩了一會，得意之至，忘記了上面的警告和自己親手暴露的端口。接著我就折騰 Jenkins 之類的去了，玩得不亦樂乎。</p>
+
+<!-- more -->
+
+<h2 id="section-1">發現入侵</h2>
+
+<p>次日我繼續調戲 Docker，剛跑起 <code>kevana/ui-for-docker</code>，突然發現多了兩個正在運行的 Containers：</p>
+
+<p><img src="http://i.imgur.com/1a2exdg.png" alt="ui-for-docker 截圖" /></p>
+
+<p>（當時這兩個 Containers 還在運行）</p>
+
+<p>看到「exploit.sh」我就知道完了，第一時間 kill 掉了 <code>romantic_snyder</code> 和 <code>thirsty_kare</code> 這兩個 Containers。</p>
+
+<p>當務之急是立刻把 shipyard/swarm/etcd/docker-proxy 的服務暫時全停掉，還有把前一天給 2375 端口開的防火牆特例砍掉。</p>
+
+<h2 id="section-2">研究入侵</h2>
+
+<p>根據 Image 名字搜索了一下，<a href="https://hub.docker.com/r/chrisfosterelli/rootplease/">chrisfosterelli/rootplease</a> 是一個很 naïve 的 exploit 程序，原理就是通過 <code>docker run -v /:/hostOS</code> 來跑這個鏡像加上 <code>chroot</code> 來獲得 root 權限。入侵者應該在裡面執行了些什麼命令。</p>
+
+<p>而另一個 Container 跑了個很單純的 CentOS 加上 Bash，想必也是跑了些命令。</p>
+
+<p>害怕之餘，必須先弄清楚黑客做了什麼，首先是通過 <code>docker inspect thirsty_kare</code> (這個是 CentOS 對應的 Container) 和 <code>docker inspect romantic_snyder</code> (這個是 <code>chrisfosterelli/rootplease</code> 對應的 Container) 看看這兩個 Containers 的信息。</p>
+
+<p>具體信息太長，所以不貼上來，值得關注的一點：</p>
+
+<ul>
+  <li><code>chrisfosterelli/rootplease</code> 啟動時間是 <code>2016-10-02T14:04:15.86229242Z</code>，發生在 46 小時前</li>
+  <li>CentOS 啟動時間是 <code>2016-10-03T14:44:35.271194859Z</code>，發生在 21 小時前</li>
+</ul>
+
+<p>這意味著這很可能是兩次入侵，而我昨日忙於玩 Jenkins，竟然這麼久了才發現。</p>
+
+<p>進一步看這兩個 Containers 的 host bind 信息：</p>
+
+<ul>
+  <li><code>chrisfosterelli/rootplease</code> 是用的 <code>-v /:/hostOS</code>，也就意味著他拿到了 root shell</li>
+  <li><code>CentOS</code> 只掛載了 <code>-v /root/.ssh:/mnt</code>，意味著他的目的是修改 <code>/root/.ssh/authorized_keys</code> 來拿到 root 帳戶的 ssh 登入的權限。但就算目的不是，破壞範圍也有限，畢竟 Docker 是個沙盒</li>
+</ul>
+
+<p>然後我進入了兩個 Containers 文件系統鏡像（<a href="https://stackoverflow.com/questions/32750748/how-to-edit-files-in-stopped-not-starting-docker-container">不啟動 Container 查看文件系統鏡像</a>）：</p>
+
+<ul>
+  <li><code>chrisfosterelli/rootplease</code> 的 <code>/root/.bash_history</code> 其實是 Host 機器的 <code>/root/.bash_history</code>，內容都是我自己的命令歷史。謹慎起見，額外查看到 Container 的文件系統鏡像中的 <code>/root/.bash_history</code> 不存在</li>
+  <li>CentOS 那個 Container 的 <code>/root/.bash_history</code> 也不存在</li>
+</ul>
+
+<p>兩種猜測：1) 入侵者抹掉了歷史紀錄；2) 黑客離開的時候這兩個 bash 還在運行，沒有退出 bash 之前 bash 不會把歷史寫入文件，而我將 Container kill 掉之後，就意味著當時還在的 bash 進程的內存也被丟掉了<s>，這段歷史也將永遠被埋沒。</s></p>
+
+<p>兩種情況我都不可能知道他們做了什麼，只能通過各種痕跡推測。</p>
+
+<pre><code># cat /root/.ssh/authorized_keys
+root@ubuntu:~# cat .ssh/authorized_keys
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDRrvCaHsH8nZ6YrTsZaTFeKW3aPzUvlK+h+KT8rT4w6EGJgl8LVANHUsl5BF3RVGjFKFnBkX6jd6tWt+435h9vrEhxynoI69ljiiP9lD8GWgp0axmupqrcU3+OBiAmQ1OrOsMeNBdlw3GjAGPLI+ACd2WPPfKlWyQqDYrtzUPm5cz7HmI5Xo10KDcAS8gRJolH1AzBLfb8gPv8X9c9pKlpkUeST7j6MWLg3QQTShqbDB5j3IvL92KPhFmsOtJFd+efRyTiFhKsiQDY1h2er4gWcAn95GgLG6ci4D3d/kCoYRwIjRRrk5/4pRRq3wpp7/anI8qqJ6pPbdV9HvA/AEOp root@localhost.localdomain
+</code></pre>
+
+<p>看到黑客留下的自己的 SSH Key。隨手 <code>: &gt;/root/.ssh/authorized_keys</code> 把內容清空。</p>
+
+<h2 id="section-3">被入侵後的安全檢測</h2>
+
+<p>下一步就是看正在登入的 Sessions，看來是正常的：</p>
+
+<pre><code>$ w
+ 13:06:55 up 108 days,  4:26,  6 users,  load average: 0.01, 0.03, 0.05
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+shou     ttyS0                     18Jun16 108days  3.73s  2.98s [打碼]
+shou     pts/1    tmux(5178).%0    28Sep16  6days  1.92s  1.42s [打碼]
+shou     pts/2    tmux(5178).%1    28Sep16  5days  1:27m  1:27m [打碼]
+shou     pts/3    tmux(5178).%2    28Sep16  5days  4.68s  4.68s -zsh
+shou     pts/11   tmux(5178).%3    28Sep16  6days  0.67s  0.67s -zsh
+shou     pts/14   [連入 IP 打碼]    11:16    1.00s  3.84s  0.00s sshd: shou [priv]
+</code></pre>
+
+<p>然後是登入紀錄，也沒有異常：</p>
+
+<pre><code>$ last
+shou     pts/14       [連入 IP 打碼]     Tue Oct  4 11:16    gone - no logout
+shou     pts/4        [連入 IP 打碼]     Mon Oct  3 16:26 - 19:23  (02:57)
+shou     pts/0        [連入 IP 打碼]     Mon Oct  3 10:45 - 13:07  (02:22)
+shou     pts/0        [連入 IP 打碼]     Mon Oct  3 02:29 - 07:13  (04:44)
+shou     pts/0        [連入 IP 打碼]     Sun Oct  2 05:32 - 20:00  (14:27)
+[...]
+</code></pre>
+
+<p>登入日誌無異常，大概可以說明前面試圖設置 SSH root 後門的那位入侵者碰壁了。他是不是登入時認證出錯了呢？想起我在 SSH 裡用了增強安全性的配置，譬如改了默認端口，關了 PermitRootLogin，允許連接的用戶也是以白名單形式寫的。那麼有沒有認證錯誤信息呢？</p>
+
+<pre><code>$ sudo less /var/log/auth.log（或者 sudo journalctl -u ssh）
+[...]
+</code></pre>
+
+<p>內容很正常，沒有看到有人用 root 登入認證出錯的信息。</p>
+
+<p>那位使用 CentOS + Bash 的入侵者看來是碰壁了，畢竟他沒有辦法訪問到 Host 機器的 <code>/etc/ssh/sshd_config</code> 不可能知道我做了哪些安全措施。然後我有防火牆，連去 TCP/22 的連接會被直接棄掉，所以沒有 SSH 登入紀錄當然不意外。</p>
+
+<p>於是來研究第一位入侵者可能做了的事情。首先檢查 systemd 啟動項：</p>
+
+<pre><code>$ systemctl list-unit-files | grep enabled
+accounts-daemon.service                    enabled
+cron.service                               enabled
+deploy_daemon.service                      enabled
+docker.service                             enabled
+[...]
+</code></pre>
+
+<p>然後挨個查看這些啟動項的詳情，如果在最近啟動過的就要注意了。</p>
+
+<pre><code>$ systemctl status accounts-daemon.service
+$ systemctl status cron.service
+$ [...]
+</code></pre>
+
+<p>所幸都沒問題。不通過 systemd 服務，要設置自動啟動程序，那就只能注入 <code>/etc/profile</code>，<code>/etc/{rc*.d/*,rc.local}</code> 之類的啟動腳本了，簡單看了一下這些文件的修改日期：</p>
+
+<pre><code>$ stat /etc/profile
+File: '/etc/profile'
+Size: 575       	Blocks: 8          IO Block: 4096   regular file
+Device: 800h/2048d	Inode: 326         Links: 1
+Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2016-04-21 19:25:20.949283213 +0000
+Modify: 2015-10-22 17:15:21.000000000 +0000
+Change: 2016-04-22 00:09:57.362266110 +0000
+ Birth: -
+</code></pre>
+
+<p>得出這些文件也均未在近期被修改過。</p>
+
+<p>這下看來入侵者不指望在啟動時運行什麼了，那麼會不會是設置成定期運行了呢？</p>
+
+<p>再檢查 <code>/etc/crontab</code>，以及 <code>/etc/cron.d/*</code> 和 <code>/etc/cron.{hourly,daily,...}/*</code> 裡的所有文件。看來這些文件修改時間都未變過。</p>
+
+<p>但說不定現在就有個木馬在跑，於是檢查所有正在偵聽的端口：</p>
+
+<pre><code>$ sudo netstat -lptn | grep 0.0.0.0
+[...]
+tcp      0      0 0.0.0.0:[打碼]         0.0.0.0:*           LISTEN      29878/[某已知服務]
+tcp      0      0 0.0.0.0:[打碼]         0.0.0.0:*           LISTEN      23577/sshd
+[...]
+</code></pre>
+
+<p>除了 TCP，UDP 也不例外：</p>
+
+<pre><code>$ sudo netstat -lpun | grep 0.0.0.0
+[...]
+</code></pre>
+
+<p>除了 IPv4，還要看看 IPv6 的，於是也要 <code>grep</code> 一下 <code>':::'</code>。</p>
+
+<p>看來都很正常，這些服務也都是我自己知道的。之所以 <code>netstat</code> 要加上 <code>-p</code> 選項，是因為這樣可以獲取到正在偵聽該端口的程序的 PID，有了 PID 我們就可以通過 <code>/proc/[PID]/*</code> 下的文件來得到進程的所有信息了。</p>
+
+<h2 id="section-4">結論</h2>
+
+<p>那位試圖通過修改 <code>/root/.ssh/authorized_keys</code> 來開後門的看來九成是失敗了。</p>
+
+<p>比較擔心另一位使用 <code>chrisfosterelli/rootplease</code> 的入侵者，畢竟他得到的是 root shell，也能不確定他做了什麼。</p>
+
+<p>根據排查，基本上也排除了被安裝木馬的可能性，而且直觀看來似乎也沒有做任何破壞性操作，猜測他也可能在某處碰壁而不繼續了。</p>
+
+<p>此外，我不太認為入侵者是深思熟慮並且小心翼翼的，畢竟他們很粗心地留下這幾個正在運行的 Docker Containers 這麼明顯的線索。所以這次入侵看來並沒有什麼問題。</p>
+
+<p>但也可能並非這麼簡單。</p>
+
+<p>既然兩天前就有人入侵並且輕鬆得到了 root shell，沒有任何理由假設我只被這兩人入侵過。可能其他入侵者侵入後小心地刪掉了入侵所用的 Container，這樣我就沒有線索來知道他們從何入侵，又做了什麼了。</p>
+
+<p>也有可能入侵者使用非常小心的手段把惡意程序注入了系統，譬如說修改了文件的修改時間或者在已知的服務中加了後門，而後門也不是簡單偵聽在 TCP/UDP 的，而還在運行的 Container 則是故意留下的。這樣的話排除入侵可能性的難度就大大提升了，畢竟我沒有精力檢查一個個文件內容是否正常。</p>
+
+<p>當然既然已知服務器被入侵過，就不能依然像以前一樣放心使用了，這幾天我會把數據遷移一下，然後重裝系統。</p>
+
+<h2 id="section-5">教訓</h2>
+
+<ul>
+  <li>配置好防火牆很重要</li>
+  <li>配置好 ssh 安全性很重要</li>
+  <li>給防火牆白名單加規則前思考一下可能的後果，特別以 root 權限運行的進程</li>
+  <li>開放端口時一定要改默認端口</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Banana Algebra]]></title>
+    <link href="http://shouya.github.io/blog/banana-algebra/"/>
+    <updated>2015-06-08T00:00:00+08:00</updated>
+    <id>http://shouya.github.io/blog/banana-algebra</id>
+    <content type="html"><![CDATA[<p>Abstract: I’ll be talking about the F-Algebra Category and related
+applications of F-Algebra in function programming in this post.</p>
+
+<h2 id="f-algebra">F-Algebra</h2>
+
+<p>So first of all, an algebra over a type $a$ is set of functions that
+converts an algebra structure $f a$ to $a$ <a href="http://web.cecs.pdx.edu/~sheard/course/AdvancedFP/notes/CoAlgebras/Code.html" title="Advanced Functional Programming, Tim Sheard's course notes.">CoAlg</a>. An algebra consists of:</p>
+
+<ul>
+  <li>An algebra structure: $\rm{F}$</li>
+  <li>A carrier type: $\rm{a}$</li>
+  <li>A total function: $\rm{F(a)} \to \rm{a}$</li>
+</ul>
+
+<p>An example of an algebra looks like:</p>
+
+<ul>
+  <li>Algebra struct: <code>data F1 a = Zero | One | Plus a a</code></li>
+  <li>A carrier type: it could be any instance of <code>a</code>: <code>Int</code>, <code>String</code>, etc.</li>
+  <li>A total function:</li>
+</ul>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">f1</span> <span class="ow">::</span> <span class="kt">F1</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">Int</span>
+</span><span class="line"><span class="nf">f1</span> <span class="kt">Zero</span>       <span class="ow">=</span> <span class="mi">0</span>
+</span><span class="line"><span class="nf">f1</span> <span class="kt">One</span>        <span class="ow">=</span> <span class="mi">1</span>
+</span><span class="line"><span class="nf">f1</span> <span class="p">(</span><span class="kt">Plus</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="ow">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Or we can have:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">f1&#39;</span> <span class="ow">::</span> <span class="kt">F1</span> <span class="kt">String</span> <span class="ow">-&gt;</span> <span class="kt">String</span>
+</span><span class="line"><span class="nf">f1&#39;</span> <span class="kt">Zero</span>       <span class="ow">=</span> <span class="s">&quot;&quot;</span>
+</span><span class="line"><span class="nf">f1&#39;</span> <span class="kt">One</span>        <span class="ow">=</span> <span class="s">&quot;1&quot;</span>
+</span><span class="line"><span class="nf">f1&#39;</span> <span class="p">(</span><span class="kt">Plus</span> <span class="n">a</span> <span class="n">b</span><span class="p">)</span> <span class="ow">=</span> <span class="n">a</span> <span class="o">++</span> <span class="n">b</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<h2 id="f-algebra-arrows">F-Algebra Arrows</h2>
+
+<p>All algebras for an algebra structure $\rm{F}$ forms a category
+$\cal{C}$. The objects are, of course, the algebras, while the arrows
+are defined as morphisms between each two pair of algebras that
+transforming the carrier type:
+$\hom_{\cal{C}}(\rm{Alg}(\rm{F},\rm{a}), \rm{Alg}(\rm{F},\rm{b}))$.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+</pre></td><td class="code"><pre><code class="text"><span class="line">   Alg(F,a)
+</span><span class="line">F a --------------&gt; a
+</span><span class="line">      |
+</span><span class="line">      |
+</span><span class="line">      | &lt;- hom(Alg(F,a), Alg(F,b))
+</span><span class="line">      |
+</span><span class="line">      v
+</span><span class="line">F b --------------&gt; b
+</span><span class="line">  Alg(F,b)
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>For an arrow in F-algebra category, we need a transformation from <code>F a</code>
+to <code>a</code>.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li></li>
+</ul>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[誡之二]]></title>
     <link href="http://shouya.github.io/blog/admonition-sono-ni/"/>
-    <updated>2015-05-08T14:50:53-04:00</updated>
+    <updated>2015-05-09T02:50:53+08:00</updated>
     <id>http://shouya.github.io/blog/admonition-sono-ni</id>
     <content type="html"><![CDATA[<p>凌，則隱  <br />
 長，則同  <br />
@@ -30,7 +312,7 @@
   <entry>
     <title type="html"><![CDATA[誡之一]]></title>
     <link href="http://shouya.github.io/blog/admonition-sono-ichi/"/>
-    <updated>2015-05-03T22:17:11-04:00</updated>
+    <updated>2015-05-04T10:17:11+08:00</updated>
     <id>http://shouya.github.io/blog/admonition-sono-ichi</id>
     <content type="html"><![CDATA[<p>分離，融合  <br />
 形影不離  <br />
@@ -46,9 +328,394 @@
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[Undeepening Continuations]]></title>
+    <link href="http://shouya.github.io/blog/undeepening-continuations/"/>
+    <updated>2015-03-14T04:40:18+08:00</updated>
+    <id>http://shouya.github.io/blog/undeepening-continuations</id>
+    <content type="html"><![CDATA[<p>Continuation was always a mystery to me since I started to learn
+monad.</p>
+
+<p>My friend Javran once sent me a link to ‘the mother of all monads’,
+from where I start to rethink the significance of the continuation
+monad. That article, to me as a novice, wasn’t enough explanative for
+me to comprehend. Therefore, to demystify the significance of the
+continuation monad, I spend several hours to read through articles
+about it last night. In the final, I eventually carried my
+understanding to continuation out into code and
+<a href="http://learnyouanagda.liamoc.net/">achieved enlightenment</a>. (not
+really)</p>
+
+<p>So let’s get started. First of all, we need to know, at least have a
+primitive concept of, what continuation is used for. So here is my
+understanding,</p>
+
+<blockquote>
+  <p>A continuation is an intermediate state that allows computation to
+run at that point.</p>
+</blockquote>
+
+<p>You don’t need to try hardly on comprehending the statement above. By
+going through this tutorial you will make your own understanding out.</p>
+
+<!-- more -->
+
+<h2 id="computation-with-holes">Computation with Holes</h2>
+
+<p>As we said above a continuation is a <em>intermediate</em> state that we can
+delay the computation to the future. Let’s see how these functions
+look like:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">transformOne</span> <span class="ow">=</span> <span class="o">???</span> <span class="mi">1</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">doSomethingOnOne</span> <span class="ow">=</span> <span class="kr">do</span>
+</span><span class="line">  <span class="n">putStrLn</span> <span class="s">&quot;before execution&quot;</span>
+</span><span class="line">  <span class="o">???</span> <span class="mi">1</span>
+</span><span class="line">  <span class="n">putStrLn</span> <span class="s">&quot;after execution&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So we’re defining two functions with this feature. The first one is
+rather easy to see, on the blank (<code>???</code>) there should be a function,
+which takes an integer and yields whatever things. In the
+<code>doSomethingOnOne</code> there should also be a function like that in the
+first, expect being constrained to return an <code>IO a</code>.</p>
+
+<p>Here’s the modified finished functions and their corresponding types:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">transformOne</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+</span><span class="line"><span class="nf">transformOne</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">f</span> <span class="mi">1</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">doSomethingOnOne</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">IO</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="kt">IO</span> <span class="nb">()</span>
+</span><span class="line"><span class="nf">doSomethingOnOne</span> <span class="n">f</span> <span class="ow">=</span> <span class="kr">do</span>
+</span><span class="line">  <span class="n">putStrLn</span> <span class="s">&quot;before execution&quot;</span>
+</span><span class="line">  <span class="n">val</span> <span class="ow">&lt;-</span> <span class="n">f</span> <span class="mi">1</span>
+</span><span class="line">  <span class="n">putStrLn</span> <span class="p">(</span><span class="s">&quot;we get &quot;</span> <span class="o">++</span> <span class="n">show</span> <span class="n">val</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>If you have other experiences about <code>Control.Monad.Cont</code>, you might be
+able to recognize the pattern in the types. Strictly, the latter one
+isn’t what continuation monad looks like because <code>IO a</code> is not the
+same as <code>IO ()</code>. Well, this is normal in our real life programming,
+but we can’t call them continuation because they’re not
+composable. And one of the main purposes we want to generalize
+continuation is to make them composable so they could be an instance
+of <code>Monad</code>. <del>Why? Well, a monad is just a MONOID in the category
+endofunctors, monoid implies composablity, what’s the problem?  Why?
+Well, a monoid is a just a SEMIGROUP in combine with an identity
+object, what’s the problem? But why? Well, that’s how semigroup is
+defined, what’s the problem?</del></p>
+
+<p>Anyway, we’ll see if we can make a continuation stronger, that is, in
+type of <code>(a -&gt; r) -&gt; r</code>, we make our life easier. For now, just
+remember it, that <code>(a -&gt; r) -&gt; r</code> is the type of continuation. Which
+means we can’t have the second piece of code above unless we add a
+<code>return val</code> at the end of the <code>do</code> notation. It also means you can’t
+have continuation like <code>foo f = show (f 1)</code>, which modifies the
+result.</p>
+
+<p>These functions are what we called <code>continuations</code>. It’s intuitive to
+think them as functions with a hole to be filled. To fill the hole in
+a continuation we need to feed it with a function that takes the
+passed in value and return something we needed from outside of the
+hole. I call these functions fed to a continuation <em>hole-filler</em>
+functions. For the arguments these hole-fillers take, I call them
+<em>seed</em> and the returning thing was barely named <em>yield</em>. I made these
+names just for referring the components more intuitively.</p>
+
+<h2 id="how-to-fill-in-the-holes">How to Fill in the Holes</h2>
+
+<p>We now see how <code>(a -&gt; r) -&gt; r</code> tastes like. You might think, well,
+continuation is weak that we are even restricted from modifying with
+the hole-filler’s yield. Well, yes, we cannot modify the yield. But
+continuation is not as weak as you might think, because modifying the
+yield is not the <em>correct</em> way to use a continuation.</p>
+
+<p>If you just want to modify the result of a passed in function and
+carry on the computation, you want a Monad instead of a continuation.
+Yet without being capable to modify the yield, you’re allowed to modify
+the seed freely.</p>
+
+<p>The significance of continuation is, in my understanding, just
+<strong>hole-filling</strong>. It’s like, if we’re playing with continuation, our
+aim will be giving out a seed to a incoming hole-filler, for which we
+don’t know what it is or what it will do. In the other words, we pass
+our result of computation IN instead of return it OUT.</p>
+
+<p>If we’ve composed a bunch of continuation together, that is, we get a
+very deeply nested continuations, how can we take the result out?
+Since the computation always throw their results inwards, by the
+seeds. Can we acquire the seed out of the continuation? Just think of
+the simplest example: <code>transformOne f = f 1</code>. The answer is, <code>id</code>
+(<code>id x = x</code>). If we feed the continuation with <code>id</code> function as
+hole-filler, it will yield the seed without any modification and then
+we can acquire it.</p>
+
+<p>As we take out the result, we can do whatever we want with it. Also we
+can take some actions directly onto the result. Think of feed a
+continuation with a <code>print</code> hole-filler, then we will see the seed
+printed out as expect.</p>
+
+<p>Now let’s think, how do we generate a continuation from a single
+value such that we can take out result out by feeding the continuation
+with <code>id</code>? The solution isn’t very hard:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">genCont</span> <span class="ow">::</span> <span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+</span><span class="line"><span class="nf">genCont</span> <span class="n">val</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">f</span> <span class="n">val</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>or more point-<del>lessly</del>freely:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">genCont</span> <span class="ow">=</span> <span class="n">flip</span> <span class="p">(</span><span class="o">$</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>So far, we have gain a basic concept how continuations are created and
+composed together.</p>
+
+<h2 id="functor-property-of-continuations">Functor Property of Continuations</h2>
+
+<p>We now look on how to transform the seed with a function.  If we have
+a function <code>f :: a -&gt; b</code>, we hope we can use it to transform a
+continuation with type <code>(a -&gt; r) -&gt; r</code> into <code>(b -&gt; r) -&gt; r</code>. What does
+it mean? If I have a continuation with seed of type <code>Int</code>, how can use
+feed it with a hole-filler that eats <code>String</code>s? The answer is to have
+a transforming function of type <code>Int -&gt; String</code>.</p>
+
+<p>Here’s how we might these functions look like:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">toStr</span> <span class="ow">::</span> <span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="kt">String</span>
+</span><span class="line"><span class="nf">toStr</span> <span class="ow">=</span> <span class="n">show</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">foo</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">Int</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+</span><span class="line"><span class="nf">foo</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">f</span> <span class="mi">1</span>
+</span><span class="line">
+</span><span class="line"><span class="nf">bar</span> <span class="ow">::</span> <span class="p">(</span><span class="kt">String</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span>
+</span><span class="line"><span class="nf">bar</span> <span class="n">f</span> <span class="ow">=</span> <span class="n">f</span> <span class="s">&quot;1&quot;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>If now we have <code>toStr</code> and <code>foo</code>, how should we combine them together
+to form <code>bar</code>?</p>
+
+<p>Some might recognize what we’re trying to implement is
+just <code>fmap</code>, if we make continuation an instance of
+<code>Functor</code>. We can do that, let’s try. First we wrap the function in
+this pattern it into a <code>newtype</code>, call it ‘Cont’.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">newtype</span> <span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="p">{</span> <span class="n">runCont</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="n">r</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The reason I write <code>Cont r a</code> instead of <code>Cont a r</code> is, the varying
+type for a continuation is its type of seed, rather than that of
+yield. So now we try:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">instance</span> <span class="kt">Functor</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">  <span class="n">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="o">???</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The returning value of fmap should be a continuation with seed type
+<code>b</code>. So first of all, we should have a continuation that takes an
+argument with a hole-filler with type <code>b -&gt; r</code>.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="p">(</span><span class="n">hf</span> <span class="ow">::</span> <span class="n">b</span> <span class="ow">-&gt;</span> <span class="n">r</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="o">???</span> <span class="ow">::</span> <span class="n">r</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>We need a <code>r</code> as result, which should be generated by the passed in
+<code>hf</code>. And <code>hf</code> takes a value with type <code>b</code>. Obviously, this <code>b</code> should
+be transformed by <code>f</code> from <code>a</code>, i.e. <code>f (??? ::: a)</code>. So now we would
+have:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="p">(</span><span class="o">???</span> <span class="ow">::</span> <span class="n">a</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Now the problem has been converted to, how can we extract <code>a</code> from the
+passed in continuation <code>cnt</code>? The word <code>extract</code> implies that we have
+to get INTO it for what we want. Just as what we did above with
+<code>id</code>. <code>(cnt id)</code> will give us <code>a</code>, pretty cool. For some purpose, here
+I will expand the definition of <code>id</code>, which is <code>\x -&gt; x</code>, you’ll see
+why I do it in that way soon:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="p">(</span><span class="n">cnt</span> <span class="p">(</span><span class="nf">\</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">a</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Looks good, seems in this way we can extract <code>a</code> out of <code>cnt</code>. But
+wait, it doesn’t typecheck? Let’s see what happens. Without the type
+constrain above, the code compiles. When we query the type of <code>fmap</code>,
+it was in type <code>(a -&gt; b) -&gt; (Cont a a) -&gt; (Cont r b)</code>.</p>
+
+<p>This is not what we want. The returning type of <code>cnt</code> shouldn’t be
+restricted to <code>a</code> as what it is, rather, it should share the same <code>r</code>
+with the one in <code>Cont r b</code> as <code>fmap</code> finally returns. So we start to
+see how we can achieve that.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="p">(</span><span class="n">cnt</span> <span class="p">(</span><span class="nf">\</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="o">???</span> <span class="ow">::</span> <span class="n">r</span><span class="p">))))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>However, <code>f</code> expects to have an argument with type <code>a</code> isn’t it? How
+can we have the <code>a</code> in the context of <code>f</code> while keeping the returning
+type of <code>cnt</code> to be <code>r</code>?</p>
+
+<p>Okay, we look for where <code>r</code> is needed in the context and we easily
+found it:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="p">((</span><span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span><span class="p">))</span> <span class="ow">::</span> <span class="n">r</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>That means, if we have the <code>a</code> to feed into <code>f</code>, then we get a <code>b</code> to
+feed into the hole-filler <code>hf</code>, and the hole-filler will yield an <code>r</code>,
+which is what we wanted. But we don’t have an <code>a</code> for <code>f</code> at this
+point. The solution is to wrap the extraction of <code>a</code> around <code>hf (f
+a)</code>:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="n">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">a</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span> <span class="n">b</span><span class="p">)</span>
+</span><span class="line"><span class="nf">fmap</span> <span class="n">f</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">cnt</span> <span class="p">(</span><span class="nf">\</span><span class="n">a</span> <span class="ow">-&gt;</span> <span class="p">(</span><span class="n">hf</span> <span class="p">(</span><span class="n">f</span> <span class="n">a</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>It typechecks, so it should be correct. Try it out:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="p">(</span><span class="n">fmap</span> <span class="p">(</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">$</span> <span class="n">genCont</span> <span class="mi">3</span><span class="p">)</span> <span class="n">id</span>     <span class="c1">-- =&gt; 4</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Good.</p>
+
+<h2 id="monadic-continuations">Monadic Continuations</h2>
+
+<p>We now make continuation an instance of a monad:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="kr">instance</span> <span class="kt">Monad</span> <span class="p">(</span><span class="kt">Cont</span> <span class="n">r</span><span class="p">)</span> <span class="kr">where</span>
+</span><span class="line">  <span class="n">return</span>           <span class="ow">=</span> <span class="o">???</span>
+</span><span class="line">  <span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">f</span> <span class="ow">=</span> <span class="o">???</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>The type of <code>return</code> is <code>a -&gt; Cont r a</code>. Unwrap the <code>Cont</code> we have
+<code>a -&gt; (a -&gt; r) -&gt; r</code>. Looks familiar? Yup it is just <code>genCont</code> we have
+above. The aim of <code>return</code> is to create a continuation from a value,
+the same as what <code>genCont</code> does. So this part is easy.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="nf">return</span> <span class="n">x</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">hf</span> <span class="n">x</span>
+</span><span class="line">
+</span><span class="line"><span class="c1">-- or pointlessly</span>
+</span><span class="line"><span class="nf">return</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">.</span> <span class="n">flip</span> <span class="p">(</span><span class="o">$</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>Actually, after we deduced <code>fmap</code>, we’ll feel much easier to catch
+<code>&gt;&gt;=</code>. The significance is to take the value out from the continuation
+supplied as the first argument of <code>&gt;&gt;=</code>. The way to do this is similar
+to <code>fmap</code>.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+</pre></td><td class="code"><pre><code class="haskell"><span class="line"><span class="c1">-- cnt     :: (a -&gt; r) -&gt; r</span>
+</span><span class="line"><span class="c1">-- f       :: a -&gt; Cont r b</span>
+</span><span class="line"><span class="c1">-- (&gt;&gt;=)   :: (Cont r a) -&gt; (a -&gt; Cont r b) -&gt; Cont r b</span>
+</span><span class="line"><span class="c1">-- hf      :: b -&gt; r</span>
+</span><span class="line"><span class="c1">-- runCont :: (Cont r b) -&gt; ((b -&gt; r) -&gt; r)</span>
+</span><span class="line">
+</span><span class="line"><span class="p">(</span><span class="kt">Cont</span> <span class="n">cnt</span><span class="p">)</span> <span class="o">&gt;&gt;=</span> <span class="n">f</span> <span class="ow">=</span> <span class="kt">Cont</span> <span class="o">$</span> <span class="nf">\</span><span class="n">hf</span> <span class="ow">-&gt;</span> <span class="n">cnt</span> <span class="p">(</span><span class="nf">\</span><span class="n">x</span> <span class="ow">-&gt;</span> <span class="n">runCont</span> <span class="p">(</span><span class="n">f</span> <span class="n">x</span><span class="p">)</span> <span class="n">hf</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+
+<p>This solution typechecks. Let’s look into it to see what it does in
+<code>&gt;&gt;=</code>. First of all, a holefiller</p>
+
+<h2 id="why-monad">Why monad?</h2>
+
+<p>Disclaimer: DO NOT READ THIS SECTION. This section was purely my OWN
+understanding to continuation monad. I try to write correct things but
+my thought was specific and could be quite misleading to beginners. If
+you think you haven’t understood continuation yet, don’t read this
+section because it will muddle you up once again. Otherwise, you’ve
+understood continuation well, you don’t need to read on my premitive
+and partial and inaccurate opinion. Anyway, don’t read it.</p>
+
+<p>Continuation, is just a kind of computations. A continuation could
+generate a dependent output that relies on a value, either a plain
+value or the output of another continuation, we call it composability
+property. (Although I used some general terms here, the way
+continuations take input is still very different from that of
+functions) On the other hand, we know we can produce a continuation
+that will generate a specified plain output. Therefore a continuation
+is a monad, whose ‘bind’ operation is the ‘compose’ operation of
+continuations.</p>
+
+<p>composed. ‘Composing’ two computations means to collapse them into
+one. On the other hand, computations are definitely the arrows in the
+category of inputs and outputs. On the third hand, we know we can
+always create a computation that gives no matter what input,
+because it is a  at the</p>
+
+<p>We’re now entering the domain of monad, so we now need to make use of
+our knowledge of how to implement <code>(&gt;&gt;=)</code>.</p>
+
+<h2 id="references">References</h2>
+
+<ul>
+  <li><a href="https://wiki.haskell.org/All_about_monads#The_Continuation_monad">All about monads: Continuation</a></li>
+  <li><a href="https://www.fpcomplete.com/user/jwiegley/understanding-continuations">Understanding continuations</a></li>
+  <li><a href="http://www.haskellforall.com/2014/04/how-continuation-monad-works.html">How continuation monad works</a></li>
+  <li><a href="http://blog.sigfpe.com/2008/12/mother-of-all-monads.html">The mother of all monads</a></li>
+</ul>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[翻譯：逆向狀態，又：惰性之力]]></title>
     <link href="http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness/"/>
-    <updated>2015-03-04T22:14:35-05:00</updated>
+    <updated>2015-03-05T11:14:35+08:00</updated>
     <id>http://shouya.github.io/blog/backwards-state-or-the-power-of-laziness</id>
     <content type="html"><![CDATA[<blockquote>
   <p>原文 「<a href="http://panicsonic.blogspot.jp/2007/12/backwards-state-or-power-of-laziness.html">Backwards State, or: The Power of Laziness</a>」由 Antoine Latter 發佈於其個人<a href="http://panicsonic.blogspot.jp/">Blogger</a>上。特別地，對 Philip Wadler 及其著作的 <a href="http://citeseer.ist.psu.edu/wadler92essence.html">The Essence of Functional Programming</a>表示至高感謝。</p>
@@ -436,7 +1103,7 @@
   <entry>
     <title type="html"><![CDATA[深淵]]></title>
     <link href="http://shouya.github.io/blog/the-abyss/"/>
-    <updated>2014-12-24T11:06:41-05:00</updated>
+    <updated>2014-12-25T00:06:41+08:00</updated>
     <id>http://shouya.github.io/blog/the-abyss</id>
     <content type="html"><![CDATA[<p>站在深淵面前   <br />
 驅使自己踏前一步   <br />
@@ -469,7 +1136,7 @@
   <entry>
     <title type="html"><![CDATA[翻譯：Haskell 怎麼實現惰性求值]]></title>
     <link href="http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell/"/>
-    <updated>2014-11-24T06:14:57-05:00</updated>
+    <updated>2014-11-24T19:14:57+08:00</updated>
     <id>http://shouya.github.io/blog/how-lazy-evaluation-works-in-haskell</id>
     <content type="html"><![CDATA[<blockquote>
   <p>原文由 <a href="http://apfelmus.nfshost.com/blog.html">Heinrich Apfelmus</a> 發表於 <a href="https://hackhands.com/lazy-evaluation-works-haskell/">Hackhands</a>，標題：How Lazy Evaluatoin Works in Haskell。</p>
@@ -820,7 +1487,7 @@
   <entry>
     <title type="html"><![CDATA[Function Calling Syntax]]></title>
     <link href="http://shouya.github.io/blog/function-calling-syntax/"/>
-    <updated>2014-08-03T05:59:14-04:00</updated>
+    <updated>2014-08-03T17:59:14+08:00</updated>
     <id>http://shouya.github.io/blog/function-calling-syntax</id>
     <content type="html"><![CDATA[<p>We use programming languages to indicate a process of
 actions/computations. Therefore programming languages tends to be more
@@ -994,7 +1661,7 @@ used in Scheme compilers.</p>
   <entry>
     <title type="html"><![CDATA[翻譯：如何幸福起來]]></title>
     <link href="http://shouya.github.io/blog/how-to-be-happy/"/>
-    <updated>2014-07-28T10:17:07-04:00</updated>
+    <updated>2014-07-28T22:17:07+08:00</updated>
     <id>http://shouya.github.io/blog/how-to-be-happy</id>
     <content type="html"><![CDATA[<blockquote>
   <p>原文由 lukeprog 發表於 <a href="http://lesswrong.com/lw/4su/how_to_be_happy/">LessWrong</a>。
@@ -1088,7 +1755,7 @@ used in Scheme compilers.</p>
   <entry>
     <title type="html"><![CDATA[Linux 下 GFW 的 DNS 投毒解決方案]]></title>
     <link href="http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution/"/>
-    <updated>2014-07-25T14:27:35-04:00</updated>
+    <updated>2014-07-26T02:27:35+08:00</updated>
     <id>http://shouya.github.io/blog/dnscrypt-plus-dnsmasq-solution</id>
     <content type="html"><![CDATA[<p>這篇日誌紀錄我在 Gentoo Linux 下配置 DNS Crypt + DNSmasq 的過程。</p>
 
@@ -1245,7 +1912,7 @@ $ sudo rc-update add dnsmasq default
   <entry>
     <title type="html"><![CDATA[A Brief Journal About Learning Coq]]></title>
     <link href="http://shouya.github.io/blog/a-brief-journal-about-learning-coq/"/>
-    <updated>2014-07-04T13:08:34-04:00</updated>
+    <updated>2014-07-05T01:08:34+08:00</updated>
     <id>http://shouya.github.io/blog/a-brief-journal-about-learning-coq</id>
     <content type="html"><![CDATA[<p><em>This article is completely an informal journal about my learning process on
 Coq. It is just created as my whim prompted. Please don’t academically refer
@@ -1564,7 +2231,7 @@ Lisp.</p>
   <entry>
     <title type="html"><![CDATA[夢魘]]></title>
     <link href="http://shouya.github.io/blog/digging-in-a-dream/"/>
-    <updated>2014-06-29T06:45:29-04:00</updated>
+    <updated>2014-06-29T18:45:29+08:00</updated>
     <id>http://shouya.github.io/blog/digging-in-a-dream</id>
     <content type="html"><![CDATA[<p>晚上，我在墳地挖土，點上火炬。 <br />
 頭頂的火光把周圍照得通明。   </p>
@@ -1599,9 +2266,106 @@ Lisp.</p>
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[Thinking in Typing System]]></title>
+    <link href="http://shouya.github.io/blog/thinking-in-typing-system/"/>
+    <updated>2014-06-03T03:28:27+08:00</updated>
+    <id>http://shouya.github.io/blog/thinking-in-typing-system</id>
+    <content type="html"><![CDATA[<p>I am reading the paper ‘Practical type inference for arbitrary-rank
+types’ [<a href="http://research.microsoft.com/en-us/um/people/simonpj/papers/higher-rank/putting.pdf">pdf</a>, <a href="https://research.microsoft.com/en-us/um/people/simonpj/papers/higher-rank/">official webpage</a>]. Here are some ideas raised while I
+was reading the paper. Those ideas might be not complete or not
+conscientious.</p>
+
+<h2 id="concept-of-subsumption">Concept of “subsumption”</h2>
+
+<p><strong>DISCLAIMER</strong>: In this section I have a misunderstanding about the
+subsumption relation. Please check on
+<a href="http://stackoverflow.com/questions/24084808/what-do-we-mean-when-we-say-t1-is-more-polymorphic-than-t2">my question</a>
+on stackoverflow.</p>
+
+<p>In the article it poses that we call types A and B in the relation
+‘subsumption’ if A is more polymorphic than B.</p>
+
+<p>The concept <em>polymorphism</em> is studied elsewhere and has different
+meanings accordingly. Referring to
+<a href="http://en.wikipedia.org/wiki/Polymorphism_(computer_science)#Parametric_polymorphism">wikipedia</a>,
+there are three types of polymorphism. One is some like overloading
+with different types <em>overloading</em>, another one <em>sub-typing</em> in object
+oriented programming. We’re discussing the polymorphism in haskell, in
+which a polymorphic function/data type is regarded as a kind of
+function/data type written generically. This kind of polymorphism is
+called <em>parametric polymorphism</em>.</p>
+
+<p>So what exactly is the relation ‘more polymorphic than’ understood? I
+conceived the definition myself, not sure if it’s accurate.</p>
+
+<blockquote>
+  <p>To say a type <code>T1</code> is more polymorphic than <code>T2</code>, is to say that,
+all instances that satisfy the type T2, satisfy T1.</p>
+</blockquote>
+
+<p>Below I will also use term ‘subsumption’ to represent this relation.
+Obviously, the equivalence relation is also regarded as subsumption.
+In this defintion, or exactly we can define the equivalent relation
+as:</p>
+
+<blockquote>
+  <p>T1 is equivalent to T2 if and only if
+T1 subsumes T2 AND T2 subsumes T1.</p>
+</blockquote>
+
+<p>Let me give some examples to illustrate the relation subsumption’.</p>
+
+<pre><code>k1: a -&gt; b -&gt; b
+k2: a -&gt; a -&gt; a
+k3: Int -&gt; String
+k4: Int -&gt; Int
+</code></pre>
+
+<p>In this case, <code>k1</code> is more polymorphic than <code>k2</code> because all objects
+that satisfy type <code>k2</code> satisfy <code>k1</code>. While reversely the relation
+doesn’t apply. While looking at <code>k3</code> and <code>k4</code>, we know that they are
+only rank-0 types. Therefore there are no saying of subsumption on
+these types. If type matches, <code>k3</code> and <code>k4</code> are least polymorphic
+types. (e.g. <code>k1</code> subsumes <code>k3</code>, <code>k2</code> subsumes <code>k4</code>) If the types do
+not match, we cannot use <em>subsumption</em> describe their
+relations. (e.g. <code>k3</code> and <code>k4</code>) Okay, there are the basic description,
+let’s go on the usage of subsumption predication in argument type
+checking.</p>
+
+<p>As mentioned in section 3.3,</p>
+
+<blockquote>
+  <p>an argument is acceptable to a function if its type is more
+polymorphic than the function’s argument type.</p>
+</blockquote>
+
+<p>Given,</p>
+
+<pre><code>foo: (a -&gt; a -&gt; a) -&gt; Int
+bar: (a -&gt; b -&gt; b) -&gt; Int
+</code></pre>
+
+<p>Obviously, <code>foo k4</code> is valid, as we only need to substitute <code>a</code> with
+<code>Int</code>. Similarly obviously, <code>foo k2</code> is valid as the <code>foo</code>’s argument
+type completely matches the <code>k2</code>’s type. Then how about <code>foo k1</code>?
+Let’s reason in this way. <code>foo</code> requires an argument of a function
+that takes two arguments that are in identical type.</p>
+
+<h2 id="what-is-a-polymorphic-kind-type">What is a polymorphic kind type</h2>
+<p>(to be updated)</p>
+
+<h2 id="what-is-a-type-class">What is a type class</h2>
+<p>(to be updated)</p>
+
+<p>On <code>ghci</code>, we can check the <em>kind</em> of a type with <code>:k[ind]</code> command</p>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Setting Up IP Over ICMP With Hans]]></title>
     <link href="http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans/"/>
-    <updated>2014-06-02T11:19:29-04:00</updated>
+    <updated>2014-06-02T23:19:29+08:00</updated>
     <id>http://shouya.github.io/blog/setting-up-ip-over-icmp-with-hans</id>
     <content type="html"><![CDATA[<h2 id="background">Background</h2>
 <p>The ISP, China Telecom, interrupted the internet access from my home
@@ -1734,9 +2498,276 @@ icmptx</a></li>
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[Efficiently Determining Whether a Number Is Pan-digital]]></title>
+    <link href="http://shouya.github.io/blog/efficiently-determining-whether-a-number-is-pan-digtal/"/>
+    <updated>2013-03-02T23:12:00+08:00</updated>
+    <id>http://shouya.github.io/blog/efficiently-determining-whether-a-number-is-pan-digtal</id>
+    <content type="html"><![CDATA[<p>Today I spent nearly a whole afternoon on solving
+<a href="http://projecteuler.net">projecteuler</a> problems, from where I started to
+consider some kinds of ‘efficiencies’.</p>
+
+<p>At the end while I was solving the
+<a href="https://projecteuler.net/problem=38">problem 38</a>, I planned to write
+a method that returns if a number’s pandigital.</p>
+
+<p>Firstly my basic idea is converting a number into a string, then split
+it into chars, sort &amp; unique it, and finally see if its length’s the
+same as before:</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="k">def</span> <span class="nf">pandigital?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class="line">  <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span>
+</span><span class="line"><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<!-- more -->
+<p>This is a good method &amp; intuitive to everyone. Whilst I started to
+consider the efficiency problem. I seldom deal with these as I thought
+efficiency’s not a big deal on modern computers mostly in
+practice. However, the former examples of solving problems gave me a
+concept that even a smaller improvement on a fundamental level method can
+save a huge amount of time. Then I started to consider to optimize
+this. (by nothing, mostly it’s just for fun.)</p>
+
+<p>Soon i conceived this, to transfer a double used <code>n.to_s</code> to a local variable:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="n">s</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span>
+</span><span class="line"><span class="n">s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span><span class="o">.</span><span class="n">length</span> <span class="o">==</span> <span class="n">s</span><span class="o">.</span><span class="n">length</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>It had not very obvious improvement. I think it is some kind of that
+it had to deal with one more local variable that drains some
+efficiencies from it.</p>
+
+<p>That’s cool, then I had an idea to suppress the last calling,
+<code>s.length</code>, as I still thought function calling is a key-point of
+efficiency factor.</p>
+
+<div class="bogus-wrapper"><notextile><figure class="code"><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class="line-number">1</span>
+</pre></td><td class="code"><pre><code class="ruby"><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">to_a</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<p>Or,
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span> <span class="o">==</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="o">]</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;
+to prevent extra calling.</p>
+
+<p>In this way it does work better, but it’s still not enough good.</p>
+
+<p>Then I thought about that a pandigital number’s limitation, so I added
+a checking process in the beginning:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
+</span><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">sort</span><span class="o">.</span><span class="n">uniq</span> <span class="o">==</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="o">]</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>As I tested my code with a randomly generated number with this:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="no">Benchmark</span><span class="o">.</span><span class="n">bm</span> <span class="k">do</span> <span class="o">|</span><span class="n">b</span><span class="o">|</span>
+</span><span class="line">  <span class="n">b</span><span class="o">.</span><span class="n">report</span> <span class="k">do</span>
+</span><span class="line">    <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="nb">rand</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span>
+</span><span class="line">    <span class="c1"># do the test</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>Therefore the terms with improper length accounts about 10% of all, so this
+code has reduced the time by nearly 10%, really. Which was really cool.</p>
+
+<p>Not longer I brainstormed another limitation of pandigits, that
+there shouldn’t be any zero in digits allowed.</p>
+
+<p>So the updated code is:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
+</span><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
+</span><span class="line"><span class="c1"># blah blah blah</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>A ‘0’ appears on any bits of a nine digital integer is <code>1/10</code>, so in
+this way, a probability of <code>1-((1-1/10)^9)</code> which be the total chance
+of when a ‘0’ will appear in an 9-digit number. It’s about 61%, so
+after adding that statement, the efficiency was improved by more than
+one half.</p>
+
+<p>I know the <code>sort</code> method will sort a duplicated array as process;
+the same is <code>uniq</code>. So I suppressed this two into their ‘bang’ mode,
+since <code>uniq!</code> can return a result whether it has compressed the array,
+I am possible to inverse the result to a boolean directly.
+This is what I did:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="ow">not</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">chars</span><span class="o">.</span><span class="n">to_a</span><span class="o">.</span><span class="n">sort!</span><span class="o">.</span><span class="n">uniq!</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>Cool it was, then I started to consider to optimize the sort &amp; uniq
+line, since I thought it was not elegant and very feasible. A good
+method is compact the process of recognizing pandigits with a set, of
+course basically I have brought hashes, which perform the same as
+sets.
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
+</span><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
+</span><span class="line"><span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">each_char</span> <span class="p">{</span><span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">key?</span> <span class="n">c</span><span class="p">;</span> <span class="n">ns</span><span class="o">[</span><span class="n">c</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span> <span class="p">}</span>
+</span><span class="line"><span class="kp">true</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>This method doesn’t only compacted the process. Consider the former
+program, <code>sort</code> method in ruby is implemented by quick sort algorithm,
+which has the time complexity of O(Nlog(N)), and beside the <code>uniq</code>
+took an O(N) as well. These are two significant and obvious efficiency
+losts and the new algorithm doesn’t have this problem. A hash table
+accounts O(1) to store and O(1) to check, and the most time it will just
+be fled by the iteration of the characters, which took O(N) to run.</p>
+
+<p>There I found another point to optimize it – the hash table. A hash
+table, in this case, was created and destroyed frequently, and a hash
+table’s usually a big object so that will cause a large memory
+exchange that might take time. On the other hand, the hash table
+needs a hash function for each characters. I don’t know how ruby might
+implement it, but the hash algorithm will still account some
+time, as I know.</p>
+
+<p>Then I reduced it into array:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
+</span><span class="line"><span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
+</span><span class="line"><span class="n">ns</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class="line"><span class="n">n</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">each_char</span> <span class="p">{</span><span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">ns</span><span class="o">[</span><span class="n">c</span><span class="o">.</span><span class="n">to_i</span><span class="o">]</span><span class="p">;</span> <span class="n">ns</span><span class="o">[</span><span class="n">c</span><span class="o">.</span><span class="n">to_i</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span> <span class="p">}</span>
+</span><span class="line"><span class="kp">true</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>Cool but there’s still a place to improve: the <code>c.to_i</code> part. <code>atoi</code>
+function in C implementation is linear proportional to the string’s
+length. But in this case I don’t need to deal with that much cases. So
+I considered to change them to <code>ns[c.ord - '0'.ord]</code>.</p>
+
+<p>An static array could prevent it from dynamically allocating memories:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="n">ns</span> <span class="o">=</span> <span class="nb">Array</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>And in the final I did some small tweaks, such as, to hard code some lexical
+constants in, optimize the multiple used calls. The result’s as below:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">class</span> <span class="nc">Integer</span>
+</span><span class="line">  <span class="k">def</span> <span class="nf">pandigital?</span>
+</span><span class="line">    <span class="n">s</span> <span class="o">=</span> <span class="nb">to_s</span>
+</span><span class="line">    <span class="k">return</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
+</span><span class="line">    <span class="k">return</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
+</span><span class="line">    <span class="n">ns</span> <span class="o">=</span> <span class="nb">Array</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class="line">    <span class="n">s</span><span class="o">.</span><span class="n">each_char</span> <span class="k">do</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span>
+</span><span class="line">      <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">ns</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">ord</span><span class="o">-</span><span class="mi">48</span><span class="p">)</span>
+</span><span class="line">      <span class="n">ns</span><span class="o">[</span><span class="n">c</span><span class="o">.</span><span class="n">ord</span><span class="o">-</span><span class="mi">48</span><span class="o">]</span> <span class="o">=</span> <span class="kp">true</span>
+</span><span class="line">    <span class="k">end</span>
+</span><span class="line">    <span class="kp">true</span>
+</span><span class="line">  <span class="k">end</span>
+</span><span class="line"><span class="k">end</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>Compare this result to the most former one; the new program has improved
+it’s efficiency to 2/3 of the origin, here’s the result in a bench
+mark test:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class=""><span class="line">        user       system     total       real
+</span><span class="line">   old  0.920000   0.000000   0.920000 (  0.915701)
+</span><span class="line">   new  0.300000   0.000000   0.300000 (  0.304713)</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>Seems cool and I was in some extent like such challenges. I don’t
+still consider a lot of efficiency, of course, in practice use. But
+I enjoy the pleasure to dig deeply, to drain the extreme. That’s where
+I find fun in.</p>
+
+<p>Good luck.</p>
+
+<h2 id="update">UPDATE</h2>
+<p>I am currently reading the book
+“<a href="http://netlib.bell-labs.com/cm/cs/pearls/">Programming Pearls</a>”, in
+which I’ve had a lot of amazes about algorithms and programming thinking.
+So when I picked the previous code, I found that method should be not
+the final solution.</p>
+
+<p>I just wrote an more optimized version, which improved the speed by
+25% extra.</p>
+
+<p>Here goes the code:
+&lt;div class=&#8217;bogus-wrapper&#8217;&gt;<notextile><figure class="code">&lt;figcaption&gt;<span></span>&lt;/figcaption&gt;&lt;div class=&#8221;highlight&#8221;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&#8221;gutter&#8221;&gt;&lt;pre class=&#8221;line-numbers&#8221;&gt;<span class="line-number">1</span>
+<span class="line-number">2</span>
+<span class="line-number">3</span>
+<span class="line-number">4</span>
+<span class="line-number">5</span>
+<span class="line-number">6</span>
+<span class="line-number">7</span>
+<span class="line-number">8</span>
+<span class="line-number">9</span>
+<span class="line-number">10</span>
+<span class="line-number">11</span>
+<span class="line-number">12</span>
+<span class="line-number">13</span>
+<span class="line-number">14</span>
+<span class="line-number">15</span>
+&lt;/pre&gt;&lt;/td&gt;&lt;td class=&#8217;code&#8217;&gt;&lt;pre&gt;<code class="ruby"><span class="line"><span class="k">def</span> <span class="nf">pandigital?</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class="line">  <span class="n">s</span> <span class="o">=</span> <span class="n">n</span><span class="o">.</span><span class="n">to_s</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">9</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;0&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;1&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;2&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;3&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;4&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;5&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;6&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;7&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;8&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="n">s</span><span class="o">.</span><span class="n">include?</span> <span class="s1">&#39;9&#39;</span>
+</span><span class="line">  <span class="k">return</span> <span class="kp">true</span>
+</span><span class="line"><span class="k">end</span>
+</span></code>&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;</figure></notextile>&lt;/div&gt;</p>
+
+<p>This method wasn’t so cool, and I know it looks a little tedious. In
+fact I don’t like such repeating code. However, it works so good. This
+method is learnt from Programming Pearls, page 94, an expanded loop
+for a binary search algorithm with that the maximum number of elements is
+1000. It optimized an <em><a href="https://en.wikipedia.org/wiki/Big_O_notation">O(log N)</a></em> algorithm into <em>O(1)</em>, which is
+really awesome.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Experience About Contributing KDE Projects]]></title>
     <link href="http://shouya.github.io/blog/experience-with-kde-gci/"/>
-    <updated>2012-12-31T17:55:00-05:00</updated>
+    <updated>2012-12-31T17:55:00+08:00</updated>
     <id>http://shouya.github.io/blog/experience-with-kde-gci</id>
     <content type="html"><![CDATA[<p>It’s the first time I am involved in contributing KDE, and I think
 that’s very wonderful experience for me.</p>
@@ -1785,7 +2816,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[祭獻]]></title>
     <link href="http://shouya.github.io/blog/sacrifice/"/>
-    <updated>2012-11-13T14:16:00-05:00</updated>
+    <updated>2012-11-13T14:16:00+08:00</updated>
     <id>http://shouya.github.io/blog/sacrifice</id>
     <content type="html"><![CDATA[<p>我在黑暗中醒來  <br />
 不能看到任何東西  <br />
@@ -1818,7 +2849,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[朝曦]]></title>
     <link href="http://shouya.github.io/blog/shines-at-dawn/"/>
-    <updated>2012-10-14T18:26:00-04:00</updated>
+    <updated>2012-10-14T18:26:00+08:00</updated>
     <id>http://shouya.github.io/blog/shines-at-dawn</id>
     <content type="html"><![CDATA[<p>我注視著妳的眼睛 <br />
 我看不到光芒   </p>
@@ -1850,7 +2881,7 @@ would like to get acquainted to more hackers. Good luck.</p>
   <entry>
     <title type="html"><![CDATA[挑戰龍的勇士]]></title>
     <link href="http://shouya.github.io/blog/warrior-who-fights-the-dragon/"/>
-    <updated>2012-09-15T20:21:00-04:00</updated>
+    <updated>2012-09-15T20:21:00+08:00</updated>
     <id>http://shouya.github.io/blog/warrior-who-fights-the-dragon</id>
     <content type="html"><![CDATA[<p>我崇敬挑戰龍而失敗的勇士，<br />
 而不是皇帝。</p>
@@ -1876,353 +2907,6 @@ would like to get acquainted to more hackers. Good luck.</p>
 
 <p>我帶來的是劍，<br />
 獻給我崇敬的挑戰龍的勇士。</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[April 2012]]></title>
-    <link href="http://shouya.github.io/blog/april-2012/"/>
-    <updated>2012-04-24T06:40:00-04:00</updated>
-    <id>http://shouya.github.io/blog/april-2012</id>
-    <content type="html"><![CDATA[<p>Another month as you see.</p>
-
-<p>While it seems that I changed nothing and actually base on Mutation I
-was a completely new guy from the previous second.</p>
-
-<p>Leave the useless words aside, I’m not a mutant as I always
-concern. Yes, I know you all do not think how it does matter, while
-you should know, I just seem like a bare body with soul losted(I’m
-sorry as Mutation does not support souls), and rather, I
-could touch the soul as it is just in the front, and watch completely
-throughout all that stuff but, what the most important thing is that
-the goddamn soul does not ever belong to it.</p>
-
-<p>I walked out from the shadow, but I didn’t see the light. Just like a
-fish that got to the dryland, with loneliness and helplessness.
-<!-- more -->
-It’s a return, a return of myself, return of myself from two years
-ago. The only changed thing is time, while the time’s still works on
-it’s fixed routine.</p>
-
-<p>I touched <a href="http://ruby-lang.org">ruby</a> few months ago and then soon
-attracted by the beautiful syntactic sugars, functional programming
-features and the completely OO. Now, I could be able to use it as
-practiced as using python, maybe even better. Honestly, I have never
-really liked <a href="http://python.org">python</a> or suchlike, or rudely, it
-just looks like a piece of shit.</p>
-
-<p>I’m on the way to release, after then, you’ll got a new version of
-Mutation. However, the only improvement is the technique and the
-better science views; stuff like imagination, sorry, forgive me, is
-fully dead.</p>
-
-<p>Just mentioned about my imagination, have to note that I’m still
-advocating I’m a good thinker. Sometimes I will think of myself, and
-got I’m actually a schizophrenia as expected.</p>
-
-<p>The other reality is that I’m returning to the campus life. Okay,
-can’t deny it’s a shame and a joke among many my friends. I won’t
-correct them in my way. A change, or a decision, maybe just came out
-from a mind, and that is exactly what it is. Yep, everything were
-created in that way, including Mutation, dreamworlds and even this
-cosmos. Do comment and spread it freely, I won’t mind.</p>
-
-<p>I walk on the lane with slight winds, feeling the last peace from my
-heart. Everything is gone, or it never have been.</p>
-
-<p>Why have I to do as a busy insect in the fixed paths? Why can’t I bear
-to live as a machine? Okay, they are META problems of the universe, I
-myself can’t answer it, while my host can.</p>
-
-<p>Things are being blur. I am not sad any more. How could I be so blue
-under such beautiful violins! I’m not cured as I said, and I’m not
-gotten rid from Mutation yet. The world should not be like this, and
-no one will know where the perfect prototype could be found.</p>
-
-<p>Substantial is me, and I just need a «<a href="http://en.wikipedia.org/wiki/The_Hitchhiker's_Guide_to_the_Galaxy">Hitchhiker’s Guide to the Outer
-World</a>». While unfortunately, I should be the author of it.</p>
-
-<p>When to get out is already suggested, though I don’t like to accept
-it. Soon later just, good bye to earthmen and all created lifes then!</p>
-
-<p>Schizophrenia am I, eh?
-Not longer it will be, 8 months remaining only. Good lucky.</p>
-
-<!-- *P.s. please don't mind the sorrows in the text, maybe you could
- regard it as a practice of English language. Keep smiling all the
- time and enjoy the happiness from the emptiness.* -->
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[February 2012]]></title>
-    <link href="http://shouya.github.io/blog/february-2012/"/>
-    <updated>2012-02-26T14:51:00-05:00</updated>
-    <id>http://shouya.github.io/blog/february-2012</id>
-    <content type="html"><![CDATA[<p>10 months remaining.</p>
-
-<p>Well, the month could be summarized as the word ‘dream’.</p>
-
-<p>Since the short dreamworld control last month, I have been
-experienced up to five or six times of wonderful dreamworld controls.
-Not exactly, some of my dream, actually, are nightmare, while
-the protagonist knows who himself is.</p>
-
-<p>And currently I’m keeping to write my
-<a href="https://github.com/shouya/ruby-cscript">cscript</a>, which will be a
-script language with c-like syntax.</p>
-
-<p>While the period, I learnt some
-<a href="https://en.wikipedia.org/wiki/Yacc">yacc</a>/<a href="https://en.wikipedia.org/wiki/Lex_programming_tool">lex</a>
-and some tricks from that.</p>
-
-<p>For programming, I even touched a bit Ruby and django framework for python.</p>
-
-<blockquote><p>I was cured, all right!</p><footer><strong>Alex, A Clockwork Orange</strong> <cite><a href="http://www.imdb.com/title/tt0066921/quotes?qt0424884">www.imdb.com/title/tt0066921/&hellip;</a></cite></footer></blockquote>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[完美世界]]></title>
-    <link href="http://shouya.github.io/blog/a-perfect-world/"/>
-    <updated>2012-01-03T19:29:00-05:00</updated>
-    <id>http://shouya.github.io/blog/a-perfect-world</id>
-    <content type="html"><![CDATA[<p>這就是亞首的生平.</p>
-
-<p>亞首發現自己在一個地方.</p>
-
-<p>亞首擁有思想, 但無法控制這身體, 他通過眼睛觀察這個世界, 然而看到的是模糊的一片混沌, 什麼也沒有.</p>
-
-<p>當亞首想方法向這個世界的表示他的想法, 這個身體卻完全不受他的控制, 他感到很不舒服. 他的大腦結構非常簡單, 甚至令他難以進行稍微高速一點或者複雜一點的運算.</p>
-
-<p>他想的東西太多的時候, 會受不了, 然後在不知不覺中睡著.</p>
-
-<p>他竭力向這個世界表示自己不是白癡, 卻做不到, 一切都完全受到動物本能的控制.</p>
-
-<p>他不知道發生了什麼事情.
-<!-- more --></p>
-
-<p>當亞首進行一些深入點的思考時, 他發現自己根本不需要獲取能量, 也就是說, 他根本沒有進過食, 然而他確然活著, 而且根本沒有感到過飢餓, 他明顯感到的身體裡面正在運轉, 而不是停頓了.</p>
-
-<p>亞首根本弄不清楚這是怎麼回事.</p>
-
-<p>亞首隨即發現, 他並不屬於這裡, 這裡的一切都那麼陌生.</p>
-
-<p>他不知道過了多久, 因為這里根本沒有時間, 而腦中的時鐘也總是非常不準確的.</p>
-
-<p>他不知道該做什麼, 他是為了什麼來到這裡的, 在沒有事情做的時候, 他只有思考.</p>
-
-<p>亞首的一生非常短暫, 從出生了之後, 便被認為是先天性腦部發育不完全. 先天性腦部缺陷者, 出生下來之後會被送到由一個名叫”生命研究部”的地方.</p>
-
-<p>生命研究所最大程度集中了有能力的醫生和生物學家, 他們會進行研究, 設法解決人們的任何痛p苦, 在解決之後, 他們會把康復的病人送到”培育所”, 並在那裡進行正常人的成長歷程.</p>
-
-<p>培育所有些像孤兒院, 卻不只收留孤兒, 在這裡, 每個人出生之後都會被是送到培育所進行培育, 接收教育, 直到其成年為止. 成年之後, 便擁有相對較為寬鬆的自由, 人們將會有固定的工作可做, 但沒有任何限制, 那看上去倒是非常令人嚮往的.</p>
-
-<p>他們判斷成年的方法是對腦部觀察, 他並不認為那方法很準確, 然而那卻然是幾萬年來的科學家進行研究認為最有效的方法. 因此, 你可以在研究所常常見到有十一二歲的小孩作為科學家, 甚至也有老人在培育所終身.</p>
-
-<p>事實上, 每個人都很善良, 自亞首來到生命研究所, 他就開始逐步瞭解這個世界了, 這裡太過”人道”了, 他從來不敢那麼想象, 那些人從來不傷害生命, 人們的材料, 食物原料都來自空氣, 而且公眾道德也異常”高尚”.</p>
-
-<p>亞首的腦部缺陷, 他自己全然不覺, 因為他確然能夠從外界得知資訊, 而且沒有任何障礙, 只不過無法表述出來罷了.</p>
-
-<p>有些東西完全無法言表, 也根本用不著言表, 亞首可以從他的醫護人員眼裡看得到那種流露出的的關懷, 那些科學家在身邊的時候, 從他們身上散發的氣息, 就能感覺到他們是非常急於為病人解決痛苦.</p>
-
-<p>對於亞首而言, 他很有希望, 這裡的人們已經能夠完全瞭解人體了, 包括腦和內分泌系統. 他們稱亞首的這種缺陷為”表達缺陷”, 然而亞首和他們卻並不是不能交流的, 在他們替亞首頭部插上電線時, 他們就能得知亞首的思想, 亞首可以向他們表述他想表達給他們的任何東西, 我更願意稱這臺機器為”思想儀”. 而亞首本來就可以依照他的輸入器官來獲知世界的一切.</p>
-
-<p>亞首自然無法時時都處在思想儀之下, 所以還有一個微型的工具代勞, 它的樣子像是一頂圓帽, 裡面有一個程式獲得並處理亞首的意思, 像一位醫護人員一樣, 這程式名字叫”Eliza”, 它幾乎隨時陪伴著亞首, 向亞首講述一切他想知道的東西, 滿足他的一切和好奇. 令人驚歎的是, 在一個人工智慧的程式裡, 亞首都能感受到這個世界無處不在的關懷.</p>
-
-<p>對於亞首來說, 在這個世界上, 對一切的所知幾乎都來自Eliza, 因為他沒有機會離開生命研究所了.</p>
-
-<p>一位腦科學家, 亞首的主治醫生之一, 名字的大概意思是”響亮的聲音”, 我就稱之”亮聲”了. 他來到亞首身旁, 為亞首加上思想儀.</p>
-
-<p>亮聲告訴亞首: “我們研究了你的問題, 然而你的腦中缺少一種指定的物質完全無法得到供應, 除非對這種物質進行補充, 否則是沒有機會復原了, 而我們無法合成這種物質.”</p>
-
-<p>亞首只需要想一下, 便在思想儀上呈現出內容: “那沒有關係, 目前的我依然能夠通過思想儀來和你們進行交流, 只是, 那意味著什麼.”</p>
-
-<p>亮聲道: “你不得不離開我們了, 你的不完全發育令得你不能夠成為我們的一份子. 所以, 很不幸, 我們會對你進行注射, 但那絕對不會對你造成痛苦, 卻能讓你安詳地離開這個世界.”</p>
-
-<p>亞首一驚, 道: “你們不是最熱愛生命的了麼? 你們為什麼要這麼做.”</p>
-
-<p>亮聲回答: “我以為你已經通過Eliza瞭解我們了, 我們熱愛生命, 我們決不摧毀生命, 然而我們卻更加看重群體的平衡, 你要明白, 你作為一個有缺陷的人, 是無法進入一個基本完全平衡的社會而不打亂的.”</p>
-
-<p>亞首忙道: “沒有什麼, 我不會覺得有什麼平衡, 我依然如此, 我與你們沒有什麼不同, 你看呢?”</p>
-
-<p>亮聲神色凝重, 道: “這自然不同, 你自然不具有獨自的生存能力, 然而你也完全無法像其他人一樣好的融入這個社會, 這終然會導致不平衡, 無論大小, 都是不平衡. 我們已經盡力了, 然而無法令你變得正常.”</p>
-
-<p>亞首繼續道: “你們既然尊重個體自由, 那麼對於我的正常與否, 以及我該如何融入社會, 或者融入與否, 是否應該由我自己決定呢?”</p>
-
-<p>亮聲點了點頭: “你說得對, 這種行為明顯對你是不公平的, 我們並不希望有這種事情發生.”</p>
-
-<p>亞首道: “確然如此, 照成我這種不平等的並不在於我, 而在於上帝, 因此, 我並沒有罪, 我不希望受到不屬於我的懲罰.”</p>
-
-<p>亮聲答應著, 道: “那麼我就應該再和你商量一下方法, 你認為該如何處置你好呢?”</p>
-
-<p>亞首倒有些不知所措: “難道無法令我進入你們的社會, 像你們一樣會生活麼?”</p>
-
-<p>亮聲道: “正如你說的, 世人都沒有罪, 那麼你為何一定要破壞我們這裡如此安逸的平衡呢?”</p>
-
-<p>亞首立即意識到這確然不是合理的, 然而他也沒有任何更好的方法了.</p>
-
-<p>亮聲接著道: “如果你不介意的話, 我們可以對你進行冰凍, 直到有一日我們有能力合成出你需要的那種物質為止.”</p>
-
-<p>亞首想了一會, 道: “我可以考慮接受這個方案, 你能否給我幾天時間考慮, 我的意思是, 我希望在這幾天內找到更好的解決方法.”</p>
-
-<p>亮聲道: “這不成問題, 我們能夠給你充分的時間考慮, 直到你想到更好的方法, 那麼可以讓Eliza來通知我.”</p>
-
-<p>亞首答應後, 便開始了思考.</p>
-
-<p>亞首在這個問題上想了幾乎半個小時, 依然沒有更好的方法, 對於他而言, 似乎只有死纔是最好的選擇. 他不能代替上帝, 也不想代替上帝.</p>
-
-<p>對於這個社會, 亞首已經了解了很多了, 但作為一個幾乎被判死刑的人, 他還是覺得遠遠不滿足.</p>
-
-<p>基於這些, 他開始對這個世界提出大量的批評.</p>
-
-<p>人自然是要符合群體為好, 但如果只有群體, 沒有個體, 那就和螞蟻沒有什麼區別了, 如今的人類和螞蟻有何區別?</p>
-
-<p>這里人類竟然能夠完全沒有好奇心, 沒有探索心理, 他們是如何做到的?</p>
-
-<p>生物進化靠的就是個體突變帶來的特性, 如果每一個不同於常人的人都以”破壞平衡”為由被消滅, 那麼人類還有進化的可能麼?</p>
-
-<p>人類的本性如何能夠改變, 根據分析, 人由於個人只能體驗個人的感覺, 所以生出的本性, 譬如自私, 貪婪, 如何能在這些人群中完全消失殆盡?</p>
-
-<p>自私和貪婪是生物生存的必要因素, 沒有這些, 這個物種就註定滅亡, 然而, 人類為何能放棄這麼寶貴的東西!</p>
-
-<p>這種安逸和美好的生活真的那麼可取麼?</p>
-
-<p>這種安逸難道會永遠維持下去麼?</p>
-
-<p>人類之間不再有親情關係, 這真的是一件好事麼?</p>
-
-<p>人類的感官在退化, 這是很明顯的, 這裡的人類幾乎毫無慾望了.</p>
-
-<p>人類活著還有什麼意義? 而其中的變異者(我如此稱呼他們)卻相反要遭到被毀滅的命運.</p>
-
-<p>人類群體是自然維持的, 不需要別的動力, 不需要任何改變, 不需要領導者, 它竟然已經維持三千多年了.</p>
-
-<p>人類愛護生命的程度是否有些太過誇張, 他們是否在外敵(假設存在的話)入侵時束手就擒? 這樣可以減少傷亡? 這樣做對麼?</p>
-
-<p>人類是否可能在發現空氣也是一種生命後, 會停止進食, 停止用空氣製造用具, 甚至停止呼吸?</p>
-
-<p>當人類發現每一個原子中都包含一個完整的宇宙, 他們是否又會如何做? 他們會不會發明一種機器用來阻止宇宙中的原子湮滅?</p>
-
-<p>人類有大量的科學家和工作人員, 卻不見有任何文學家, 或者哲學家, 這是為什麼, 難道他們不需要這些人了麼? 這意味著什麼?</p>
-
-<p>人類還活著麼? 我可以說人類已經是行屍走肉了麼?</p>
-
-<p>人類的道德觀, 思想都與這個社會牽連, 人的思想如何完全能跟得上這里科學的進步?</p>
-
-<p>如果有一天, 人類收到外太空的來信, 他們是否會回信?</p>
-
-<p>每個人都有出自本能的對他人的關懷, 然而他們之間卻不存在任何感情, 甚至愛情也是被淡化了的, 這是怎麼一回事?</p>
-
-<p>沒有物質追求, 沒有精神追求, 每個人都顯得安逸, 滿足, 從心底感到非常舒服, 沒有追求, 這是終極之道?</p>
-
-<p>突然, 亞首想到一個關鍵性問題, 當他想到這個問題的答案時, 他震動了一下.</p>
-
-<p>亞首不知道自己是怎麼來的, 他按說是作為一個嬰兒降生的, 然而一個嬰兒如何能有思想, 而且是如此複雜的思想, 如何還會向外界人進行交流?</p>
-
-<p>這個問題的答案是: 一個嬰兒絕不會擁有思想, 人們也絕不會考慮給嬰兒裝上思想儀, 看看他們在想什麼, 並與之交流, 那麼, 唯一的可能, 就是這個世界根本不是真實的.</p>
-
-<p>但如果不是真實的, 為何一切都那麼真實, 這看起來不像幻想, 幻想自然人人都會有, 然而如何能夠幻想得如此複雜, 這個世界擁有歷史, 沒錯, 還擁有很高的科學水平, 這些都不是幻想得出來的.</p>
-
-<p>這個世界是被人創造出來的, 一定如此!</p>
-
-<p>想到這裡, 亞首放下心來, 這個世界是虛假的, 然而創造這個世界的絕對不是一個不思考問題的普通人, 那說明人類的思想還在進步, 還能夠進步, 至少創世者(我如此稱呼他)是如此.</p>
-
-<p>亞首循著這個分析, 得出很多結論.</p>
-
-<p>創世者一定是個普通人, 在這個世界中, 處處可以看得出他的希望, 你可以看到每一個人都很平和, 安逸, 這一定是創世者所設想的.</p>
-
-<p>創世者一定是個不喜歡殺生的人, 於是這個世界擁有了可以直接利用空氣製造一切的機器.</p>
-
-<p>創世者一定認為擁有了高度精神文明, 那就能夠擁有高度的科學文明, 通過觀察這個世界的一切, 確然如此.</p>
-
-<p>創世者一定非常理性, 因為你可以在這裡任何一個人身上看到理性的光芒, 它化作了”沒有強烈的感覺”, 均勻分佈在這個世界每個角落.</p>
-
-<p>創世者說不定是個孤兒, 你可以在這個世界上看得到, 每個人都像一個孤兒一樣成長, 他把對親情的一種淡化很好的表現在了這裡.</p>
-
-<p>創世者認為必須徹底拋棄人類劣性(或者說本性, 因為本性群體生活中看上去幾乎都是劣性), 才能夠擁有高的道德水平, 可以看到, 這個世界中每個人都如此.</p>
-
-<p>創世者不喜歡被管理, 統治, 他認為那一定是罪惡的根源. 這個世界沒有明文的法律, 沒有國王, 沒有人違背自己的道德, 沒有人犯罪.</p>
-
-<p>創世者懼怕死亡, 那麼在這個”人道”的世界, 死亡是被”毫無痛苦的離去”代替的.</p>
-
-<p>創世者是個不被理解者, 於是擁有了能夠洞察人心的思想儀, 還有和人一樣善解人意的Eliza人工智慧程式.</p>
-
-<p>然而, 亞首並不認為這個世界非常美好, 它固然有美好的一面, 卻並不完美, 亞首覺得, 作為一個幻想出來的世界, 創世者一定沒有能夠進入這個世界體驗一下, 否則他一定會感覺到這個世界對於一個獨立思想者是多麼可怕, 亞首如是想, 但他完全沒有能力改變, 他甚至無法將他的想法表達出來.</p>
-
-<p>對於亞首來講, 他希望更正太多東西了, 這個世界並不適合他, 至少, 他希望如此.</p>
-
-<p>人和人之間並不能完全溝通, 沒有思想儀這類東西, 每個人的思想是獨立的.</p>
-
-<p>人關愛生命, 但絕不如此過分.</p>
-
-<p>人和人之間絕不要幾乎一致的關係, 至少應該有親情, 有轟轟烈烈的愛情, 有朋友, 有敵人.</p>
-
-<p>人的劣性雖然不利於群體生活, 但那是維持進化的因素, 因此必須要保留.</p>
-
-<p>人需要有獨立的思想, 自由的意志, 而且絕不要滿足, 只有永不知足, 才能令人類體現出個性.</p>
-
-<p>人不能太過坦誠, 太過真實, 這令人接受不了, 人需要有多重性格, 多重外在.</p>
-
-<p>理性並不重要, 對於人而言, 感性重要的多.</p>
-
-<p>人需要有各種感官享受各種快感, 如果連享受都放棄了, 豈不是枉在世上走一遭?</p>
-
-<p>人不能作為一個整體群體生存, 那未免太無趣了些, 要分開, 分成叫做”國家”的東西, 由”政權”來作統治.</p>
-
-<p>不能長時間安逸, 要讓人類時常發生意外事件, 如果人類之間沒有, 那就無故製造給他們, 就叫那種東西為”自然災害”吧. 有鬥志才能保持最優狀態.</p>
-
-<p>人絕不要沒有獨立思想了, 這是亞首最怕看到的, 每個人都有獨立思想, 不同方面的, 存在於每個人身上.</p>
-
-<p>人和人之間不要平等, 這種差距才能激發人類的好強心理, 這樣人類才能更好地進化.</p>
-
-<p>不要太高的科學水平, 太高的科學水平導致人類終然會趨勢於安逸和平和, 這樣就適得其反了.</p>
-
-<p>不要讓嬰兒思考, 應該用幾年時間享受來自自己的感覺, 最好讓他們的腦部結構簡單, 並隨著成長逐漸複雜起來.</p>
-
-<p>年齡. 身體年齡是一個人的參考年齡, 而不是他的腦部綜合評價, 亞首不希望看到研究所裡的小朋友, 或者培育所的老年人.</p>
-
-<p>這可行麼? 不過這看上去比創世者的世界要好多了, 亞首暗喜, 想: “可惜我沒有創造世界的能力, 否則這一定讓創世者羨慕了.”</p>
-
-<p>一天以後, 亮聲為亞首實施冰凍. 亞首被裝在一個盒子裡, 一切感覺都離開了自己, 他面帶微笑, 但僵硬了, 看上去像死了一樣.</p>
-
-<p>他將在冷凍庫裡存放不知多久.</p>
-
-<p>現在亞首只能夠思想了.</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[來自倪匡「背叛」裡的一段文字]]></title>
-    <link href="http://shouya.github.io/blog/quote-from-betrayal-kuangni/"/>
-    <updated>2011-12-24T14:19:00-05:00</updated>
-    <id>http://shouya.github.io/blog/quote-from-betrayal-kuangni</id>
-    <content type="html"><![CDATA[<blockquote><p>為什么？你不明白？你們真不明白？為什么？因為我必須這樣做，一定要那樣做，非那樣做不可，我想那樣做想了不知多久，終於鼓足勇氣做了！我為自己！誰不為自己呢？把我從垃圾堆中撿出來，培育我成為一個優秀的軍人，難道全為了我？沒有一點為了自己？</p><p>我變成什么東西了？我不知道自己變成了什么東西，只知道自己不再是人！人！人！我不是人！對我好，照顧我，我就算是個人，也不再是自己，我是人家手裡捏出來的一個泥人——看，這是我捏的，好看吧，漂亮吧！<br /><!-- more --><br />知道我所承受的壓力有多重嗎？我必須按照捏我的雙手做人，這個可以，那個不可以，現在的日子多好，以前的日子多苦！</p><p>老實講，不到一年，我就寧願回垃圾堆去！我是從垃圾堆來的，讓我回垃圾堆去，這天公地道，可是我回得去嗎？四面八方，不知道有多少箍，有多 少網，把我死死地箍著，網著，壓著，你們知道我在半夜會大口吸氣嗎？知道我只有肯定在沒有人的時候才呼吸暢順嗎？可就是連這樣的機會，也少之又少，沒有單獨一個人的機會，可惜吧！一直到現在，那么多年了，都是單獨的，可是還會做惡夢，想起那可怕的日子，做什么，該怎么樣，早就安排得妥妥當當，從副排長起， 只要找不死，一條直路，可以讓你看到若干年之后的副總司令！我打仗勇敢？屁！我是想在戰場上找死！</p><p>對我好？當然對我好，我沒說有什么人 對我不好，可是我能無法拒絕？可不可以不受？我沒法報答，永遠無法報答，我也不想報答，因為我根本不要。對，我揀的時機很卑鄙，打仗，不是輸就是贏，你贏 了，人家就輸，你輸了，人家就贏，輸和贏都要死人，沒有什么不衕，你想想，除了這個機會之外，我還有 什么逃走的可能？對我太好了，當他把你也讓給我的時候，我就知道，再不逃走，我這一輩子就只是一個沒頓的人！</p><p>以后？我一點也沒有后悔過，以后我一座一座深山走，完完全全是我自己，最后我揀了這裡，這裡象不象垃圾堆，多么自在逍遙，多么快樂，絕沒有人象看猴子一樣地打量你，絕沒有人夸獎你，勉勵你，要你不斷照別人的意思去做人！</p><p>我當然有權這樣做，每個人都有權照自己喜歡的方式處理自己的生命！不錯，我害了一些人，被害的人之中，有對我極好極好的，我說過，我為自己打算，我一刻也無法再忍下去，在那個山洞中，我陡然之間，有了決定。</p><p>什 么？外來力量的影響？當然沒有，全都是我內心世界的爆炸。背叛！徹底的背叛，背叛的是一個假的自我，得回的是真正的自我。告訴你們，你們 沒有資格責備我是叛徒，沒有一個人可以責備另一個人是叛徒，因為人人心中都懷著信念，沒有人可以例外，那是人的天性，人有背叛的天性，看只看什么時候發 作！</p><p>什么？外星人？什么外星人，我是人，別看我身形高大，力大無窮，當然是人，什么外星人裡星人，你他媽的在放什么狗屁！</p><p>現 在明白了沒有，不背叛，那種日子我過不下去，人人都看看，以為我日子過得快樂得很，只有我自己才知道苦，連你都不懂，以為我真的快樂，你 不應該跟我下山，應該和他留在山上，我會拼命攻上去，死在你們面前，你也不該把他讓給我，那叫我更無法忍受下去，你們都不把我當一個平等的人，都把我當成 一個要盡一切力量對他好的人！</p><p>沒有什么不對，對你們賜給者來說，當然沒有什么不對，可是對我這受惠者來說，我要拒絕，我要大聲叫：夠了！夠了！你們會聽嗎？</p><footer><strong>背叛, 倪匡</strong> <cite><a href="https://zh.wikipedia.org/zh/%E8%83%8C%E5%8F%9B_(%E5%B0%8F%E8%AA%AA)">Wikipedia (背叛)</a></cite></footer></blockquote>
-
-<p>我對此不願作任何評論.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[「偉大」的想法]]></title>
-    <link href="http://shouya.github.io/blog/a-great-thought/"/>
-    <updated>2011-09-15T13:12:00-04:00</updated>
-    <id>http://shouya.github.io/blog/a-great-thought</id>
-    <content type="html"><![CDATA[<p>那傢伙化為烏有了，他徹底被滅絕了。</p>
-
-<p>妄想什麼？已經不容你幻想了。</p>
-
-<p>這是怎麼樣的一個決定呢？那傢伙的潛意識可能有答案，但那傢伙自己沒有。</p>
-
-<p>hey，我多次提醒你，絕對不要讓它例項化，不可能成立的，為甚麼還要那麼做？</p>
-
-<p>hey，我並不是對人類劣性尚存希望，而是欺騙自我罷了。</p>
-
-<p>hey，小朋友，我還會看到你麼？祈禱吧。</p>
-
 ]]></content>
   </entry>
   
