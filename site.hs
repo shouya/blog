@@ -232,6 +232,6 @@ getCategoryAndTags ident = do
 
 siteConfiguration :: Configuration
 siteConfiguration = defaultConfiguration
-                    { deployCommand = "rsync -aveP _site vultr:blog"
+                    { deployCommand = "rsync -avzh _site/ vultr:blog/ --delete"
                     , providerDirectory = "src"
                     }
