@@ -1,4 +1,4 @@
-> 原文由 [Francesco Cogno](https://dev.to/mindflavor) 發佈 [其博客](https://dev.to/mindflavor/rust-futures-an-uneducated-short-and-hopefully-not-boring-tutorial---part-1-3k3)。本文是一篇系列教程，目前原文已更新至[第四章](https://dev.to/mindflavor/rust-futures-an-uneducated-short-and-hopefully-not-boring-tutorial---part-4---a-real-future-from-scratch-734)，現譯文只包括前三部分。
+> 原文《[Rust futures: an uneducated, short and hopefully not boring tutorial](https://dev.to/mindflavor/rust-futures-an-uneducated-short-and-hopefully-not-boring-tutorial---part-1-3k3)》由 [Francesco Cogno](https://dev.to/mindflavor) 發佈 [於其博客](https://dev.to/mindflavor/rust-futures-an-uneducated-short-and-hopefully-not-boring-tutorial---part-1-3k3)。本文是一篇系列教程，原文已更新至[第四部分](https://dev.to/mindflavor/rust-futures-an-uneducated-short-and-hopefully-not-boring-tutorial---part-4---a-real-future-from-scratch-734)，目前譯文只完成了前三部分。
 
 
 
