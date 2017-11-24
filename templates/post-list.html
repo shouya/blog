@@ -1,7 +1,10 @@
-<ul>
+<ul class="post-list">
     $for(posts)$
+    $if(visible)$
         <li>
-            <a href="$url$">$title$</a> - $date$
+            <div class="post-item-title"><a href="$url$">$title$</a></div>
+            <div class="post-item-subline">$date$</div>
         </li>
+    $endif$
     $endfor$
 </ul>

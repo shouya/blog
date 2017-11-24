@@ -1,0 +1,18 @@
+<ul class="post-list">
+    $for(posts)$
+    $if(visible)$
+        <li>
+            <div class="post-item-title"><a href="$url$">$title$</a></div>
+            <!--<div class="post-item-subline">$date$</div>-->
+            <div class="teaser">
+                $if(teaser)$
+                $teaser$
+                $else$
+                $body$
+                $endif$
+            </div>
+            <div class="read-more"><a href="$url$">» Read on</a></div>
+        </li>
+    $endif$
+    $endfor$
+</ul>

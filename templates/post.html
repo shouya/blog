@@ -5,6 +5,25 @@
             by $author$
         $endif$
     </section>
+    <section class="category-info">
+        $if(tags)$
+        <span class="cat-span tags">Tags:
+        $for(tags)$
+        <a href="$link$">$name$</a>
+        $endfor$
+        </span>
+        $endif$
+        $if(categories)$
+        <span class="cat-span categories">
+        Categories:
+        $for(categories)$
+        <a href="$link$">$name$</a>
+        $endfor$
+        </span>
+        $endif$
+    </section>
+
+    </section>
     <section>
         $body$
     </section>
