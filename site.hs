@@ -14,7 +14,7 @@ import           Hakyll
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith siteConfiguration $ do
-  forM_ ["js/**", "images/**"] $ \pattern -> do
+  forM_ ["favicon.png", "js/**", "images/**"] $ \pattern -> do
     match pattern $ do
       route   idRoute
       compile copyFileCompiler
