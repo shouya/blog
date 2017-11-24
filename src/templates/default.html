@@ -24,7 +24,8 @@
             </nav>
         </header>
 
-        <main role="main" class="han-init-context">
+        <main role="main" class="han-init-context"
+        $if(lang)$ lang="$lang$" $endif$>
             $if(notitle)$ $else$ <h1>$title$</h1> $endif$
             $body$
         </main>
