@@ -1,0 +1,278 @@
+---
+layout: page
+title: "7 Aug, 2013 SICP Note"
+date: 2013-08-07 22:29
+comments: true
+sharing: true
+footer: true
+---
+
+Well, reading time it is now.
+
+Chapter 2.1.4 is an practical instance about a calculating system that
+involves uncertain numbers. The fiction character, Alyssa P. Hacker,
+conceives an abstract object, interval, to represent this data type.
+
+On the most basic layer, there are a group of functions. Usually, an
+interval consists of a lower bound and a upper bound. As expected, so
+was what an interval object is constructed.
+
+Here comes the first exercise:
+
+> **Exercise 2.7:**  Alyssa's program is incomplete because she has not
+> specified the implementation of the interval abstraction. Here is a
+> definition of the interval constructor:
+>
+>     (define (make-interval a b) (cons a b))
+>
+> Define selectors `upper-bound` and `lower-bound` to complete the
+> implementation.
+
+This is the easiest one. Here's the solution:
+
+```scheme
+(define upper-bound car)
+(define lower-bound cdr)
+```
+
+The next one:
+
+> **Exercise 2.8:**  Using reasoning analogous to Alyssa's, describe
+> how the difference of two intervals may be computed. Define a
+> corresponding subtraction procedure, called `sub-interval`.
+
+Solution to this is as easy:
+
+```scheme
+(define (sub-interval x y)
+  (make-interval (- (lower-bound x) (upper-bound y))
+                 (- (upper-bound x) (lower-bound y))))
+```
+
+Next one:
+
+> **Exercise 2.9:**  The *width* of an interval is half of the difference
+> between its upper and lower bounds. The width is a measure of the
+> uncertainty of the number specified by the interval. For some
+> arithmetic operations the width of the result of combining two
+> intervals is a function only of the widths of the argument intervals,
+> whereas for others the width of the combination is not a function of
+> the widths of the argument intervals. Show that the width of the sum
+> (or difference) of two intervals is a function only of the widths of
+> the intervals being added (or subtracted). Give examples to show that
+> this is not true for multiplication or division.
+
+Let me restate above question in a simpler way. In some operations,
+the width of resulted interval is a function of the operands' widths,
+whereas for other operations, the result width is not.
+
+I'm trying to show that:
+
+```
+Let-syntax: Let [a,b] be the interval from a to b.
+
+For subtraction:
+
+ interval:  [a0,a1]    -  [b0,b1]    =  [a0-b1,a1-b0]
+ width:     (a1-a0)/2     (b1-b0)/2  -> (a1+b1-a0-b0)/2
+         => (a1+b1-a0-b0) = (a1-a0) + (b1-b0)
+
+Addition's the same.
+
+For multiplication:
+width(absolute uncertainty) of [a,b] = (b-a)/2
+width(absolute uncertainty) of [c,d] = (d-c)/2
+%uncertainty of [a,b] = ((b-a)/2) / ((b+a)/2) = (b-a)/(b+a)
+%uncertainty of [c,d] =                         (d-c)/(d+c)
+%uncertainty of [a,b]*[c,d] = (b-a)/(b+a) + (d-c)/(d+c)
+center of [a,b]*[c,d] = (a+b)/2 * (c+d)/2 = (a+b)(c+d)/4
+absolute uncertainty of [a,b]*[c,d]
+   = (center of [a,b]*[c,d]) * (%uncertainty of [a,b]*[c,d])
+   = (a+b)(c+d)/4 * ((b-a)/(b+a) + (d-c)/(d+c))
+```
+
+The width of the result is the absolute uncertainty of the result.
+
+Here I implied a concept that *width* is actually the *absolute
+uncertainty range* of an interval. As we see here, we can't express
+the width of the result, `(a+b)(c+d)/4 * ((b-a)/(b+a) + (d-c)/(d+c))`,
+in terms of its arguments `(b-a)/2` and `(d-c)/2`. So we say the width
+of a multiplication of two intervals is not a function of the
+intervals' widths. So is the division.
+
+
+Let's move on. Next exercise:
+
+> **Exercise 2.10:**  Ben Bitdiddle, an expert systems programmer, looks
+> over Alyssa's shoulder and comments that it is not clear what it means
+> to divide by an interval that spans zero. Modify Alyssa's code to
+> check for this condition and to signal an error if it occurs.
+
+Easy. Simply add a condition determination:
+
+```scheme
+(define (div-interval x y)
+  (if (and (< (lower-bound y) 0)
+           (> (upper-bound y) 0))
+      (begin
+        (display "error: divisor interval spans across the zero point")
+        (newline)
+        (exit))
+      (mul-interval x
+                    (make-interval (/ 1.0 (upper-bound y))
+                                   (/ 1.0 (lower-bound y))))))
+;; test case
+(if #t
+    (let ((intv1 (make-interval 2 5))
+          (intv2 (make-interval -3 -1))
+          (intv3 (make-interval -3 2)))
+      (div-interval intv1 intv2)
+      (div-interval intv1 intv3))
+    '())
+```
+
+I don't really understand what the next exercise asks. Here goes the
+texts:
+
+> **Exercise 2.11:**  In passing, Ben also cryptically comments: ``By
+> testing the signs of the endpoints of the intervals, it is possible to
+> break `mul-interval` into nine cases, only one of which requires more
+> than two multiplications.'' Rewrite this procedure using Ben's
+> suggestion.
+
+I don't know why there it needs 9 cases in multiplication. I don't
+know whether my understanding to the question 2.10 is correct. It
+seems querying the span-zero check for multiplication as well. I don't
+know what's the point. So I decide to skip this.
+
+Then it proposes another function to build a interval, from a center,
+and a width. Basically that is what I learnt in physics class, called
+absolute uncertainty.
+
+And the exercise is to ask for a implementation for percentage
+uncertainty constructor.
+
+> **Exercise 2.12:**  Define a constructor `make-center-percent` that takes a
+> center and a percentage tolerance and produces the desired
+> interval. You must also define a selector `percent` that produces the
+> percentage tolerance for a given interval. The `center` selector is the
+> same as the one shown above.
+
+My solution to this exercise is here:
+
+```scheme
+(define (make-center-percent c p)
+  (make-interval (- c (* c p))
+                 (+ c (* c p))))
+(define (percent i)
+  (/ (- (upper-bound i) (lower-bound i))
+     (+ (upper-bound i) (lower-bound i))))
+```
+
+The process to obtain the `percent` function was deduced in the answer
+to the exercise 2.9 above.
+
+
+> **Exercise 2.13:**  Show that under the assumption of small percentage
+> tolerances there is a simple formula for the approximate percentage
+> tolerance of the product of two intervals in terms of the tolerances
+> of the factors. You may simplify the problem by assuming that all
+> numbers are positive.
+
+The equation is:
+
+```
+let x = center([a,b]),  y = center([c,d])
+    m = percent([a,b]), n = percent([c,d])
+
+[a,b] * [c,d] = x * y +/- x * y * (m+n)
+```
+
+> **Exercise 2.14:**  Demonstrate that Lem is right. Investigate the
+> behavior of the system on a variety of arithmetic expressions. Make
+> some intervals A and B, and use them in computing the expressions
+> A/A and A/B. You will get the most insight by using intervals whose
+> width is a small percentage of the center value. Examine the results
+> of the computation in center-percent form (see exercise 2.12).
+
+
+For this exercise, I used a rough approach to guess the
+possibility. Mainly the interval result of multiplication or division
+is obtained in a uncertain process involves `min` and `max` of a group
+of possible results. In this way for different processes, that might
+be algebraic equivalent, the actual data passing around could be
+uncertain. Counting the number of times how multiplication/division is
+called in each method, I found they're not even same. So intuitively I
+can say that this problem is expected to happen.
+
+Okay, let me make this answer clearer with an example. Suppose we have
+two intervals, *A* and *B*. *A/A* should be equivalent to *A/B * B/A*
+algebraically. However, let me show the process of calculating and the
+increase in uncertainty:
+
+```
+A/A = (C1 +/- A1) / (C1 +/- A1)
+    = C1/C1 +/- C1/C1 * (A1/C1 + A1/C1)
+    = 1 +/- 2*A1/C1
+
+# The uncertainty is the '2*A1/C1' here.
+
+A/B = (C1 +/- A1) / (C2 +/- A2)
+    = C1/C2 +/- C1/C2 * (A1/C1 + A2/C2)
+B/A = C2/C1 +/- C2/C1 * (A1/C1 + A2/C2)
+
+A/B * B/A = C1/C2 * C2/C1 +/- ((C1/C2 * (A1/C1 + A2/C2)) + C2/C1 * (A2/A1))
+          = 1 +/- ((A1/C1 + A2/C2) * (C1/C2 + C2/C1))
+          = 1 +/- ((A1*C2+A2*C1)/(C1*C2) * (C1*C1+C2*C2)/(C1*C2))
+          = 1 +/- ((A1*C2+A2*C1)(C1^2+C2^2))/(C1*C2)
+```
+
+As you see, the uncertainty of *A/B * B/A* is far complex than it of
+*A/A*. Two seemly equivalent algebraic expressions have different
+uncertainty. This result considers that two equivalent expressions in
+Interval operations could be different.
+
+> **Exercise 2.15:**  Eva Lu Ator, another user, has also noticed the
+> different intervals computed by different but algebraically equivalent
+> expressions. She says that a formula to compute with intervals using
+> Alyssa's system will produce tighter error bounds if it can be written
+> in such a form that no variable that represents an uncertain number is
+> repeated. Thus, she says, `par2` is a ''better'' program for parallel
+> resistances than `par1`. Is she right? Why?
+
+Proof:
+
+<a href="http://imgur.com/EGC43bH" title="sicp ex 2.15"><img
+src="http://i.imgur.com/EGC43bHl.jpg" title="view full-size image"
+alt="sicp ex 2.15"/></a>
+<a href="http://imgur.com/qiv6Fh7"><img
+src="http://i.imgur.com/qiv6Fh7l.jpg" title="view full-size image"/></a>
+
+
+> **Exercise 2.16:**  Explain, in general, why equivalent algebraic
+> expressions may lead to different answers. Can you devise an
+> interval-arithmetic package that does not have this shortcoming, or is
+> this task impossible? (Warning: This problem is very difficult.)
+
+All right, very difficult it is. Simply I thought I already
+demonstrated this case in the answer to exercise 2.14. A general
+explanation to this is that, in fact interval arithmetic operations
+are not the same as the pure numerical ones, since we'd to
+consider a range rather than a fixed point. So, in a complex
+expression, although it might be algebraically equivalent to another
+simpler one, it still gain a larger uncertainty in the process of
+calculating.
+
+A design to a interval-arithmetic package is here. Before processing
+the calculation, firstly simplify the expression to eliminate the
+multiplication and/or division between two interval as many as
+possible\[1\]. Then do the regular process of calculation. Because for
+different but algebraically equivalent expressions, the simplified one
+could be unique. In the case we can acquire an unified result.
+
+\[1\]: Because I don't know if this kind of program is possible to
+exist, I am not sure if this package could exist. I intuitively
+thought it's quite plausible to be.
+
+## References
+* Combining uncertainty, *Errors and Uncertainty* http://pfnicholls.com/physics/Uncertainty.html

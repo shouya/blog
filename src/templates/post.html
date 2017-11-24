@@ -5,15 +5,17 @@
             by $author$
         $endif$
     </section>
+
+    $if(hastagsorcats)$
     <section class="category-info">
-        $if(tags)$
+        $if(hastags)$
         <span class="cat-span tags">Tags:
         $for(tags)$
         <a href="$link$">$name$</a>
         $endfor$
         </span>
         $endif$
-        $if(categories)$
+        $if(hascats)$
         <span class="cat-span categories">
         Categories:
         $for(categories)$
@@ -22,6 +24,7 @@
         </span>
         $endif$
     </section>
+    $endif$
 
     </section>
     <section>

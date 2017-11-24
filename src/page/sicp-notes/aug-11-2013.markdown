@@ -1,0 +1,234 @@
+---
+layout: page
+title: "11 Aug, 2013 SICP Note"
+date: 2013-08-11 12:45
+comments: true
+sharing: true
+footer: true
+---
+
+
+Section 2.2.2 is about *Hierarchy Structure*. The book elaborates how
+to use simple pairs to construct complex data types in hierarchy
+structures. We use multiple nesting sequence in a specific composition
+to construct our hierarchy data type.
+
+We regard a cons as a binary tree node structure. Its `car` can be regard as
+the left-child, and its `cdr` could be the right. (In this way we can
+present any sequence data structure as a binary tree.)
+
+The exercise 2.24 asks for interpretation of result of the expression
+`(list 1 (list 2 (list 3 4)))`. This one's easy. My answer's below.
+
+<a href="http://imgur.com/nazclS0"><img
+src="http://i.imgur.com/nazclS0l.jpg" title=View large image"/></a>
+
+The first three exercise are both for warming up. Exercise 2.25 asks to
+find the `car` and `cdr` composition to acquire `7` from each lists:
+
+* `(1 3 (5 7) 9)`
+* `((7))`
+* `(1 (2 (3 (4 (5 (6 7))))))`
+
+
+The responses are:
+
+* `(cadr (caddr (~)))`
+* `(car (car (~)))`
+* `(cadr (cadr (cadr (cadr (cadr (cadr (~)))))))`
+
+
+Issue found: revo doesn't have convenient functions `cadr`, `caddr`
+defined. It was reported as [issue #5](https://github.com/shouya/revo/issues/5).
+
+Exercise 2.26:
+
+* `(append x y) ;=> (1 2 3 4 5 6)`
+* `(cons x y)   ;=> ((1 2 3) 4 5 6)`
+* `(list x y)   ;=> ((1 2 3) (4 5 6))`
+
+Exercise 2.27 asks to implement a `deep-reverse` function that
+recursively reverse elements in nesting lists. So my basic thought is,
+use the `reverse` function in exercise 2.27, map through each elements
+and apply recursively if one of which is a list. This is my solution,
+and it works.
+
+```scheme
+(define (deep-reverse lst)
+  (map (lambda (e)
+         (if (list? e)
+             (deep-reverse e) e))
+       (reverse lst)))
+```
+
+Exercise 2.28 asks to implement a Ruby `Array#flatten` like function
+named `fringe` in scheme. What I thought is to use `append` to connect
+elements in nested pairs.
+
+```scheme
+(define (fringe lst)
+  (fold-left (lambda (a b)
+               (let ((rhs (if (list? b)
+                              (fringe b)
+                              (list b))))
+                 (append a rhs)))
+             '() lst))
+```
+
+Above is my solution. However, it seems in R5RS there's no `fold-left`
+function, as it is standardized in R6RS. So guile doesn't run it
+correctly, while my revo does :) Anyway the method is adoptable, so I
+won't rewrite a standard R5RS style one again.
+
+Exercise 2.29
+
+Here's it([github](https://github.com/shouya/sicp-exercise/blob/master/2.29.ss)):
+
+```scheme
+;; Question a)
+(define left-branch car)
+(define right-branch cadr)
+(define branch-length car)
+(define branch-structure cadr)
+(define mobile? list?)
+
+
+;; Question b)
+(define (total-weight struct)
+  (if (not (mobile? struct)) struct
+      (+ (total-weight (branch-structure (left-branch struct)))
+         (total-weight (branch-structure (right-branch struct))))))
+
+
+;; Question c)
+(define (equilibrium? struct)
+  (if (not (mobile? struct)) #t
+      (let ((left (left-branch struct))
+            (right (right-branch struct)))
+        (and (equilibrium? (branch-structure left))
+             (equilibrium? (branch-structure right))
+             (= (* (branch-length left)
+                   (total-weight (branch-structure left)))
+                (* (branch-length right)
+                   (total-weight (branch-structure right))))))))
+
+;; Question d)
+;(if #f
+;    (begin
+;      (define make-mobile cons)
+;      (define left-branch car)
+;      (define right-branch cdr)
+;      (define make-branch cons)
+;      (define branch-length car)
+;      (define branch-structure cdr)
+;      (define mobile? pair?)
+;      ) '())
+```
+
+These codes work as expectation hopefully. The test cases are written
+in the source codes which is not presented here. You can view them on
+github.
+
+
+All right, then next section is talking about how to map through a
+tree structure.
+
+Exercise 2.3 asked to square all elements within a tree and keep its
+shape. I raised a impulsion to write a universal `tree-map` function,
+and it would apply a lambda and a tree as arguments, then return the
+result tree in which all the leaves was transformed in the lambda.
+
+My solution's here:
+
+```scheme
+(define (map-tree proc tree)
+  (if (not (pair? tree)) (proc tree)
+      (map (lambda (ele) (map-tree proc ele))
+           tree)))
+
+(define (map-tree2 proc tree)
+  (cond ((null? tree) '())
+        ((not (pair? tree)) (proc tree))
+        (else (cons (map-tree2 proc (car tree))
+                    (map-tree2 proc (cdr tree))))))
+
+(define (scale-tree tree scl)
+  (map-tree (lambda (x) (* x scl)) tree))
+(define (square-tree tree)
+  (map-tree2 (lambda (x) (* x x)) tree))
+
+
+(display (scale-tree '(1 2 3 (4 5 (6 7 8))) 2))
+(newline)
+(display (square-tree '(1 2 3 (4 5 (6 7 8)))))
+(newline)
+```
+
+I used the two ways(direct recursion and high-order function) to
+define the function `map-tree`, and then use it to generate
+`scale-tree` and `square-tree`.
+
+And then I found what I did is exactly what is asked in exercise 2.31.
+
+
+Exercise 2.32 is one of my favorite questions. It asks to complete the
+program and figure out how the following codes can generate all
+subsets of a list.
+
+```scheme
+(define (subsets s)
+  (if (null? s) (list '())
+      (let ((reset (subsets (cdr s))))
+        (append rest (map <???> rest)))))
+```
+
+Firstly my solution:
+
+```scheme
+(define (subsets s)
+  (if (null? s) (list '())
+      (let ((rest (subsets (cdr s))))
+        (append rest
+                (map (lambda (x) (cons (car s) x))
+                     rest)))))
+
+(display (subsets '(1 2 3)))
+```
+
+I like this because it adopts a typical idea in algorithm design,
+*partition*. I learned this idea in the book
+[Programming Pearls](http://www.cs.bell-labs.com/cm/cs/pearls/).
+Basically the main thesis was very
+clear. When faced to an algorithm problem, I should consider to
+separate the question into several small sub-questions, then compute
+each sub-questions, and combine the up in the final step. This is what
+exactly applied in the code.
+
+Firstly, obviously the terminal condition is `'()`. Subsets of `'()`
+is only itself. Then consider the global application. For a regular
+list, for example, `(a b c)`, has three elements. One we'd take the
+first element `a` out, and compute the subsets of the rest ones,
+`(b c)`. What we'd notice most is how to combine the result up. I
+choose to observe what the subsets of the rest are and what I
+expected, and then compare the results to decide what I'd do to
+generate the expected result.
+
+So the subsets of `(b c)` are `((b c) (c) (b) '())` and the result
+should be `((a b c) (a c) (a b) (a) (b c) (c) (b) '())`. The
+difference between these two lists is that the result contain an extra
+group of elements that each has `a`, the first elements, contained.
+
+This is why here's an `append` that concatenate the original list and
+the list which imitates from original list and has the first element
+added on. I filled the space with a `cons` operation in a lambda.
+
+To illustrate how the code works, I drew a graph showing the
+partitioning and reducing process.
+
+
+<a href="http://imgur.com/6ZqHjLT"><img
+src="http://i.imgur.com/6ZqHjLTl.jpg" title="View large image"/></a>
+
+Yet I feel refreshing on the questions. Although these are not quite
+challenging yet, I can still regard these as a practice of computer
+science thinking, which was yet amazing.

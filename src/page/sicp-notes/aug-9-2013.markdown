@@ -1,0 +1,288 @@
+---
+layout: page
+title: "9 Aug, 2013 SICP Note"
+date: 2013-08-09 23:15
+comments: true
+sharing: true
+footer: true
+---
+
+I started to read the new section. Well, my progress was slow yet.
+
+This section is about hierarchical data and the closure
+property. ([textbook](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-15.html#%_sec_2.2))
+
+The graph shows a representation of `cons`,
+
+![cons](https://mitpress.mit.edu/sicp/full-text/book/ch2-Z-G-12.gif)
+
+As you see, a cons is actually a pair. In language of LISP, a cons
+could contain following types of elements:
+
+* regular atom
+* another cons
+* nil, presented as `'()` usually.
+
+An atom is a single value. The `nil` is a little special, as we
+usually use it to indicate an empty *list*(notice that it's not
+*cons*). With cons-es and nil, we can construct a linear sequence(i.e.
+list) with the following structure.
+
+![list](https://mitpress.mit.edu/sicp/full-text/book/ch2-Z-G-13.gif)
+
+It is construct by `(cons 1 (cons 2 (cons 3 (cons 4 '()))))`. In
+Haskell it looks more elegant: `1:2:3:4:[]`. This is actually what an
+list is in Haskell as well as LISP. This is a very pretty and clean
+concept of a manner to construct data types.
+
+In this section the authors mainly introduced some basic uses of
+`cons`. Especially, It emphasized a usual way to construct a list with
+`cons`, as list is widely used in Scheme programming.
+
+This section is not difficult for me since I am used to compose such
+recursive functions. In the study of Haskell I'd practiced a lot.
+
+So after skimming the example implement of `list-ref`, `length` and
+`append` functions. I would try the exercises directly.
+
+> **Exercise 2.17:**  Define a procedure last-pair that returns the list
+> that contains only the last element of a given (nonempty) list:
+>     (last-pair (list 23 72 149 34))
+>     (34)
+
+My solution is
+below([github](https://github.com/shouya/sicp-exercise/blob/master/2.17.ss)). It
+works perfectly with both guile and revo.
+
+```scheme
+(define (last-pair lst)
+  (cond
+   ((null? lst) "failed")
+   ((null? (cdr lst)) lst)
+   (else (last-pair (cdr lst)))))
+
+(display (last-pair '(23 72 149 34)))
+(newline)
+```
+
+> **Exercise 2.18:**  Define a procedure reverse that takes a list as
+> argument and returns a list of the same elements in reverse order:
+>     (reverse (list 1 4 9 16 25))
+>     (25 16 9 4 1)
+>
+
+```scheme
+(define (reverse lst)
+  (define (reverse-helper a b)
+    (if (null? a) b
+        (reverse-helper (cdr a)
+                        (cons (car a) b))))
+  (reverse-helper lst '()))
+
+(define (reverse2 lst)
+  (define (reverse-helper a)
+    (if (null? (cdr a)) (list (car a))
+        (append (reverse-helper (cdr a))
+                (list (car a)))))
+  (reverse-helper lst))
+
+
+(display (reverse '(1 2 3 4)))
+(newline)
+(display (reverse2 '(1 2 3 4)))
+(newline)
+```
+
+I produced two functions. The first one is better as it's intuitive,
+clear and efficient. I wrote the second one as a thought to implement
+a linear recursion version beside the iteration taught in
+[section 1.2.1](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-11.html#%_sec_1.2).
+Both cases pass the test under revo and scheme.
+
+
+> **Exercise 2.19:**  Consider the change-counting program of section
+  [1.2.2](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-11.html#%_sec_1.2.2).
+  It would be nice to be able to easily change the currency
+  used by the program, so that we could compute the number of ways to
+  change a British pound, for example. As the program is written, the
+  knowledge of the currency is distributed partly into the procedure
+  `first-denomination` and partly into the procedure `count-change` (which
+  knows that there are five kinds of U.S. coins). It would be nicer to
+  be able to supply a list of coins to be used for making change.
+
+> We want to rewrite the procedure cc so that its second argument is a
+  list of the values of the coins to use rather than an integer
+  specifying which coins to use. We could then have lists that defined
+  each kind of currency:
+
+>     (define us-coins (list 50 25 10 5 1))
+>     (define uk-coins (list 100 50 20 10 5 2 1 0.5))
+
+> We could then call `cc` as follows:
+>     (cc 100 us-coins)
+>     ;=> 292
+
+> To do this will require changing the program `cc` somewhat. It will
+> still have the same form, but it will access its second argument
+> differently, as follows:
+
+```scheme
+(define (cc amount coin-values)
+  (cond ((= amount 0) 1)
+        ((or (< amount 0) (no-more? coin-values)) 0)
+        (else
+         (+ (cc amount
+                (except-first-denomination coin-values))
+            (cc (- amount
+                   (first-denomination coin-values))
+                coin-values)))))
+```
+
+> Define the procedures `first-denomination`, `except-first-denomination`,
+  and `no-more?` in terms of primitive operations on list
+  structures. Does the order of the list `coin-values` affect the answer
+  produced by `cc`? Why or why not?
+
+This was quite easy as actually what we treat the coin list in
+functions `first-denomination`, `except-first-denomination` and
+`no-more?` is equivalent to `car`, `cdr` and `null?` operators.
+
+So I define them directly([github](https://github.com/shouya/sicp-exercise/blob/master/2.19.ss)):
+
+```scheme
+(define no-more? null?)
+(define except-first-denomination cdr)
+(define first-denomination car)
+```
+
+Then it works. There's an issue prompted. Revo, so far, cannot parse
+float numbers directly. This loss of feature was submitted as
+[issue #4](https://github.com/shouya/revo/issues/4).
+
+
+
+Next exercise is about a syntax to define arbitrary number of
+parameters of a lambda. The text was so long so I omitted it. I'd only
+reproduce the question directly:
+
+> Use this notation to write a procedure `same-parity` that takes one
+  or
+  more integers and returns a list of all the arguments that have the
+  same even-odd parity as the first argument. For example,
+
+>     (same-parity 1 2 3 4 5 6 7)
+>     ;=> (1 3 5 7)
+
+>     (same-parity 2 3 4 5 6 7)
+>     ;=> (2 4 6)
+
+The solutions is intuitive:
+
+```scheme
+(define (same-parity . x)
+  (define (same-parity-helper p b)
+    (cond
+     ((null? b) '())
+     (p    (cons (car b)
+                 (same-parity-helper (not p) (cdr b))))
+     (else (same-parity-helper (not p) (cdr b)))))
+  (same-parity-helper #t x))
+```
+
+The next is about mapping. Easy as well is it. Mapping and reducing/folding
+are commonly used in Haskell as well as Ruby.
+
+Directly hitting the exercises:
+
+> **Exercise 2.21:**  The procedure `square-list` takes a list of numbers as
+  argument and returns a list of the squares of those numbers.
+
+>      (square-list (list 1 2 3 4))
+>      (1 4 9 16)
+
+>  Here are two different definitions of square-list. Complete both of
+   them by filling in the missing expressions:
+
+>      (define (square-list items)
+>        (if (null? items)
+>             nil
+>            (cons <??> <??>)))
+>      (define (square-list items)
+>        (map <??> <??>))
+
+My approach([github](https://github.com/shouya/sicp-exercise/blob/master/2.21.ss)):
+
+```scheme
+(define (square-list items)
+  (if (null? items) '()
+      (cons (* (car items) (car items))
+            (square-list (cdr items)))))
+
+(define (square-list2 items)
+  (map (lambda (x) (* x x)) items))
+```
+
+
+Exercise 2.22 asks to explain why the following code doesn't work as
+expectation:
+
+```scheme
+(define (square-list items)
+  (define (iter things answer)
+    (if (null? things)
+        answer
+        (iter (cdr things)
+              (cons answer
+                    (square (car things))))))
+  (iter items nil))
+```
+
+Well, the best way to cope with this kind of logical errors is to
+trace the program step by step. Let me try it.
+
+```
+call: (square-list '(2 3 4))
+rec:  (iter '(2 3 4) '()            )
+rec:  (iter '(3 4)   ('() . 4)      )  ; problem starts here
+rec:  (iter '(4)     (('() . 4) . 9))
+...
+```
+
+A sequence, usually, is a cons in which the right pointer refers to
+another cons until appears `'()`. Cons-ing an element with another
+cons is the way to do it. While in this code, a cons is used to glue a
+list(or cons) with an element. That's not the correct way to do it. An
+solution requires a little change in code and is less efficient is to
+change the `cons` into `append`, which connect to lists into one,
+besides, the `(square (car things))` needs to be wrapped into a list
+as well.
+
+
+The next exercise is about the `for-each` procedure. `for-each` offers
+the same function as `map` except that `for-each` returns an arbitrary
+value instead of a list. The exercise asks to implement the `for-each`
+procedure. This is not difficult, but I still reviewed the implement
+of this in
+revo. ([github](https://github.com/shouya/revo/blob/ff5250710c6a730986673bd2ca084a469313b4f1/lib/revo/builtin/stdlib.rv#L327))
+In revo, `for-each` was implemented as a standard lib function as well
+as `map`. This part of code was implemented under scheme, directly
+copied from the [Heist](https://github.com/jcoglan/heist) project,
+which is another scheme interpreter written in ruby. In his
+implementation it looks slightly complex as it has to follow the R5RS
+standard `for-each` for different arguments. I don't need to cope with
+them now. Here's
+it([github](https://github.com/shouya/sicp-exercise/blob/master/2.23.ss)):
+
+```scheme
+(define (my-for-each proc lst)
+  (map proc lst)
+  '())
+
+(define (my-for-each2 proc lst)
+  (if (null? lst) '()
+      (begin
+        (proc (car lst))
+        (my-for-each2 proc (cdr lst)))))
+```
+
+I felt yet comfortable.

@@ -1,0 +1,85 @@
+---
+layout: page
+title: "5 Aug, 2013 SICP Note"
+date: 2013-08-05 23:30
+comments: true
+sharing: true
+footer: true
+---
+
+A magical demonstration implements rational number data type in a few
+codes, showing the succinctness of fp. That's why i love it always.
+
+I reproduced the code. It runs nearly perfectly under revo. One issue
+is that revo doesn't treat fractions good. Although revo has built-in
+fraction type, as specified in R5RS, it doesn't deal with the
+condition of downcasting a fraction back to an integer. For example,
+`(/ (/ 1 2) (/ 1 2))` will result in `1/1`, which is not what I
+expected. The issued was submitted to the revo github repository,
+[issue #1](https://github.com/shouya/revo/issues/1). I'd fix this
+later.
+
+Besides, revo doesn't have built-in fraction number syntax. All'd to
+write now is `(/ 1 2)`, while what I want is to write `1/2`
+directly. reported as
+[issue #2](https://github.com/shouya/revo/issues/2). Fixation of this
+issue could involve lexical scanner and syntax parser. I'd work on it
+later as well.
+
+The exercise left to the readers is:
+
+> **Exercise 2.1**: Define a better version of `make-rat` that handles both
+> positive and negative arguments. `make-rat` should normalize the
+> sign so that if the rational number is positive, both the numerator
+> and denominator are positive, and if the rational number is
+> negative, only the numerator is negative.
+>
+> **SICP** - *Page 125* (chinese version: *page 58*)
+
+Keep working on it.
+
+Just found an incompleteness in revo. It doesn't cope with negations
+normally. Since neither syntactic `-1` nor functional `(- 1)` work
+properly. It was not bug but a requiring function. Reported as
+[issue #3](https://github.com/shouya/revo/issues/3).
+
+
+My solution is:
+{% codeblock solution to exercise 2.1 lang:scheme https://github.com/shouya/sicp-exercise/blob/master/2.1.ss#L29 view on github %}
+(define (make-rat n d)
+  (let* ((xor (lambda (x y)
+                (or (and x (not y))
+                    (and y (not x)))))
+         (neg? (xor (negative? n)
+                    (negative? d)))
+         (abs-n (abs n))
+         (abs-d (abs d))
+         (g (gcd abs-n abs-d))
+         (new-n (/ abs-n g))
+         (new-d (/ abs-d g))
+         (signed-n (if neg? (- new-n) new-n)))
+    (cons signed-n new-d)))
+
+(define (neg-rat x)
+  (make-rat (- (numer x))
+            (denom x)))
+{% endcodeblock %}
+
+Test cases:
+
+```scheme
+(print-rat (add-rat one-half one-third))     ;=> 5/6
+(print-rat (add-rat one-third one-third))    ;=> 2/3
+(print-rat (add-rat (neg-rat one-half)
+                    one-third))              ;=> -1/6
+(print-rat (mul-rat (neg-rat one-third)
+                    (neg-rat one-third)))    ;=> 1/9
+```
+
+It works as expectation, great.
+
+All right. My feeling to write scheme code was still ambivalent. On
+one hand I feel quite comfortable to code in scheme, and enjoy the
+beauty of it. On the other I still can't write very mature code to
+dominate scheme as so to ruby. Okay, it's well yet; just keep going
+and practice more.

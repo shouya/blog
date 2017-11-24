@@ -11,5 +11,3 @@ executable site
                   , pandoc == 1.19.*
   ghc-options:      -threaded
   default-language: Haskell2010
-  other-modules:    Custom.Route
-                  , Custom.Feed

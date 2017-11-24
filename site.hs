@@ -5,7 +5,7 @@ import           System.FilePath     ((</>), takeDirectory, takeBaseName)
 import           Data.List           (isSuffixOf)
 import           Data.Maybe          (maybe, fromJust, fromMaybe)
 import           Debug.Trace         (trace)
-import           Control.Monad       (liftM, forM_)
+import           Control.Monad       (liftM, forM_, mplus)
 import           Control.Applicative (empty)
 import           Text.Pandoc.Options
 
@@ -13,9 +13,9 @@ import           Hakyll
 
 --------------------------------------------------------------------------------
 main :: IO ()
-main = hakyll $ do
-  forM_ ["js/*", "iamges/*"] $ \dir -> do
-    match dir $ do
+main = hakyllWith siteConfiguration $ do
+  forM_ ["js/**", "images/**"] $ \pattern -> do
+    match pattern $ do
       route   idRoute
       compile copyFileCompiler
 
@@ -34,6 +34,7 @@ main = hakyll $ do
       makeItem ""
         >>= loadAndApplyTemplate "templates/tag.html" ctx
         >>= loadAndApplyTemplate "templates/default.html" ctx
+        >>= cleanIndexUrls
         >>= relativizeUrls
 
   cats <- buildCategories "posts/*" (fromCapture "categories/*/index.html")
@@ -47,16 +48,22 @@ main = hakyll $ do
       makeItem ""
         >>= loadAndApplyTemplate "templates/category.html" ctx
         >>= loadAndApplyTemplate "templates/default.html" ctx
+        >>= cleanIndexUrls
         >>= relativizeUrls
 
-  let taggedPostCtx = tagListContext cats "categories" <>
-                      tagListContext tags "tags" <>
+  let taggedPostCtx = tagListContext getCategory cats "categories" <>
+                      tagListContext getTags     tags "tags"       <>
+                      boolListNotEmptyField "hastags" getTags      <>
+                      boolListNotEmptyField "hascats" getCategory  <>
+                      boolListNotEmptyField "hastagsorcats" getCategoryAndTags <>
                       postCtx
 
-  match (fromList ["about.rst", "contact.markdown"]) $ do
+  match (fromList ["about/index.markdown"]) $ do
     route   $ setExtension "html"
     compile $ pandocCompiler
+      >>= loadAndApplyTemplate "templates/comment.html" defaultContext
       >>= loadAndApplyTemplate "templates/default.html" defaultContext
+      >>= cleanIndexUrls
       >>= relativizeUrls
 
   match "index.html" $ do
@@ -102,6 +109,16 @@ main = hakyll $ do
       >>= cleanIndexUrls
       >>= relativizeUrls
 
+  match "page/**" $ do
+    route   $ setExtension "html"
+    compile $ pandocPostCompiler
+      >>= loadAndApplyTemplate "templates/post.html" taggedPostCtx
+      >>= cleanIndexUrls
+      >>= relativizeUrls
+      >>= loadAndApplyTemplate "templates/comment.html" postCtx
+      >>= loadAndApplyTemplate "templates/default.html" postCtx
+      >>= cleanIndexUrls
+      >>= relativizeUrls
 
   match "templates/*" $ compile templateBodyCompiler
 
@@ -124,9 +141,9 @@ postCtx =
     defaultContext
 
 visibleCtx :: Context String
-visibleCtx = field "visible" $ \(Item ident _) -> do
+visibleCtx = boolFieldM "visible" $ \(Item ident _) -> do
   cond <- fromMaybe "true" <$> getMetadataField ident "published"
-  if cond == "true" then pure "true" else empty
+  return $ cond == "true"
 
 
 ---- Route
@@ -174,9 +191,9 @@ listContextWith ctx s = listField s ctx $ do
   let metas = maybe [] (map trim . splitAll ",") metaStr
   return $ map (\x -> Item (fromFilePath x) x) metas
 
-tagListContext :: Tags -> String -> Context a
-tagListContext tx s = listField s tagContext $ do
-  tags <- getUnderlying >>= getTags
+tagListContext :: (Identifier -> Compiler [String]) -> Tags -> String -> Context a
+tagListContext f tx s = listField s tagContext $ do
+  tags <- getUnderlying >>= f
   return $ map (\x -> Item (tagsMakeId tx x) x) tags
   where tagContext = tagName <> tagLink
         tagName    = bodyField "name"
@@ -187,3 +204,34 @@ pandocPostCompiler = pandocCompilerWith defaultHakyllReaderOptions writerOptions
   where writerOptions = defaultHakyllWriterOptions
                         { writerHTMLMathMethod = MathJax ""
                         }
+
+boolListNotEmptyField :: String -> (Identifier -> Compiler [a]) -> Context b
+boolListNotEmptyField name f = boolFieldM name $ \_ -> do
+  list <- f =<< getUnderlying
+  return . not . null $ list
+
+
+boolFieldM :: String -> (Item a -> Compiler Bool) -> Context a
+boolFieldM name f = field name $ \i -> do
+  b <- f i
+  if b then return "true" else empty
+
+
+getCategory :: Identifier -> Compiler [String]
+getCategory identifier = do
+    metadata <- getMetadata identifier
+    return $ fromMaybe [] $
+        (lookupStringList "categories" metadata) `mplus`
+        (map trim . splitAll "," <$> lookupString "categories" metadata)
+
+getCategoryAndTags :: Identifier -> Compiler [String]
+getCategoryAndTags ident = do
+  tags <- getTags ident
+  cats <- getCategory ident
+  return $ tags ++ cats
+
+siteConfiguration :: Configuration
+siteConfiguration = defaultConfiguration
+                    { deployCommand = "rsync -aveP _site vultr:blog"
+                    , providerDirectory = "src"
+                    }

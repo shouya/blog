@@ -1,0 +1,268 @@
+---
+layout: page
+title: "13 Aug, 2013 SICP Note"
+date: 2013-08-13 23:30
+comments: true
+sharing: true
+footer: true
+---
+
+In section 2.2.3 the author described a conventional abstract
+interface for sequential data structure. The interfaces are
+three types of high-order functions. They are:
+
+* map
+* filter
+* accumulate
+
+For descriptions of each terms, I added corresponding haskell type
+signatures. I think that's a very helpful way to understand them.
+
+*Map* is the easiest to understand one. What it do is to take a
+ sequence and a procedure as argument and then produce the result
+ sequence in which each elements were applied the transformation
+ specified in the procedure.
+
+```haskell
+map :: (a -> b) -> [a] -> [b]
+```
+
+*Filter* is a process that selects a subsequence of passing in
+ sequence according to the specific rule, another argument that is a
+ predication, i.e. a procedure that returns a boolean value. For those
+ that are predicated as true, they will be remained in the result
+ sequence; whereas for those which are not, they will be omitted. The
+ name of filter varies in some other programming languages. In ruby,
+ it is called `select`, or `find_all`.
+
+```haskell
+filter :: (a -> Bool) -> [a] -> [a]
+```
+
+*Accumulate* is a little complicated. A accumulation process takes a
+ procedure that takes two arguments, an initial value and a sequence,
+ and return a  value. Accumulation is called `fold{l,r}` in Haskell
+ and `reduce`, `inject` in Ruby. As its name, it walks through the
+ elements of a sequence, and apply the procedure for each
+ elements. Differing from *map*, the result of `accumulate` is a value
+ rather than a sequence. For each steps of accumulating, the procedure
+ passed in produces a value, according to the element and, a carrying
+ value that is returned from the previous calling. Does it sound a
+ little complex? Perhaps it's my problem on expressing. Here's the
+ type signature of `fold-left` in Haskell.
+
+```haskell
+foldr :: (a -> b -> a) -> a -> [b] -> a
+```
+Very intuitive isn't it? The procedure in it takes two arguments. One
+ is the carrying value, and the another one is an element from the
+ sequence.(In scheme's `accumulate` they're flipped.)
+ Besides, the second argument passed to `foldr` is the
+ initial carrying value. `fold-right` in Haskell is equivalent to
+ `accumulate` in scheme actually.
+
+An example is always a better illustration:
+
+```haskell
+  foldr (\x -> \y -> x + y) 0 [1,2,3]
+= (0+(1+(2+(3+0))))nn
+```
+
+Did you see how it works now? Let me attach a picture from wikipedia
+that I think is helpful to understand it.
+
+![foldr](http://upload.wikimedia.org/wikipedia/commons/3/3e/Right-fold-transformation.png)
+
+By combining these high-order functions in different ways, we can
+obtain the result that we want.
+
+All right, let's move on to the exercise.
+
+> *Exercise 2.33.* **233.** Fill in the missing expressions to
+   complete the following definitions of some basic list-manipulation
+   operations as accumulations:
+
+```scheme
+(define (map p sequence)
+  (accumulate (lambda (x y) <??>) nil sequence))
+(define (append seq1 seq2)
+  (accumulate cons <??> <??>))
+(define (length sequence)
+  (accumulate <??> 0 sequence))
+```
+
+So here's my solution:
+
+```scheme
+(define (map p sequence)
+  (accumulate (lambda (x y) (cons (p x) y) '() sequence))
+(define (append seq1 seq2)
+  (accumulate cons seq2 seq1))
+(define (length sequence)
+  (accumulate (lambda (_ y) (+ y 1)) 0 sequence))
+```
+
+Aren't them look elegant? Especially the second one.
+
+
+Exercise 2.34 is a question that asks to write a function to evaluate
+a polynomial in *x* at a given value. For a polynomial in form of
+
+![ploynomial](https://mitpress.mit.edu/sicp/full-text/book/ch2-Z-G-18.gif)
+
+The Horner's rule to evaluate a polynomial can be illustrated as
+
+![horner's rule](https://mitpress.mit.edu/sicp/full-text/book/ch2-Z-G-19.gif)
+
+So simply turn this recursive formula into scheme code is what I did:
+
+```scheme
+(define (horner-eval x coeff-seq)
+  (accumulate (lambda (this-coeff higher-terms)
+                (+ this-coeff (* higher-terms x)))
+              0
+              coeff-seq))
+```
+
+Exercise 2.35 asks for a redefinition of `count-leaves` with the
+the abstract interfaces. The function count the number of the leaves
+of a tree. So here's my answer, which works well.
+
+```scheme
+(define (count-leaves t)
+  (accumulate + 0
+              (map (lambda (x)
+                     (cond ((null? x) 0)
+                           ((not (pair? x)) 1)
+                           (else (count-leaves x))))
+                   t)))
+```
+
+There are some questions remained. It is now quite late so I will
+complete them later.
+
+Update(14 August):
+
+Exercise 2.36.  The procedure accumulate-n is similar to accumulate
+except that it takes as its third argument a sequence of sequences,
+which are all assumed to have the same number of elements. It applies
+the designated accumulation procedure to combine all the first
+elements of the sequences, all the second elements of the sequences,
+and so on, and returns a sequence of the results. For instance, if s
+is a sequence containing four sequences, `((1 2 3) (4 5 6) (7 8 9) (10
+11 12))`, then the value of `(accumulate-n + 0 s)` should be the sequence
+(22 26 30). Fill in the missing expressions in the following
+definition of `accumulate-n`:
+
+```scheme
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs))
+      nil
+      (cons (accumulate op init <??>)
+            (accumulate-n op init <??>))))
+```
+
+So the result should be
+
+```
+(define (accumulate-n op init seqs)
+  (if (null? (car seqs)) '()
+      (cons (accumulate op init (map car seqs) )
+            (accumulate-n op init (map cdr seqs)))))
+```
+
+I thought to accumulate all the first elements, and then drop the rest
+to the recursion again. So was what I've done.
+
+Exercises is about implementing matrix operations: `dot-product`,
+`matrix-*-vector`, `matrix-*-matrix` and `transpose`.
+
+My solution seems good, but I know the implementation of
+`matrix-*-matrix` is not the simplest solution, as I didn't follow the
+pre-given template.
+
+```scheme
+; Dot product
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+
+; Matrix * Vector
+; http://upload.wikimedia.org/math/d/c/f/dcf8ccf9344226b39a18818eb03eea6e.png
+(define (matrix-*-vector m v)
+  (map (lambda (w) (map * w v)) m))
+
+; Matrix * Matrix
+; http://upload.wikimedia.org/math/7/b/c/7bc5e0122746b494cc5844db44ef975c.png
+; http://upload.wikimedia.org/math/7/b/6/7b62cda9a2e78e8414806c5aea486b5c.png
+; http://upload.wikimedia.org/math/d/3/c/d3c223ed4af4939e565893b2f3136bae.png
+;; NOT BEST SOLUTION
+(define (matrix-*-matrix m n)
+  (map (lambda (mi)
+         (accumulate-n + 0
+                       (map (lambda (mii ni)
+                              (map * ni (map (lambda _ mii) ni)))
+                            mi n)))
+       m))
+
+; Transpose
+(define (transpose mat)
+  (accumulate-n cons '() mat))
+```
+
+The following images are from
+[wikipedia](http://en.wikipedia.org/wiki/Matrix_multiplication).
+
+M * V formula:
+
+![](http://upload.wikimedia.org/math/d/c/f/dcf8ccf9344226b39a18818eb03eea6e.png)
+
+M * M formula & example:
+
+![](http://upload.wikimedia.org/math/7/b/c/7bc5e0122746b494cc5844db44ef975c.png)<br />
+![](http://upload.wikimedia.org/math/7/b/6/7b62cda9a2e78e8414806c5aea486b5c.png)
+![](http://upload.wikimedia.org/math/d/3/c/d3c223ed4af4939e565893b2f3136bae.png)
+
+The way I follow to write the M*M program is right like what is
+demonstrated in the example.
+
+
+
+Exercise 2.38 compares between `fold-left` and `fold-right`. *Give a
+property that `op` should satisfy to guarantee that fold-right and
+fold-left will produce the same values for any sequence.*
+
+My guessing condition is that,
+
+we know that op takes two arguments, so in different direction of
+folding, the arguments are flipped. So for an op whose arguments are
+interchangeable, it produce the same result for `fold-left` and
+`fold-right`.
+
+> **Exercise 2.39:** Complete the following definitions of reverse
+>    (exercise 2.18) in terms of fold-right and fold-left from
+>    exercise 2.38:
+
+```scheme
+(define (reverse sequence)
+(fold-right (lambda (x y) <??>) nil sequence))
+(define (reverse sequence)
+(fold-left (lambda (x y) <??>) nil sequence))
+```
+
+
+My solution:
+
+```scheme
+(define (reverser sequence)
+  (fold-right (lambda (x y) (append y (list x))) '() sequence))
+(define (reversel sequence)
+  (fold-left (lambda (x y) (cons y x)) '() sequence))
+```
+
+
+
+BTW today(13 August) I learned some lambda calculus. One is the deduction of Y
+combinator. I am obsessive about this kind of stuff. I know what
+attracts me most is the mathematical beauty inside.
+
+`Y = \f.(\x.x x) (\x.f (x x))`

@@ -1,0 +1,78 @@
+---
+layout: page
+title: "19 Aug, 2013 SICP Note"
+date: 2013-08-20 01:10
+comments: true
+sharing: true
+footer: true
+---
+
+It's good to come back. Okay, let me follow on the progress.
+
+I'd take note for a subsection of chapter 2.2.3. This section is about
+'Nested Mappings'.
+([sicp book](https://mitpress.mit.edu/sicp/full-text/book/book-Z-H-4.html#%_toc_%_sec_Temp_193))
+
+This section talks about the useful methods to cope with nested
+lists.
+
+In the book it demonstrates an example to generate the list of numbers
+that conform the specific rules shown below. The result required is $i$,
+$j$ and their sum, and the argument given is $n$.
+
+* $1 \leq i \lt j \leq n$
+* $i + j$ is a prime
+
+The book gives a full code to construct such a program, besides, I am
+going to translate it into Haskell, both to deepen my impress and to
+have fun in Haskell :)
+
+```haskell
+primeSumPairs :: Integer -> [(Integer, Integer, Integer)]
+primeSumPairs n =
+  map makePairSum $ filter isPrimeSum [(x, y)|x <-[1..n], y <- [1..(x-1)]]
+  where
+    isPrimeSum (a,b) = isPrime $ a + b
+    makePairSum (a,b) = (a,b,a+b)
+```
+
+Wow, due to the powerful syntax of Haskell, those code looks much more
+elegant!
+
+The function `isPrime`, picked from [a stackoverflow question](http://stackoverflow.com/questions/4541415/haskell-prime-test), is defined before this.
+
+```haskell
+isPrime :: Integer -> Bool
+isPrime x = ([] == [y | y <- [2..floor (sqrt $ fromIntegral x)], mod x y == 0])
+```
+
+And then the book presented a permutation generator, which was
+regularly impressive, looks cool yet.
+
+Exercise 2.40 asks to write a procedure `uniq-pairs` that takes an
+argument *n* and return a sequence of $(i, j)$ for each that
+satisfies $1 \leq i \lt j \leq n$.
+
+This was quite easy, as implied in the code above,
+
+```haskell
+uniqPairs :: Integer -> [(Integer, Integer)]
+uniqPairs n = [(x, y)|x <-[1..n], y <- [1..(x-1)]]
+```
+
+
+Exercise 2.41 asks for a very simple procedure. Given *n* and *s*, the
+procedure could return all possible lists of pairs of (elements for each takes
+values from 1 to *n* that sums to *s*). (Well, I like such logical
+English.)
+
+Right as definition, translate those English into Haskell and we will
+get the answer, a one-liner.
+
+```haskell
+ex241 :: Integer -> Integer -> [(Integer, Integer, Integer)]
+ex241 n s = [(a,b,c) | a <- rng, b <- rng, c <- rng, a + b + c == s]
+  where rng = [1..n]
+```
+
+Quite simple isn't it?

@@ -46,6 +46,7 @@ footer {
     margin-top: 30px;
     padding: 12px 0px 12px 0px;
     text-align: right;
+    line-height: 16px;
 }
 
 h1 {
@@ -170,6 +171,23 @@ pre {
     background-color: #f8f8f8;
     font-size: .9em;
     padding: 10px;
+}
+
+.icon-links {
+    float: left;
+    margin: 0;
+    padding: 0;
+}
+.icon-links .icon {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-links ul {
+    list-style: none;
+}
+.icon-links li {
+    display: inline-block;
 }
 
 /* source highlighting */

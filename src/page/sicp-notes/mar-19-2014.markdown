@@ -1,0 +1,72 @@
+---
+layout: page
+title: "19 Mar, 2014 SICP Note"
+date: 2014-03-19 19:50
+comments: true
+sharing: true
+footer: true
+---
+
+I got to keep reading SICP. Repicking the book recently from my
+drawer, I decided to continue this article series. SICP tastes good,
+and it brings me surprise everytime I read it again. Actually I read
+much faster than the progress on taking notes here. Anyway, I'd to
+record what I learned from the book.
+
+----
+
+Being lazy and tired on the cliché of eight queens problem and the
+graphical
+language before *Section 2.3*, I will not write programs as solutions
+for the problems. (Okay, actually I just want to skip to the symbolic
+language section, which is far more attracting.)
+
+Starting from *Excercise 2.42*, exercise asks to write a function
+`safe?` for the eight-queen puzzle, which checks whether a queen is
+compatible with other queens on the board in the given place. This is
+not difficult. We should take the conjunction of these three
+conditions:
+
+* no chess is there in the same row
+* no chess is there in the upward diagonal
+* no chess is there in the downward diagonal
+
+Since we calculate the availability for each column, there will be no
+conflict in the same column.
+
+
+*Exercise 2.43*. This question is interesting. It asks to find out the
+ reason why this code:
+
+```scheme
+(flatmap
+  (lambda (new-row)
+    (map (lambda (rest-of-queens)
+	          (adjoin-position new-row k rest-of-queens))
+         (queen-cols (- k 1))))
+  (enumerate-interval 1 board-size))
+```
+
+appears evidently slower than the code:
+
+```scheme
+(flatmap
+  (lambda (rest-of-queens)
+     (map (lambda (new-row)
+             (adjoin-position new-row k rest-of-queens))
+          (enumerate-interval 1 board-size)))
+  (queen-cols (- k 1)))
+```
+giving these two snippet function the same.
+
+Well, what the inefficient one does is to enumerate all possible ways
+to place the queens and filter the valid ones. The efficiency of this
+algorithm is $O(8^N)$. However, the efficient way to do this is to
+eliminate the number of wasted steps. For each step of the efficient
+algorithm follows the reduced possibilities and therefore this part of
+efficiency is be reduced to $O(N!)$, which is far more smaller than
+the exponential.
+
+
+The exercise 2.44 - 2.52 are boring so I'd just skip them. Tomorrow
+I'd work on the symbolic data section, which is my favorite. <3
