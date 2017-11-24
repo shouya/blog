@@ -93,14 +93,16 @@ ul.post-list {
 }
 
 article li, article p {
-    text-align: left;
+    /* text-align: left; */
 }
 
 .figure {
     max-width: 600px;
 }
 
-img {
+.figure > img {
+    display: block;
+    margin: auto;
     max-width: 100%;
 }
 
@@ -150,6 +152,12 @@ img {
 
 footer .copyright {
     float: left;
+}
+
+#load-comment-btn {
+    cursor: pointer;
+    display: block;
+    text-align: center;
 }
 
 

@@ -1,0 +1,17 @@
+$body$
+<div id="comment">
+    <a id="load-comment-btn" onclick="loadComment();">Load Comment</a>
+    <div id="disqus_thread"></div>
+    <script>
+     function loadComment() {
+         document.getElementById('load-comment-btn').remove();
+         document.getElementById('disqus_thread').innerText = "Loading comment...";
+         (function() {
+             var d = document, s = d.createElement('script');
+             s.src = '//shousorigin.disqus.com/embed.js';
+             s.setAttribute('data-timestamp', +new Date());
+             (d.head || d.body).appendChild(s);
+         })();
+     }
+    </script>
+</div>

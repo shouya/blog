@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "翻譯：Haskell 怎麼實現惰性求值"
+title: "Haskell 怎麼實現惰性求值"
 date: 2014-11-24 19:14:57 +0800
 comments: true
 tags:
@@ -9,7 +9,8 @@ categories:
   - haskell
 ---
 
-> 原文由 [Heinrich Apfelmus](http://apfelmus.nfshost.com/blog.html) 發表於 [Hackhands](https://hackhands.com/lazy-evaluation-works-haskell/)，標題：How Lazy Evaluatoin Works in Haskell。
+> 原文由 [Heinrich Apfelmus](http://apfelmus.nfshost.com/blog.html) 發表於 [Hackhands](https://hackhands.com/lazy-evaluation-works-haskell/)，
+> 標題：How Lazy Evaluatoin Works in Haskell。
 
 
 *Lambda 醬想遲些再去打掃房間～*
@@ -64,13 +65,13 @@ square (1+2)
 
 為了避免這種重複的求值，我們採用一個叫作**圖規約**（Graph Reduction）的方法。用這種方法，每個表達式將會被表示為一個圖。我們的例子這樣表示：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/blocks-square-0.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/blocks-square-0.png)
 
 每個方塊對應一個函數式應用，函數名字寫在白色的區域，灰色區域指向函數參數。事實上，這種圖的標記法類似於編譯器在內存中通過指針來表示的表達式。
 
 每個程序員定義的函數都對應一個**規約規則**（Reduction Rule）。對`square`函數而言，規則如下：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/blocks-square-rule.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/blocks-square-rule.png)
 
 標記著`x`的圓圈是一個子圖的佔位符。注意`*`函數的兩個參數都指向同一個子圖。這種共享子圖的策略是避免重複求值的關鍵所在。
 
@@ -78,7 +79,7 @@ square (1+2)
 
 我們先規約`square`函數的 redex，然後進一步規約`+`函數的 redex，得到這樣一個過程：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/blocks-square-eval.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/blocks-square-eval.png)
 
 每一個步驟，我們都給正在要規約的 redex 加上顏色。在倒數第二個步驟中，產生了一個新的對應著`*`函數的 redex。對之求值，我們會得到最終的結果`9`。
 
@@ -86,11 +87,11 @@ square (1+2)
 
 當一個表達式（圖）不包含任何 redex 時，我們就不能再進一步規約下去了，所以規約就完成了。這時，我們就稱這個表達式為**規範式**（Normal form），這就是求值的最終結果。在上面的例子裡，規範式是一個數字，表示為下面這樣的一個圖：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/blocks-9.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/blocks-9.png)
 
 但是像`Just`，`Nothing`這樣的構建子，又如`:`和`[]`這種列表的構建子都會規約出模範式，他們看起來像是函數，但是他們是通過`data`聲明的，而且不存在像函數一樣的定義，所以他們沒有進一步規約規則。譬如說，圖：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/blocks-nf-list.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/blocks-nf-list.png)
 
 就是`1:2:3:[]`的模範式。
 
@@ -102,13 +103,13 @@ ones = 1 : ones
 
 就對應這樣的循迴圖（Cyclic Graph）：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/blocks-ones.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/blocks-ones.png)
 
 這個圖就不包含 redex，但它卻*不*是模範式，因為它包含循迴結構：列表的尾（Tail）指向列表自身，以至於這個列表是無窮的。正如這樣，很多表達式並沒有模範式，因為他們對應無窮循環。
 
 在 Haskell，我們並不會求值所有表達式至其模範式。相反，我們常常會在圖達到**弱首模範式**（Weak Head Normal Form）時就停下來，為了簡略，我們稱弱首模範式為 WHNF。只要一個圖的最上級節點是構建子，我們就稱之為 WHNF。譬如說，表達式`(7+12):[]`，或者圖
 
-![](https://hackhands.com/wp-content/uploads/2014/11/blocks-whnf-list.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/blocks-whnf-list.png)
 
 就屬於 WHNF，因為它最上級的節點是列表構件子`(:)`。它並非模範式，因為它的第一個參數包含一個 redex。
 
@@ -135,8 +136,8 @@ False && x = False
 
 根據第一個參數是`True`還是`False`，這個函數會有兩種求值規則：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/and-rule-true.png)
-![](https://hackhands.com/wp-content/uploads/2014/11/and-rule-false.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/and-rule-true.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/and-rule-false.png)
 
 現在，再看此表達式：
 
@@ -146,15 +147,15 @@ False && x = False
 
 圖的形式表示如下：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/and-expr-0.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/and-expr-0.png)
 
 它的兩個參數都是 redex，惰性求值將會從左到右求值參數，所以我們從左邊開始規約：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/and-expr-1.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/and-expr-1.png)
 
 現在，因為最左邊的函數變成了一個 redex，因為它的第一個參數現在成了一個構造式。惰性求值總是會先規約最上級節點，所以我們就這麼做。根據`(&&)`的規約規則，我們會得到：
 
-![](https://hackhands.com/wp-content/uploads/2014/11/and-expr-2.png)
+![](https://hackhands.com/data/blogs/ClosedSource/lazy-evaluation-works-haskell/assets/and-expr-2.png)
 
 這個表達式屬於模範式，所以我們的求值就完成了！
 
