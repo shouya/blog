@@ -8,7 +8,8 @@ a:hover {
 body {
     color: #222;
     margin: 0px auto 0px auto;
-    width: 600px;
+    width: 768px;
+    background-color: white;
 }
 
 header {
@@ -127,6 +128,7 @@ ul.post-list {
     max-height: 300px;
     text-overflow: ellipsis;
     overflow-y: hidden;
+    overflow-x: hidden;
     position: relative;
 }
 .teaser > article::before {
