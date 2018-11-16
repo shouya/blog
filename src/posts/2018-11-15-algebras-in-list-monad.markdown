@@ -16,9 +16,9 @@ theory on YouTube. In this lecture [Category Theory III 4.2, Monad algebras part
 that in an algebra that is compatible with the list monad is a monoid.
 
 In his video lecture he explained it very briefly and drawn the conclusion
-quickly before I can follow to convince myself on the fact. After that, I saw in
-comment below someone else had the similar questions on the notation Dr.
-Milewski uses. I derived it from the beginning and made clear my understanding.
+quickly before I can follow to convince myself on the fact. After that, in
+comment, I saw someone else had the similar questions at the ambiguous notation
+Dr. Milewski uses. So I derived the theorem myself to clarify my understanding.
 I think the outcome is kind of interesting that worths a post about it.
 
 I want to write this post in a very beginner-friendly manner, to explain the
@@ -43,7 +43,7 @@ Here are some common examples of monoids:
 
 ## Monad
 
-A monad is defined as a functor $T$ along with two natural transformations
+A monad is defined as an endofunctor $T$ along with two natural transformations
 $\eta: a \to T a$ called unit and $\mu: T^2 a\to T a$ called multiplication that
 satisified these laws:
 
@@ -67,8 +67,8 @@ T^2 a @>\mu >> T a
 \end{CD}
 $$
 
-These laws are actually monoid laws (left/right identity law and associativity
-law) in the category of endofunctors.
+These laws are essentially just monoid laws (left/right identity law and
+associativity law) on the category of endofunctors.
 
 
 ## List monad
@@ -88,9 +88,9 @@ focus, I'll skip it.
 
 ## Algebra
 
-An algebra on functor $F: C\to D$ is given by a tuple $(a, \sigma)$, where $a$
-is an object in $C$ and $\sigma$ is an endofunction $F a \to a$. It's worth
-noting that an algebra is not a natural transformation as it seems.
+An algebra on an endofunctor $F: C\to D$ is given by a tuple $(a, \sigma)$,
+where $a$ is an object in $C$ and $\sigma$ is an endofunction $F a \to a$. It's
+worth noting that an algebra is not a natural transformation as it seems.
 
 A natural transformation has no knowledge on its component, therefore must be a
 polymorphic function. This restriction is, however, not required for an algebra.
@@ -110,9 +110,10 @@ function evaluates it.
 
 ## Category of algebras
 
-Algebras on a functor $F:C\to D$ can form a category, where the objects are the
-algebras $(a, \sigma)$, and the morphisms from $(a,\sigma)$ to $(b,\tau)$ can be
-defined as morphisms in $C(a,b)$. We now show that the morphisms are composible:
+Algebras on an given endofunctor $F:C\to D$ can form a category, where the
+objects are the algebras $(a, \sigma)$, and the morphisms from $(a,\sigma)$ to
+$(b,\tau)$ can be defined as morphisms in $C(a,b)$. We now show that the
+morphisms are composible:
 
 $$
 \begin{CD}
@@ -127,7 +128,8 @@ Since $F$ is a functor, this diagram automatically commutes.
 ## Monad algebra
 
 Given an endofunctor $T$, A monad algebra on $T$ is a monad on $T$ along with an
-compatible algebra on $T$. A monad algebra contains these operations:
+compatible algebra on $T$. A monad algebra contains all the operations from
+its monad part and its algebra part:
 
 - $\eta: a \to T a$
 - $\mu: T^2 a \to T a$
@@ -147,17 +149,17 @@ T a @>\sigma>> a
 \end{CD}
 $$
 
-These two conditions are strong. Only a few algebras on $T$ is compatible with a
+These two conditions are strong. Not all algebras on $T$ are compatible with a
 given monad on $T$. For example, in the list monad of integers, the condition
-requires `η [x] = x`; this eliminates all algebras that don't satisfy this
+requires `η [x] = x`; this eliminates all other algebras that don't satisfy this
 property, like the `length` algebra.
 
 ## Algebra on list monad
 
 Now we finally get to the interesting one. There are many monad-compatible
-algebras on list, for example: `sum`, `product`, `concat` etc. These algebras
-does various of things but there's one thing in common: they seems all related
-to some monoids. In fact they indeed do. We will now prove it.
+algebras on list, for example: `sum`, `product`, `concat` etc. These algebras do
+various of operations but there's one thing in common: they all seems to related
+to some monoid. In fact they indeed do. We will now prove it.
 
 First we see what properties do algebras on list monad hold. By the
 compatibility we discussed eariler, we always have:
@@ -171,15 +173,17 @@ is the multiplication operator in a monoid.
 We now prove the left identity law for the monoid. We prove this by evaluting
 `(σ∘Tσ) [[], [x]]` in two ways. On the left we got `(σ∘Tσ) [[], [x]] = σ [e, x]
 = e <> x`, on the right we got `(σ∘Tσ) [[], [x]] = (σ∘μ) [[], [x]] = σ [x] = x`.
-This shows `e <> x = x`. The right identity law can be proved in the same
+This shows `e <> x = x`. The right identity law can be proved in a similar
 fashion.
 
-Now the associativity law. First we get `(σ∘Tσ) [[x,y],z] = [x <> y, z] = (x <>
+Now the associativity law, first we get `(σ∘Tσ) [[x,y],z] = [x <> y, z] = (x <>
 y) <> z`, and `(σ∘Tσ) [x,[y,z]] = [x, y<>z] = x <> (y <> z)`. We also no that
 they both equal to `(σ∘μ) [[x,y],z] = (σ∘μ) [x,[y,z]] = σ [x,y,z]`. For
 consistency, this means `σ [x,y,z]` must be defined as `(x <> y) <> z` or `x <>
-(y <> z)` and they are both equal. Now we have proved that the algebra must
-gives rise to a monoid, and $\sigma$ is the mconcat function.
+(y <> z)`, and they are equal.
+
+Now we have proved that the algebra must gives rise to a monoid, and $\sigma$ is
+the mconcat function.
 
 ## References
 

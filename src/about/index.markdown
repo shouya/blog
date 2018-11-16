@@ -41,10 +41,9 @@ technique. I hope you enjoy them.
 
 ## Contacts:
 
-* IRC ([#haskell](http://webchat.freenode.net/?channels=#haskell),
-  sometimes on #coq): shouya
-* Twitter: [@54c3](https://twitter.com/54c3)
 * Email (also gtalk): shou<span
-  style="display: inline-block; overflow-x: hidden; width: 0px;">NO-SPAM</span>yatf AT gmail D0T com
+  style="display: inline-block; overflow: hidden; width: 0px; height: 0px;">NO-SPAM</span> AT lain DOT li
   ([0xbf86d8d1754a1009](http://http-keys.gnupg.net/pks/lookup?op=get&search=0xBF86D8D1754A1009))
-* Telegram: [@shouya](https://telegram.me/shouya)
+* Twitter: [54c3\_](https://twitter.com/54c3\_)
+* GitHub: [shouya](https://github.com/shouya)
+<!--* Telegram: [@shouya](https://telegram.me/shouya)-->
