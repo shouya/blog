@@ -8,7 +8,21 @@
         <link rel="alternate" type="application/atom+xml" title="Shou's Origin" href="/atom.xml" />
         <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">
         <link rel="stylesheet" href="/css/default.css" />
-        <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+        <script type="text/x-mathjax-config">
+        MathJax.Ajax.config.path["local"] = "/js";
+        MathJax.Hub.Config({
+          jax: ["input/TeX","input/MathML","input/AsciiMath","output/HTML-CSS"],
+          extensions: ["tex2jax.js","MathMenu.js","MathZoom.js"],
+          TeX: {
+            extensions: [
+                  $if(mathjax.xypic)$ "[local]/xypic.js", $endif$
+                  $if(mathjax.amscd)$ "AMScd.js", $endif$
+                  "AMSmath.js","AMSsymbols.js"]
+          }
+        });
+        </script>
+        <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.4.0/MathJax.js"></script>
     </head>
     <body>
         <header>
