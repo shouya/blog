@@ -8,6 +8,7 @@ tags:
 categories:
   - category theory
 lang: en
+mathjax.amscd: true
 ---
 
 I'm currently watching Dr. Bartosz Milewski's video lecture series on category
@@ -50,7 +51,7 @@ satisified these laws:
 - identity law:
 
 $$
-\require{AMScd}\begin{CD}
+\begin{CD}
 a @>\eta>> T a \\
 @VVTV  @VTVV \\
 T a @>T \eta>> T^2 a
