@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Algebras compatible with list monad gives rise to a monoid"
+title: "Algebras compatible with list monad gives rise to monoids"
 date: 2018-11-15 15:14:35 +800
 comments: true
 tags:
