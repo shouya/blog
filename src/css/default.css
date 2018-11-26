@@ -131,7 +131,7 @@ ul.post-list {
     overflow-x: hidden;
     position: relative;
 }
-.teaser > article::before {
+.teaser > article::after {
     content: '';
     position: absolute;
     bottom: 0;
