@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Algebras compatible with list monad gives rise to monoids"
+title: "Algebras in list monad"
 date: 2018-11-15 15:14:35 +800
 comments: true
 tags:
@@ -52,11 +52,13 @@ satisified these laws:
 
 $$
 \begin{CD}
-a @>\eta>> T a \\
-@VVTV  @VTVV \\
-T a @>T \eta>> T^2 a
+T a @>\eta>> T^2 a \\
+@VVT\mu V  @V\mu VV \\
+T^2 a @>\mu >> T a
 \end{CD}
 $$
+
+where the $T a$ at top-left is equal to the $T a$ at bottom right.
 
 - mutiplication law:
 
@@ -70,7 +72,6 @@ $$
 
 These laws are essentially just monoid laws (left/right identity law and
 associativity law) on the category of endofunctors.
-
 
 ## List monad
 
@@ -142,6 +143,7 @@ To make the algebra compatible with the monad, we need to impose these two condi
 
 - with unit, $(\sigma \circ \eta) a = a$
 - with multiplication, the diagram below should commute
+
 $$
 \begin{CD}
 T^2 a @>\mu>> T a \\
