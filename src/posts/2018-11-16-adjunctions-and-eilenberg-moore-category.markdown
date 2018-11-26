@@ -191,7 +191,9 @@ In fact, an adjunction also gives rise to a comonad on $RL$, in a very similar
 fashion, by defining the counit (`extract`) to be $\epsilon$ and $\delta$
 (`duplication`) to be $L\circ\eta\circ R$.
 
-## 1
+## Adjunction from Monad and Algebra
+
+Now you might be curious, if we have a Monad.
 
 
 ## References
