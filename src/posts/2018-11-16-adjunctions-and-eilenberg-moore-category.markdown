@@ -120,7 +120,7 @@ $R$. Where one can think of $L$ as to introduce some structures, and $R$ to
 remove the structures. A typical example for adjunction is the [free-forgetful
 adjunction](https://ncatlab.org/nlab/show/free-forgetful+adjunction).
 
-## Monad from Adjunction
+## Monad from adjunction
 
 In last post I mentioned an adjunction can give rise to a monad, here's how.
 
@@ -184,17 +184,73 @@ LRL \ar[rr]^{\epsilon_L} & & RL
 }
 $$
 
-This is exactly the naturality square of $\epsilon: LR\to1$. The monad
-associativity law holds naturally.
+This is exactly the naturality square of $\epsilon: LR\to1$. Thus we proved that
+the monad associativity law holds naturally just because $\epsilon$ is a natural
+transform.
 
 In fact, an adjunction also gives rise to a comonad on $RL$, in a very similar
 fashion, by defining the counit (`extract`) to be $\epsilon$ and $\delta$
-(`duplication`) to be $L\circ\eta\circ R$.
+(`duplication`) to be $L\circ\eta\circ R$. We define
 
-## Adjunction from Monad and Algebra
+## Monad algebra category
 
-Now you might be curious, if we have a Monad.
+Now let's get back to monad algebra which we discussed extensively in the last
+post. Last time we proved that an algebra compatible with a list monad is a
+monoid, it's a rather surprising finding.
 
+Let's now revisit the definition of monad compatible algebra. Given a monad $(T:
+C \to C, \eta: 1 \to T, \mu: T^2 \to T)$ and an algebra $(a: C, \sigma: T a \to
+a)$, we define the coherence conditions as follows:
+
+- $\sigma \circ \eta_a = 1_a$
+- $\sigma \circ \mu_a = \sigma \circ T \sigma$
+
+Algebras that satisfy these conditions are compatible with the given monad, and
+we call them monad algebras.
+
+Not very surprisingly, monad algebras for a monad $(T, \tau, \mu)$ do form a
+category. The objects are $(a:C, \sigma:T a\to a)$, and the morphisms are the
+same morphisms in $C$. This category is called monad algebra category, or
+Eilenberg-Moore category, denoted as $\textbf{mAlg}_T$, or $C^T$.
+
+Identity morphism on $(a,\sigma)$ in $C^T$ is just the identity morphism on $a$
+in $C$. Morphism compositions also work the same way as they're in $C$.
+
+We missed one thing. Before we claim $(T a, \mu_a)$ is a monad algebra, we first
+need to check the conherence conditions.
+
+First, $\mu \circ \eta = 1$
+
+## Free monad algebra
+
+The cannonical functor from $C^T$ to $C$ is the forgetful functor that "forget"
+about the algebra part, i.e. $U: (a,\sigma) \mapsto a$. In addition, $U: f
+\mapsto f$ for morphisms.
+
+It's much more tricker to define the free functor $F: C\to C^T$. We need to find
+a valid algebra for every $a$. Fortunately, it turns out we already have a very
+good candidate -- $\mu_a: T (T a) \to T a$ from the monad. $\mu$ is a natural
+transformation so it works on any $a$, for every $a$ we have an algebra from $T
+(T a)$ to $T a$.
+
+Now we can define the free functor $F: C \to C^T$ as $a \mapsto (T a, \mu_a)$,
+which is kind of neat. Of course, $F$ should also maps $f: a \to b$ to $F f: T a
+\to T b$, which is just $T f$.
+
+## Monad algebra adjunctions
+
+Now we have got a pair of free and forgetful functors, it's time to prove they
+are really adjoint. We say $F$ is left adjoint to $U$, or $F \dashv U$.
+
+To play with adjunction, we need to first define our pair of natural
+transformations $\eta: 1_C \to U\circ F$ and $\epsilon: F\circ U \to 1_{C^T}$.
+
+Let's write down $\eta$ in its components form: $\eta_a: a \to U (F a)$, and we
+know $U (F a) = U (T a, \sigma) = T a$. See what we find! It's just the same
+$\eta$ from the monad!
+
+What about $\epsilon$? $\epsilon_{(a,\sigma)}: F (U (a,\sigma)) \to (a,\sigma)$.
+Where $F (U (a, \sigma)) = F a = (T a, \mu_a)$
 
 ## References
 
