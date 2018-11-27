@@ -190,7 +190,7 @@ transform.
 
 In fact, an adjunction also gives rise to a comonad on $RL$, in a very similar
 fashion, by defining the counit (`extract`) to be $\epsilon$ and $\delta$
-(`duplication`) to be $L\circ\eta\circ R$. We define
+(`duplication`) to be $L\circ\eta\circ R$.
 
 ## Monad algebra category
 
@@ -216,10 +216,14 @@ Eilenberg-Moore category, denoted as $\textbf{mAlg}_T$, or $C^T$.
 Identity morphism on $(a,\sigma)$ in $C^T$ is just the identity morphism on $a$
 in $C$. Morphism compositions also work the same way as they're in $C$.
 
-We missed one thing. Before we claim $(T a, \mu_a)$ is a monad algebra, we first
-need to check the conherence conditions.
+I just missed one thing. Before we can claim $(T a, \mu_a)$ is a monad algebra,
+we need to check if this algebra meets the coherence conditions.
 
-First, $\mu \circ \eta = 1$
+First, $\mu \circ \eta_{T a} = 1_{T a}$. This one is just the right identity law
+for monad, so it automatically holds. Then we check $\mu\circ \mu_{T a}=\mu\circ
+T \mu$. It's just the monad associativity (multiplication) law! See how these
+all fits so perfectly. Just because of monad laws, $\mu_a$ will always be a
+compatible algebra on $T a$.
 
 ## Free monad algebra
 
@@ -246,11 +250,54 @@ To play with adjunction, we need to first define our pair of natural
 transformations $\eta: 1_C \to U\circ F$ and $\epsilon: F\circ U \to 1_{C^T}$.
 
 Let's write down $\eta$ in its components form: $\eta_a: a \to U (F a)$, and we
-know $U (F a) = U (T a, \sigma) = T a$. See what we find! It's just the same
-$\eta$ from the monad!
+know $U (F a) = U (T a, \sigma) = T a$. We can just use the unit $\eta$ from the
+monad!
 
 What about $\epsilon$? $\epsilon_{(a,\sigma)}: F (U (a,\sigma)) \to (a,\sigma)$.
-Where $F (U (a, \sigma)) = F a = (T a, \mu_a)$
+Where $F (U (a, \sigma)) = F a = (T a, \mu_a)$. We need to find a map from $(T
+a, \mu_a)$ to $(a, \sigma)$. We can just use the forgotten evaluator $\sigma: T
+a\to a$.
+
+In order for the unit and counit to form an adjunction, we need to check the
+triangle laws.
+
+$$
+\xymatrix {
+(T a, \mu_a) \ar[r]^{F\circ \eta_a} \ar@2{-}[rd]^{} & (T(T a), \mu_{T a}) \ar[d]^{\mu_{a}} \\
+& (T a, \mu_a) \\
+}
+$$
+
+We can check the algebras' carrier types.
+
+$$
+\xymatrix {
+  T a \ar[r]^\eta & T (T a) \ar[r]^\mu & T a
+}
+$$
+
+This is essentially just $\mu \circ \eta$, which is equal to the identity by the
+right unit law on monad. The evaluator follows automatically, because they're
+just regular morphisms in $C$. Then we check another triangle identity:
+
+$$
+\xymatrix {
+a \ar[r]^{\eta_{U (a, \sigma_a)}} \ar@2{-}[rd]^{} & T a \ar[d]^{U\circ\sigma_a} \\
+& a \\
+}
+$$
+
+Omitting the unimportant part, we get:
+
+$$\xymatrix { a \ar[r]^{\eta_a} & T a \ar[r]^{\sigma_a} & a }$$
+
+Looking familiar? Yes, $\sigma \circ \eta = 1$ must hold by one of the coherence conditions for $\sigma$ to be compatible with our monad.
+
+Therefore we have shown the Eilenberg-Moore category $C^T$ is left adjoint to a
+monad category $C$. I'm not sure if it's valid to say a category is left adjoint
+to another category. But anyway, we have discovered another free-forgetful
+functor pair that are adjoint to each other, and what makes it so fascinating is
+that it's an adjunction we can get from ANY monad.
 
 ## References
 
