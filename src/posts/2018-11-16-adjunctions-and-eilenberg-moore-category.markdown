@@ -15,7 +15,7 @@ This post is the sequel to the yesterday's post [Algebras compatible with list
 monad gives rise to a monoid](/blog/algebras-in-list-monad). To illustrate how
 Eilenberg-Moore category can be constructed with algebras on monads.
 
-A question rises as we learned that an adjunction gives rise to a monad and a
+A question arises as we learned that an adjunction gives rise to a monad and a
 comonad, does the converse hold as well? Is there a natural way to get an
 adjunction from a monad? The answer to this is yes. The intuition is that with
 monad $T$, we have plenty of choices for $C$, the point is to find out these two
@@ -76,6 +76,9 @@ $$
 
 Thus $(G\circ \alpha)_a = G \alpha_a$, not exactly symmetric to the left
 whiskering version.
+
+In the rest of the articles, I'll using the result from this sections a lot and
+won't get into the details.
 
 ## Adjunction
 
