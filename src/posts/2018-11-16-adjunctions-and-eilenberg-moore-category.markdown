@@ -15,7 +15,7 @@ This post is the sequel to the yesterday's post [Algebras compatible with list
 monad gives rise to a monoid](/blog/algebras-in-list-monad). To illustrate how
 Eilenberg-Moore category can be constructed with algebras on monads.
 
-A question rises as we learned that an adjunction gives rise to a monad and a
+A question arises as we learned that an adjunction gives rise to a monad and a
 comonad, does the converse hold as well? Is there a natural way to get an
 adjunction from a monad? The answer to this is yes. The intuition is that with
 monad $T$, we have plenty of choices for $C$, the point is to find out these two
@@ -77,6 +77,9 @@ $$
 Thus $(G\circ \alpha)_a = G \alpha_a$, not exactly symmetric to the left
 whiskering version.
 
+In the rest of the articles, I'll using the result from this sections a lot and
+won't get into the details.
+
 ## Adjunction
 
 Given two categories $C$ and $D$, two morphisms that goes between them $L: D\to
@@ -120,7 +123,7 @@ $R$. Where one can think of $L$ as to introduce some structures, and $R$ to
 remove the structures. A typical example for adjunction is the [free-forgetful
 adjunction](https://ncatlab.org/nlab/show/free-forgetful+adjunction).
 
-## Monad from Adjunction
+## Monad from adjunction
 
 In last post I mentioned an adjunction can give rise to a monad, here's how.
 
@@ -184,17 +187,120 @@ LRL \ar[rr]^{\epsilon_L} & & RL
 }
 $$
 
-This is exactly the naturality square of $\epsilon: LR\to1$. The monad
-associativity law holds naturally.
+This is exactly the naturality square of $\epsilon: LR\to1$. Thus we proved that
+the monad associativity law holds naturally just because $\epsilon$ is a natural
+transform.
 
 In fact, an adjunction also gives rise to a comonad on $RL$, in a very similar
 fashion, by defining the counit (`extract`) to be $\epsilon$ and $\delta$
 (`duplication`) to be $L\circ\eta\circ R$.
 
-## Adjunction from Monad and Algebra
+## Monad algebra category
 
-Now you might be curious, if we have a Monad.
+Now let's get back to monad algebra which we discussed extensively in the last
+post. Last time we proved that an algebra compatible with a list monad is a
+monoid, it's a rather surprising finding.
 
+Let's now revisit the definition of monad compatible algebra. Given a monad $(T:
+C \to C, \eta: 1 \to T, \mu: T^2 \to T)$ and an algebra $(a: C, \sigma: T a \to
+a)$, we define the coherence conditions as follows:
+
+- $\sigma \circ \eta_a = 1_a$
+- $\sigma \circ \mu_a = \sigma \circ T \sigma$
+
+Algebras that satisfy these conditions are compatible with the given monad, and
+we call them monad algebras.
+
+Not very surprisingly, monad algebras for a monad $(T, \tau, \mu)$ do form a
+category. The objects are $(a:C, \sigma:T a\to a)$, and the morphisms are the
+same morphisms in $C$. This category is called monad algebra category, or
+Eilenberg-Moore category, denoted as $\textbf{mAlg}_T$, or $C^T$.
+
+Identity morphism on $(a,\sigma)$ in $C^T$ is just the identity morphism on $a$
+in $C$. Morphism compositions also work the same way as they're in $C$.
+
+I just missed one thing. Before we can claim $(T a, \mu_a)$ is a monad algebra,
+we need to check if this algebra meets the coherence conditions.
+
+First, $\mu \circ \eta_{T a} = 1_{T a}$. This one is just the right identity law
+for monad, so it automatically holds. Then we check $\mu\circ \mu_{T a}=\mu\circ
+T \mu$. It's just the monad associativity (multiplication) law! See how these
+all fits so perfectly. Just because of monad laws, $\mu_a$ will always be a
+compatible algebra on $T a$.
+
+## Free monad algebra
+
+The cannonical functor from $C^T$ to $C$ is the forgetful functor that "forget"
+about the algebra part, i.e. $U: (a,\sigma) \mapsto a$. In addition, $U: f
+\mapsto f$ for morphisms.
+
+It's much more tricker to define the free functor $F: C\to C^T$. We need to find
+a valid algebra for every $a$. Fortunately, it turns out we already have a very
+good candidate -- $\mu_a: T (T a) \to T a$ from the monad. $\mu$ is a natural
+transformation so it works on any $a$, for every $a$ we have an algebra from $T
+(T a)$ to $T a$.
+
+Now we can define the free functor $F: C \to C^T$ as $a \mapsto (T a, \mu_a)$,
+which is kind of neat. Of course, $F$ should also maps $f: a \to b$ to $F f: T a
+\to T b$, which is just $T f$.
+
+## Monad algebra adjunctions
+
+Now we have got a pair of free and forgetful functors, it's time to prove they
+are really adjoint. We say $F$ is left adjoint to $U$, or $F \dashv U$.
+
+To play with adjunction, we need to first define our pair of natural
+transformations $\eta: 1_C \to U\circ F$ and $\epsilon: F\circ U \to 1_{C^T}$.
+
+Let's write down $\eta$ in its components form: $\eta_a: a \to U (F a)$, and we
+know $U (F a) = U (T a, \sigma) = T a$. We can just use the unit $\eta$ from the
+monad!
+
+What about $\epsilon$? $\epsilon_{(a,\sigma)}: F (U (a,\sigma)) \to (a,\sigma)$.
+Where $F (U (a, \sigma)) = F a = (T a, \mu_a)$. We need to find a map from $(T
+a, \mu_a)$ to $(a, \sigma)$. We can just use the forgotten evaluator $\sigma: T
+a\to a$.
+
+In order for the unit and counit to form an adjunction, we need to check the
+triangle laws.
+
+$$
+\xymatrix {
+(T a, \mu_a) \ar[r]^{F\circ \eta_a} \ar@2{-}[rd]^{} & (T(T a), \mu_{T a}) \ar[d]^{\mu_{a}} \\
+& (T a, \mu_a) \\
+}
+$$
+
+We can check the algebras' carrier types.
+
+$$
+\xymatrix {
+  T a \ar[r]^\eta & T (T a) \ar[r]^\mu & T a
+}
+$$
+
+This is essentially just $\mu \circ \eta$, which is equal to the identity by the
+right unit law on monad. The evaluator follows automatically, because they're
+just regular morphisms in $C$. Then we check another triangle identity:
+
+$$
+\xymatrix {
+a \ar[r]^{\eta_{U (a, \sigma_a)}} \ar@2{-}[rd]^{} & T a \ar[d]^{U\circ\sigma_a} \\
+& a \\
+}
+$$
+
+Omitting the unimportant part, we get:
+
+$$\xymatrix { a \ar[r]^{\eta_a} & T a \ar[r]^{\sigma_a} & a }$$
+
+Looking familiar? Yes, $\sigma \circ \eta = 1$ must hold by one of the coherence conditions for $\sigma$ to be compatible with our monad.
+
+Therefore we have shown the Eilenberg-Moore category $C^T$ is left adjoint to a
+monad category $C$. I'm not sure if it's valid to say a category is left adjoint
+to another category. But anyway, we have discovered another free-forgetful
+functor pair that are adjoint to each other, and what makes it so fascinating is
+that it's an adjunction we can get from ANY monad.
 
 ## References
 
