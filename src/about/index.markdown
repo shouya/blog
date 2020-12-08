@@ -8,7 +8,7 @@ Hello, anyone there? This is Shou speaking. Welcome to my website.
 
 You can find my random thoughts and (mostly inaccurate) technical sharings here. Some articles may contain emotionally depressing content. So please read on your own risk. All posts on this websites are licensed under CC BY-SA license.
 
-My fields of interest include functional programming, maths, linguistics and philsophy. I also sometimes hack linux for fun.
+My fields of interest include functional programming, maths, linguistics and philsophy. I sometimes also hack linux for fun.
 
 You may contact me via the means listed below.
 

@@ -1,0 +1,230 @@
+---
+layout: post
+title: "What I learned about Codata"
+date: 2020-12-09 03:53:28 +800
+comments: true
+tags:
+  - explanation
+categories:
+  - category theory
+  - haskell
+lang: en
+---
+** Codata as dual of data
+*** Data
+
+When we define a new type in Haskell, we use the =data= keyword:
+
+#+begin_src haskell
+data Foo
+  = Foo1 Int String
+  | Foo2 Bool
+#+end_src
+
+This is essentially equivalent as defining two data constructors (they are legit functions):
+
+#+begin_src haskell
+Foo1 :: Int -> String -> Foo
+Foo2 :: Bool -> Foo
+#+end_src
+
+This type of construct is called "data" by some people.
+
+*** Usage of a data
+
+Here's an example of an inductively defined data structure.
+
+#+begin_src haskell
+data Tree = Leaf | Node Tree Int Tree
+-- i.e.
+Leaf :: Tree
+Node :: Tree -> Int -> Tree -> Tree
+#+end_src
+
+What does it mean to /use/ such data? It means we need to destruct the data by matching on all its constructors:
+
+#+begin_src haskell
+height :: Tree -> Int
+height Leaf = 0
+height (Node left _val right) = 1 + max (height left) (height right)
+#+end_src
+
+This types of function is called an "eliminator".
+
+*** Data eliminator and initial algebras
+
+A data is an initial algebra we previously learned about. Take the
+above =Tree= as an example, it's defined as the initial algebra on the following functor.
+
+#+begin_src haskell
+data TreeF a = Leaf | Node (TreeF a) Int (TreeF a)
+type Tree = Fix TreeF
+#+end_src
+
+You can review the my [[https://gist.github.com/shouya/c59f6dd270e58403b4eee898835367a3][previous talk]] on initial algebra.
+
+Then above defintion of =height= can be expressed as catamorphism on an algebra of =TreeF=.
+
+#+begin_src haskell
+heightAlg :: TreeF Int -> Int
+heightAlg Leaf = 0
+heightAlg (Node left _val right) = 1 + (max left right)
+
+height :: Fix TreeF -> Int
+height = cata heightAlg
+#+end_src
+
+*** Codata
+
+If we revert the arrows that constructs a data, we get two functions dual to the previous data constructors that have the shapes like this:
+
+#+begin_src haskell
+Bar1 :: Bar -> (Int, String)
+Bar2 :: Bar -> Bool
+#+end_src
+
+Intuitively, =Bar1= and =Bar2=, instead of two ways to construct a =Bar= from their components, they specifies two ways to use the =Bar=. This is what we called codata.
+
+*** Construction of codata
+
+Here's another example of useful codata:
+
+#+begin_src haskell
+type Stream = (Int, Stream)
+
+head :: Stream -> Int
+tail :: Stream -> Stream
+#+end_src
+
+Here's an example on how to construct this codata.
+
+#+begin_src haskell
+startFrom :: Int -> Stream
+startFrom n = (n, startFrom (n + 1))
+#+end_src
+
+*** Terminal coalgebra and codata constructor
+
+Above codata =Stream= can be expressed as terminal coalgebra (fix-point) on the following
+
+#+begin_src haskell
+type StreamF a = (Int, a)
+type Stream = Fix StreamF
+#+end_src
+
+Then the =startFrom= constructor for =Stream= will be an anamorphism on some coalgebra:
+
+#+begin_src haskell
+startFromCoalg :: Int -> StreamF Int
+startFromCoalg n = (n, n + 1)
+
+startFrom :: Int -> Fix StreamF
+startFrom = ana fromCoalg
+#+end_src
+
+** General purpose codata
+*** Church encoding of data types
+
+One intriguing topic in functional programming is Church encoding. Church encoding shows us ways to encode any data and control constructs as purely lambda functions.
+
+#+begin_src haskell
+\f x -> x               -- 0
+\f x -> f x             -- 1
+\f x -> f (f x)         -- 2
+\n -> \f x -> f (n f x) -- succ :: Nat -> Nat
+
+\x y -> x               -- true
+\x y -> y               -- false
+\p -> \a b -> p b a     -- not :: Bool -> Bool
+\p a b -> p a b         -- if :: Bool -> a -> a -> a
+
+\x y z -> z x y         -- pair :: a -> b -> pair
+\p -> p (\x y -> x)     -- fst :: pair -> a
+#+end_src
+
+*** General eliminator of Bool
+
+Let's take a look in an eliminator for =Bool=.
+
+#+begin_src haskell
+data Bool = True | False
+type BoolC a = (a, a) -> a
+
+elimBool :: Bool -> BoolC a
+elimBool True  (a, a) = a
+elimBool False (a, b) = b
+#+end_src
+
+You may recognize that the =BoolC= for =elimBool= is equivalent to the church encoding for =Bool=. We will show their equivalence in next section.
+
+You may also recognize that that =elimBool= is the most general eliminator for type =Bool=. In other words, every valid eliminator can be derived from this eliminator.
+
+In fact, the general eliminator =elimBool= is the catamorphism of type =Bool=.
+
+*** Isomorphism between church encoding and the data
+
+We will demonstrate that =Bool= and =BoolC= are indeed isomorphic:
+
+#+begin_src haskell
+from :: Bool -> BoolC a
+from = elimBool
+
+to :: BoolC a -> Bool
+to f = f (True, False)
+#+end_src
+
+It's easy to prove that =from . to = id= and =to . from = id= so I'll elaborate. So far we have shown that =BoolC= is indeed a church encoding for =Bool=.
+
+*** General eliminator for Tree
+
+Let's look at a more complex type:
+
+#+begin_src haskell
+data Tree = Leaf | Node Tree Int Tree
+
+type TreeC a = a -> ((a, Int, a) -> a) -> a
+elimTree = Tree -> TreeC a
+elimTree Leaf                f g = f
+elimTree (Node left n right) f g = g left' n right'
+  where left'  = elimTree f g left
+        right' = elimTree f g right
+#+end_src
+
+You may recognize that =elimTree= is the catamorphism for =Tree=. Also =TreeC= is a legit church encoding for Tree.
+
+*** Visitor pattern on Tree
+
+Now we learned how to find Church encoding and shown how Church encoding is isomorphic as the represented data type.
+
+We can discover a pattern such that we can extract of all the ways we can eliminate a =Tree= into a single entity. We will call this entity "TreeVisitor".
+
+#+begin_src haskell
+type TreeVisitor a = (a, (a, Int, a) -> a)
+
+visitLeaf :: TreeVisitor a -> a
+visitNode :: TreeVisitor a -> (a, Int, a) -> a
+#+end_src
+
+As the name suggests, this pattern is just the /Visitor pattern/ in OOP. Here I am using a pair to represent the type for =TreeVisitor=, but the exact way to implement it doesn't really matter.
+
+The point of =TreeVisitor a= being a codata type because the only thing we care about it is to be able to derive the two methods =visitLeaf= and =visitNode=.
+
+*** Tree as Codata
+
+A Tree can then be defined as the all possible =TreeVisitor a -> a= instances (i.e. =TreeC a=), as we already proved by showing the isomorphism between =Tree= and =TreeC=.
+
+#+begin_src haskell
+walk :: Tree -> (forall a. TreeVisitor a -> a)
+#+end_src
+
+This representation of Tree is also a codata because the actual underlying data structure of Tree is hidden from the outside, and the TreeVisitors already defined all the ways to access it.
+
+** References
+
+- This article is inspired by [[https://www.javiercasas.com/articles/codata-in-action][Codata in action, or how to connect Functional Programming and Object Oriente...]]
+
+- Codata in Action, by Paul Downen, Zachary Sullivan, et al. ([[https://www.springer.com/gp/book/9783030171834][Programming Languages and Systems]])
+
+- [[https://babel.ls.fi.upm.es/~pablo/Papers/adt-functors.pdf][When is an abstract data type a functor?]]
+
+- [[http://blog.sigfpe.com/2007/07/data-and-codata.html][A Neighborhood of Infinity: Data and Codata]]
