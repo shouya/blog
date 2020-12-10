@@ -57,7 +57,7 @@ A data is an initial algebra we previously learned about. Take the
 above =Tree= as an example, it's defined as the initial algebra on the following functor.
 
 #+begin_src haskell
-data TreeF a = Leaf | Node (TreeF a) Int (TreeF a)
+data TreeF a = Leaf | Node a Int a
 type Tree = Fix TreeF
 #+end_src
 
@@ -151,17 +151,17 @@ data Bool = True | False
 type BoolC a = (a, a) -> a
 
 elimBool :: Bool -> BoolC a
-elimBool True  (a, a) = a
+elimBool True  (a, b) = a
 elimBool False (a, b) = b
 #+end_src
 
-You may recognize that the =BoolC= for =elimBool= is equivalent to the church encoding for =Bool=. We will show their equivalence in next section.
+You may recognize that the =BoolC= for =elimBool= is equivalent to the Church encoding for =Bool=. We will show their equivalence in next section.
 
 You may also recognize that that =elimBool= is the most general eliminator for type =Bool=. In other words, every valid eliminator can be derived from this eliminator.
 
 In fact, the general eliminator =elimBool= is the catamorphism of type =Bool=.
 
-*** Isomorphism between church encoding and the data
+*** Isomorphism between Church encoding and the data
 
 We will demonstrate that =Bool= and =BoolC= are indeed isomorphic:
 
@@ -173,7 +173,7 @@ to :: BoolC a -> Bool
 to f = f (True, False)
 #+end_src
 
-It's easy to prove that =from . to = id= and =to . from = id= so I'll elaborate. So far we have shown that =BoolC= is indeed a church encoding for =Bool=.
+It's easy to prove that =from . to = id= and =to . from = id= so I'll elaborate. So far we have shown that =BoolC= is indeed a Church encoding for =Bool=.
 
 *** General eliminator for Tree
 
@@ -190,7 +190,7 @@ elimTree (Node left n right) f g = g left' n right'
         right' = elimTree f g right
 #+end_src
 
-You may recognize that =elimTree= is the catamorphism for =Tree=. Also =TreeC= is a legit church encoding for Tree.
+You may recognize that =elimTree= is the catamorphism for =Tree=. Also =TreeC= is a legit Church encoding for Tree.
 
 *** Visitor pattern on Tree
 
