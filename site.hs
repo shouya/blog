@@ -14,7 +14,11 @@ import           Hakyll
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith siteConfiguration $ do
-  forM_ ["favicon.png", "js/**", "images/**"] $ \pattern -> do
+  match "images/*/**" do
+    route $ customRoute (("blog/" <>) . toFilePath)
+    compile copyFileCompiler
+
+  forM_ ["favicon.png", "js/**", "images/*.svg"] $ \pattern -> do
     match pattern $ do
       route   idRoute
       compile copyFileCompiler
