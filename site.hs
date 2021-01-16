@@ -9,15 +9,11 @@ import           Control.Monad       (liftM, forM_, mplus)
 import           Control.Applicative (empty)
 import           Text.Pandoc.Options
 
-import           Hakyll
+import           Hakyll hiding (getCategory)
 
 --------------------------------------------------------------------------------
 main :: IO ()
 main = hakyllWith siteConfiguration $ do
-  match "images/*/**" do
-    route $ customRoute (("blog/" <>) . toFilePath)
-    compile copyFileCompiler
-
   forM_ ["favicon.png", "js/**", "images/*.svg"] $ \pattern -> do
     match pattern $ do
       route   idRoute
@@ -26,6 +22,10 @@ main = hakyllWith siteConfiguration $ do
   match "css/*" $ do
     route   idRoute
     compile compressCssCompiler
+
+  match "images/*/**" $ do
+    route $ customRoute (("blog/" <>) . toFilePath)
+    compile copyFileCompiler
 
   tags <- buildTags "posts/*" (fromCapture "tags/*/index.html")
   tagsRules tags $ \tag pattern -> do
