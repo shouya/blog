@@ -13,11 +13,11 @@ lang: en
 
 ** Background
 
-I used to hear many people talk about that fast fourier transform (FFT) is one of the most beautiful algorithms in the engineering world, but I never dive deep into that.
+I used to hear many people talk about that fast fourier transform (FFT) is one of the most beautiful algorithms in the engineering world, but I never dove deep into that.
 
 Then a few days ago I stumble upon this wonderful Youtube video about FFT created by [[https://twitter.com/Reducible20][@Reducible]]. So I took some note of my learning from the that video. I figured out this note is probably qualified for public consumption so I decided to publicize it.
 
-If you haven't watched the video yet, I highly recommened you to watch it:
+If you haven't watched the video yet, I highly recommend you to watch it:
 
 - [[https://www.youtube.com/watch?v=h7apO7q16V0][The Fast Fourier Transform (FFT): Most Ingenious Algorithm Ever? - YouTube]]
 - [[https://www.youtube.com/watch?v=Ty0JcR6Dvis][FFT Example: Unraveling the Recursion - YouTube]]
@@ -26,7 +26,7 @@ Let's begin the journey!
 
 ** Polynomial multiplication problem
 
-How do we multiple two polynomial? A method we all learned from high school is to use distribution law to expand the terms, and then combine the terms with the same exponent. Here's an example:
+How do we multiply two polynomials? A method we all learned from high school is to use distribution law to expand the terms, and then combine the terms with the same exponent. Here's an example:
 
 \begin{equation}
 \begin{split}
@@ -47,7 +47,7 @@ For polynomial of degree $d$, there are two unique ways we can use:
 
 The value representation works because a polynomial of degree $N$ can be determined by $N+1$ distinct [[https://en.wikipedia.org/wiki/Polynomial_interpolation#Interpolation_theorem][interpolation points]]. For example, two points determine a line, three points determine a parabola.
 
-The coefficient representation is what we demonstrated in [[*Polynomial multiplication problem][Polynomial multiplication problem]]. It's straightforward and we already know it. However, it's not performant enough for polynomial multiplication. The time compexity is $O(N^2)$ where $N$ is the degree of the polynomial, because we need to multiply all possible pairs of terms.
+The coefficient representation is what we demonstrated in [[*Polynomial multiplication problem][Polynomial multiplication problem]]. It's straightforward and we already know it. However, it's not performant enough for polynomial multiplication. The time complexity is $O(N^2)$ where $N$ is the degree of the polynomial, because we need to multiply all possible pairs of terms.
 
 The value representation, on the other hand, is much faster for multiplying polynomial. To multiply two polynomials, if we assume the $\mathbf{x}$ values are consistent in the two representations, we can just pointwise multiply the $P(\mathbf{x})$ values. So this algorithm has a time complexity of $O(N)$.
 
@@ -101,9 +101,9 @@ P(-x_i) &= P_e(x_i^2) - x_i P_o(x_i^2)
 \end{cases}
 \end{equation}
 
-In which $P_e(x_i^2)$ and $P_o(x_i^2)$ can be calculated only once and gets used twice.
+In which $P_e(x_i^2)$ and $P_o(x_i^2)$ can be calculated only once and used twice.
 
-From here we can go with the recursive step, $P_e(x)$ and $P_o(x)$ each is a polynomial of degree $d/2$, which only have half of the terms. We can further apply the algorithm to it with half the size until we reached the base case where $d=0$. In the case case we have $1$ term - the constant term, so we can just return it as the evaluation result.
+From here we can go with the recursive step. $P_e(x)$ and $P_o(x)$ each is a polynomial of degree $d/2$, which only have half of the terms. We can further apply the algorithm to it with half the size until we reach the base case where $d=0$. In such case we just have $1$ term - the constant term, so we can just return it as the evaluation result.
 
 Except there is a blocker in the recursion step. The "divide" step works based on the assumption that we can always choose two set of points $\mathbf{x_i}$ and $-\mathbf{x_i}$. This will not be the case except for the first iteration. In the second iteration we will have $x_i^2$ and $(-x_i)^2$ which are normally both positive, so we can no longer further split the polynomial - well, /unless we introduce complex number into the play./
 
@@ -111,7 +111,7 @@ Except there is a blocker in the recursion step. The "divide" step works based o
 
 Let's list out the requirements we need for the $N$ sampling points for degree $N-1$ polynomial. From now on, for simplicity purpose, we will only talk about polynomial with degree $2^k-1$ where $k\in\mathbb{Z}^{*}$.
 
-In the first iteration, we have $N$ points, half of them needs to be negation of the other half. Let's note down the conditions.
+In the first iteration, we have $N$ points, half of them need to be negation of the other half. Let's note down the conditions.
 
 \begin{equation}\label{cond1}
 x_{\frac{N}{2}+i} = -x_i\quad\text{for } i \in 0,\ldots,\frac{N}{2}
@@ -173,7 +173,7 @@ plot fx(t),fy(t) notitle with lp pn (n+1) pt 7
 
 The $x$ points are arranged in an counter-clockwise order, starting from $x_0=1$.
 
-We can see that these points are symmetrical about the origin - that is to say, every point $x_i$ has a counterpart $x_{N/2+i}=-x_i$, which is the reflection of $x_i$ about the origin. This property is exactly the property we wanted.
+We can see that these points are symmetrical about the origin - that is to say, every point $x_i$ has a counterpart $x_{N/2+i}=-x_i$, which is the reflection of $x_i$ about the origin. This property is exactly what we wanted.
 
 In the following iterations, we would square the half of all the $x_i$ values. Squaring a unit complex number $z$ is the same as doubling angle of the number couter-clockwise. So in the next iterations, we essentially continue to fill the circle with half of the points, resulting a new circle where points are twice the old distance apart. In the last iteration, the result will be just a single point $x_0^N = 1$.
 
@@ -325,7 +325,7 @@ print(fft(ifft([1j,2j+1])))
 : [(1+0j), (2-5.721188726109833e-18j), (3+0j), (4+5.721188726109833e-18j)]
 : [1j, (1+2j)]
 
-Ihe inverse does seem work ignoring the round-off errors.
+Ihe inverse does seem to work ignoring the round-off errors.
 
 I tried to understand the IFFT algorithm in a similar way as we exploit the symmetry of even and odd polynomials, but I can't find a way to make sense of it. The algorithm itself still works like magic - I can't explain it with a deeper understanding. I am sorry if you're expecting that.
 
