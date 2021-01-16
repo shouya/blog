@@ -1,0 +1,16 @@
+Create binary:
+
+stack build
+stack install
+
+Run site commands:
+
+stack exec site watch
+
+Or
+
+site watch
+
+Deploy with:
+
+site deploy

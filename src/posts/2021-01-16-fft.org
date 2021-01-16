@@ -15,7 +15,7 @@ lang: en
 
 I used to hear many people talk about that fast fourier transform (FFT) is one of the most beautiful algorithms in the engineering world, but I never dive deep into that.
 
-Then few days ago I stumble upon this wonderful Youtube video about FFT created by [[https://twitter.com/Reducible20][@Reducible]]. So I took some note of my learning from the that video. I figured out this note is probably qualified for public consumption so I decided to publicize it.
+Then a few days ago I stumble upon this wonderful Youtube video about FFT created by [[https://twitter.com/Reducible20][@Reducible]]. So I took some note of my learning from the that video. I figured out this note is probably qualified for public consumption so I decided to publicize it.
 
 If you haven't watched the video yet, I highly recommened you to watch it:
 
