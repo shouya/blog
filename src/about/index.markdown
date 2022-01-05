@@ -14,7 +14,7 @@ You may contact me via the means listed below.
 
 ## Contacts
 
-* Email (also gtalk): shou<span
+* Email: shou<span
   style="display: inline-block; overflow: hidden; width: 0px; height: 0px;">NO-SPAM</span> AT lain DOT li
   ([GPG](/gpg-pubkey.asc))
 * Mastodon: https://mastodon.social/@54c3
