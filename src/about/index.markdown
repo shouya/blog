@@ -17,8 +17,8 @@ You may contact me via the means listed below.
 * Email: shou<span
   style="display: inline-block; overflow: hidden; width: 0px; height: 0px;">NO-SPAM</span> AT lain DOT li
   ([GPG](/gpg-pubkey.asc))
-* Mastodon: https://mastodon.social/@54c3
-* https://github.com/shouya
+* [https://mastodon.social/@54c3](https://mastodon.social/@54c3)
+* [https://github.com/shouya](https://github.com/shouya)
 
 <!--* t.me/eosiziksW -->
 <!--* twitter.com/54c3_ *-->
