@@ -27,6 +27,10 @@ main = hakyllWith siteConfiguration $ do
     route $ customRoute (("blog/" <>) . toFilePath)
     compile copyFileCompiler
 
+  match "gpg-pubkey.asc" $ do
+    route $ customRoute toFilePath
+    compile copyFileCompiler
+
   tags <- buildTags "posts/*" (fromCapture "tags/*/index.html")
   tagsRules tags $ \tag pattern -> do
     route idRoute
