@@ -38,7 +38,7 @@ made of an element $\eta\in S$ called unit and binary operation $\mu: S \times S
 
 Here are some common examples of monoids:
 
-- list monoid on list, where $\eta$ is empty list and $\mu$ is the append operator (`++` in Haskell)
+- list, where $\eta$ is empty list and $\mu$ is the append operator (`++` in Haskell)
 - additive monoid on integer, where $\eta$ is $0$ and $\mu$ is $+$
 - multiplicative monoid on integer, where $\eta$ is $1$ and $\mu$ is $\times$
 
@@ -90,20 +90,19 @@ focus, I'll skip it.
 
 ## Algebra
 
-An algebra on an endofunctor $F: C\to D$ is given by a tuple $(a, \sigma)$,
+An algebra on an endofunctor $F: C\to C$ is given by a tuple $(a, \sigma)$,
 where $a$ is an object in $C$ and $\sigma$ is an endofunction $F a \to a$. It's
 worth noting that an algebra is not a natural transformation as it seems.
 
-A natural transformation has no knowledge on its component, therefore must be a
-polymorphic function. This restriction is, however, not required for an algebra.
-In an algebra, $\sigma$ is bound to a specific object $a: C$, thus it can do
-transformations on $a$ or generate an $a$ from nowhere.
+A natural transformation has no knowledge on its component, therefore
+must be a polymorphic function. For an algebra, it is the opposite
+case. $\sigma$ operates on a specific object $a: C$.
 
 An algebra can be viewed as a map to evaluate a functor on values (e.g.
 algebraic expression) into an single value. Here are some examples of algebras:
 
 - `sum` on list of additive numbers
-- `length` on polymorphic list
+- `length` on an integer list
 - `foo (x:_) = x; foo [] = 1` on list of integers
 - `eval: ExprF a -> a` on an expression of type `a`
 
@@ -112,10 +111,10 @@ function evaluates it.
 
 ## Category of algebras
 
-Algebras on an given endofunctor $F:C\to D$ can form a category, where the
-objects are the algebras $(a, \sigma)$, and the morphisms from $(a,\sigma)$ to
+Algebras on an given endofunctor $F:C\to C$ can form a category, where the
+objects are the algebras $(a,\sigma)$, and the morphisms from $(a,\sigma)$ to
 $(b,\tau)$ can be defined as morphisms in $C(a,b)$. We now show that the
-morphisms are composible:
+morphisms are composable:
 
 $$
 \begin{CD}
@@ -129,20 +128,25 @@ Since $F$ is a functor, this diagram automatically commutes.
 
 ## Monad algebra
 
-Given an endofunctor $T$, A monad algebra on $T$ is a monad on $T$ along with an
-compatible algebra on $T$. A monad algebra contains all the operations from
-its monad part and its algebra part:
+Given an endofunctor $T$, A monad algebra on $T$ is a 2-tuple:
+
+1. a monad on $T$
+2. a algebra on $T$
+
+(Of course, they must be compatible with each other, see below)
+
+A monad algebra therefore contains all the operations from its monad part and its algebra part:
 
 - $\eta: a \to T a$
 - $\mu: T^2 a \to T a$
 - $\sigma: T a \to a$
 
-Be noted that a specific algebra can have a specific $a$.
+(Be noted that an algebra needs to operate on a specific $a$.)
 
 To make the algebra compatible with the monad, we need to impose these two conditions:
 
-- with unit, $(\sigma \circ \eta) a = a$
-- with multiplication, the diagram below should commute
+- $\sigma \circ \eta = 1$.
+- $\sigma \circ \mu = \sigma \circ T\sigma$. In other words, the diagram below should commute
 
 $$
 \begin{CD}
@@ -152,32 +156,39 @@ T a @>\sigma>> a
 \end{CD}
 $$
 
-These two conditions are strong. Not all algebras on $T$ are compatible with a
-given monad on $T$. For example, in the list monad of integers, the condition
-requires `η [x] = x`; this eliminates all other algebras that don't satisfy this
-property, like the `length` algebra.
+These two conditions are strong. Not all nice algebras on $T$ are compatible with a given monad on $T$.
+
+For example, consider the list monad and the algebra `length :: [a] -> a` (note that the length is a defined algebra only when `a ~ Int`), the first condition requires `length [n] = n` for all integer `n`, which is not true.
+
+These conditions eliminate algebras that don't satisfy this property.
 
 ## Algebra on list monad
 
-Now we finally get to the interesting one. There are many monad-compatible
-algebras on list, for example: `sum`, `product`, `concat` etc. These algebras do
-various of operations but there's one thing in common: they all seems to related
-to some monoid. In fact they indeed do. We will now prove it.
+Now we finally get to the interesting one. There are many
+monad-compatible algebras on list, for example: `sum: [Int] -> Int`,
+`product :: [Int] -> Int`, `concat :: [[a]] -> [a]` etc. These
+algebras are somewhat different, but there's one thing in common: they
+all seems to related to some underlying monoid. In fact they indeed
+do. We will now prove it.
 
 First we see what properties do algebras on list monad hold. By the
-compatibility we discussed eariler, we always have:
+compatibility conditions we discussed earlier, we must have:
 
-- `η [x] = x` and,
+- `σ [x] = x` and,
 - `(σ∘Tσ) x = (σ∘μ) x`, where $\mu$ is the `concat` operator for list
+  + i.e. `(σ ∘ fmap σ) x = (σ ∘ concat) x`
 
-Let `σ [] = e` and `σ [x,y] = x <> y`, we now show `e` is an unit and `x <> y`
-is the multiplication operator in a monoid.
+For any algebra σ, we define two operators:
 
-We now prove the left identity law for the monoid. We prove this by evaluting
-`(σ∘Tσ) [[], [x]]` in two ways. On the left we got `(σ∘Tσ) [[], [x]] = σ [e, x]
-= e <> x`, on the right we got `(σ∘Tσ) [[], [x]] = (σ∘μ) [[], [x]] = σ [x] = x`.
-This shows `e <> x = x`. The right identity law can be proved in a similar
-fashion.
+- `e ≔ σ []` to be the monoid unit
+- `x <> y ≔ σ [x,y]` to be the monoid multiplication
+
+And we claim `(e, <>)` forms an monoid. We first prove the left identity
+law for the monoid. We prove this by evaluting `(σ∘Tσ) [[], [x]]` in
+two ways. On the left we got `(σ∘Tσ) [[], [x]] = σ [e, x] = e <> x`,
+on the right we got `(σ∘Tσ) [[], [x]] = (σ∘μ) [[], [x]] = σ [x] = x`.
+This shows `e <> x = x`. The right identity law can be proved in a
+similar fashion.
 
 Now the associativity law, first we get `(σ∘Tσ) [[x,y],z] = [x <> y, z] = (x <>
 y) <> z`, and `(σ∘Tσ) [x,[y,z]] = [x, y<>z] = x <> (y <> z)`. We also no that
