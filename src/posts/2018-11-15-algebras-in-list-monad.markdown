@@ -128,10 +128,10 @@ Since $F$ is a functor, this diagram automatically commutes.
 
 ## Monad algebra
 
-Given an endofunctor $T$, A monad algebra on $T$ is a 2-tuple:
+Given an endofunctor $T: C\to C$, A monad algebra on $T$ is a 2-tuple:
 
-1. a monad on $T$
-2. a algebra on $T$
+1. a monad on $T$: $(\eta: 1 \to T, \mu: T^2\to T)$
+2. a algebra on $T$: $(a: C, \sigma : T a \to a)$
 
 (Of course, they must be compatible with each other, see below)
 
