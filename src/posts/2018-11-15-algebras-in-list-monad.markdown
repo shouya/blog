@@ -91,7 +91,7 @@ focus, I'll skip it.
 ## Algebra
 
 An algebra on an endofunctor $F: C\to C$ is given by a tuple $(a, \sigma)$,
-where $a$ is an object in $C$ and $\sigma$ is an endofunction $F a \to a$. It's
+where $a$ is an object in $C$ and $\sigma : F a \to a$. It's
 worth noting that an algebra is not a natural transformation as it seems.
 
 A natural transformation has no knowledge on its component, therefore
@@ -158,7 +158,7 @@ $$
 
 These two conditions are strong. Not all nice algebras on $T$ are compatible with a given monad on $T$.
 
-For example, consider the list monad and the algebra `length :: [a] -> a` (note that the length is a defined algebra only when `a ~ Int`), the first condition requires `length [n] = n` for all integer `n`, which is not true.
+For example, we consider the compatibility of the list monad and the algebra `length :: [Int] -> Int` on list. The first condition requires `length [n] = n` for all integer `n`, which is not true.
 
 These conditions eliminate algebras that don't satisfy this property.
 
@@ -184,20 +184,20 @@ For any algebra σ, we define two operators:
 - `x <> y ≔ σ [x,y]` to be the monoid multiplication
 
 And we claim `(e, <>)` forms an monoid. We first prove the left identity
-law for the monoid. We prove this by evaluting `(σ∘Tσ) [[], [x]]` in
+law for the monoid. We prove this by evaluating `(σ∘Tσ) [[], [x]]` in
 two ways. On the left we got `(σ∘Tσ) [[], [x]] = σ [e, x] = e <> x`,
 on the right we got `(σ∘Tσ) [[], [x]] = (σ∘μ) [[], [x]] = σ [x] = x`.
 This shows `e <> x = x`. The right identity law can be proved in a
 similar fashion.
 
-Now the associativity law, first we get `(σ∘Tσ) [[x,y],z] = [x <> y, z] = (x <>
-y) <> z`, and `(σ∘Tσ) [x,[y,z]] = [x, y<>z] = x <> (y <> z)`. We also no that
-they both equal to `(σ∘μ) [[x,y],z] = (σ∘μ) [x,[y,z]] = σ [x,y,z]`. For
+Now the associativity law, first we get `(σ∘Tσ) [[x,y],[z]] = [x <> y, z] = (x <>
+y) <> z`, and `(σ∘Tσ) [[x],[y,z]] = [x, y<>z] = x <> (y <> z)`. We also no that
+they both equal to `(σ∘μ) [[x,y],[z]] = (σ∘μ) [[x],[y,z]] = σ [x,y,z]`. For
 consistency, this means `σ [x,y,z]` must be defined as `(x <> y) <> z` or `x <>
 (y <> z)`, and they are equal.
 
-Now we have proved that the algebra must gives rise to a monoid, and $\sigma$ is
-the mconcat function.
+Now we have proved that an algebra on the list monad must gives rise to a monoid, where $\sigma$ is
+the `mconcat` function.
 
 ## References
 
